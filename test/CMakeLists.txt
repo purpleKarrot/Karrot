@@ -8,6 +8,7 @@
 
 set(test_list
   quark
+  url
   )
 
 create_test_sourcelist(test_sources

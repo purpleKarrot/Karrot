@@ -9,7 +9,7 @@
 #include <karrot/quark.hpp>
 #include <boost/detail/lightweight_test.hpp>
 
-std::ostream& operator<<(std::ostream& out, karrot::Quark quark)
+static std::ostream& operator<<(std::ostream& out, karrot::Quark quark)
   {
   return out << quark.str();
   }

@@ -8,4 +8,5 @@
 
 add_library(karrot STATIC
   quark.cpp
+  url.cpp
   )

@@ -1,0 +1,160 @@
+/*
+ * Copyright (C) 2013 Daniel Pfeifer <daniel@pfeifer-mail.de>
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * See accompanying file LICENSE_1_0.txt or copy at
+ *   http://www.boost.org/LICENSE_1_0.txt
+ */
+
+#include <karrot/url.hpp>
+
+#include <cctype>
+#include <cstring>
+#include <stdexcept>
+
+namespace karrot
+{
+
+// TODO: relative paths are not supported.
+// TODO: replace by C++1y URI Proposal (http://github.com/glynos/uri_c--1y)
+
+Url::Url(const char* str, Url* base)
+  {
+  std::size_t length;
+  if (base)
+    {
+    if (str[0] == '/')
+      {
+      if (str[1] == '/')
+        {
+        str += 2;
+        this->scheme = base->scheme;
+        goto scheme_specific;
+        }
+      else
+        {
+        this->scheme = base->scheme;
+        this->user_info = base->user_info;
+        this->host = base->host;
+        this->port = base->port;
+        goto path;
+        }
+      }
+    if (str[0] == '?')
+      {
+      this->scheme = base->scheme;
+      this->user_info = base->user_info;
+      this->host = base->host;
+      this->port = base->port;
+      this->path = base->path;
+      goto query;
+      }
+    if (str[0] == '#')
+      {
+      this->scheme = base->scheme;
+      this->user_info = base->user_info;
+      this->host = base->host;
+      this->port = base->port;
+      this->path = base->path;
+      this->query = base->query;
+      goto fragment;
+      }
+    }
+  length = std::strcspn(str, ":");
+  this->scheme = Quark(str, length);
+  str += length;
+  if (*str++ != ':')
+    {
+    goto error;
+    }
+  if (*str++ != '/')
+    {
+    goto error;
+    }
+  if (*str++ != '/')
+    {
+    goto error;
+    }
+scheme_specific:
+  length = std::strcspn(str, "@:[/?#");
+  if (str[length] == '@')
+    {
+    this->user_info = Quark(str, length);
+    str += length + 1;
+    }
+  else if (str[length] == ':')
+    {
+    std::size_t length2 = std::strcspn(str + length, "@/?#");
+    if (str[length + length2] == '@')
+      {
+      this->user_info = Quark(str, length + length2);
+      str += length + length2 + 1;
+      }
+    }
+  if (*str == '[')
+    {
+    length = std::strcspn(str, "]");
+    if (str[length] != ']')
+      {
+      goto error;
+      }
+    this->host = Quark(str, length + 1);
+    str += length + 1;
+    if (std::strcspn(str, ":/?#") != 0)
+      {
+      goto error;
+      }
+    }
+  else
+    {
+    length = std::strcspn(str, ":/?#");
+    this->host = Quark(str, length);
+    str += length;
+    }
+  if (*str == ':')
+    {
+    length = std::strcspn(++str, "/?#");
+    if (length == 0)
+      {
+      goto error;
+      }
+    for (std::size_t i = 0; i < length; ++i)
+      {
+      if (!std::isdigit(str[i]))
+        {
+        goto error;
+        }
+      }
+    this->port = Quark(str, length);
+    str += length;
+    }
+  if (*str == '/')
+    {
+path:
+    length = std::strcspn(str, "?#");
+    this->path = Quark(str, length);
+    str += length;
+    }
+  else
+    {
+    this->path = Quark("/", 1);
+    }
+  if (*str == '?')
+    {
+query:
+    length = std::strcspn(++str, "#");
+    this->query = Quark(str, length);
+    str += length;
+    }
+  if (*str == '#')
+    {
+fragment:
+    ++str;
+    this->fragment = Quark(str, strlen(str));
+    }
+  return;
+error:
+  throw std::runtime_error(std::string("invalid url: ") + str);
+  }
+
+} // namespace karrot
