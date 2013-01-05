@@ -6,13 +6,13 @@
 #   http://www.boost.org/LICENSE_1_0.txt
 #=============================================================================
 
-cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
 project(Karrot CXX)
 
 enable_testing()
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost "1.50" REQUIRED COMPONENTS
+find_package(Boost "1.48" REQUIRED COMPONENTS
   filesystem
   system
   )

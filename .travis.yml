@@ -12,10 +12,14 @@ compiler:
   - clang
   - gcc
 
+env:
+  - OPTIONS="-DCMAKE_BUILD_TYPE=Debug"
+  - OPTIONS="-DCMAKE_BUILD_TYPE=Release"
+
 script:
   - mkdir _build
   - cd _build
-  - cmake ..
+  - cmake $OPTIONS ..
   - cmake --build .
   - ctest -V
 
