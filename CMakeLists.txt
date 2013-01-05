@@ -9,6 +9,8 @@
 cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
 project(Karrot CXX)
 
+list(APPEND CMAKE_MODULE_PATH "${Karrot_SOURCE_DIR}/CMake")
+
 enable_testing()
 
 set(Boost_USE_STATIC_LIBS ON)
