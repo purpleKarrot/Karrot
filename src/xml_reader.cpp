@@ -9,6 +9,8 @@
 #include "xml_reader.hpp"
 #include "xml_re2c.hpp"
 #include <boost/filesystem/fstream.hpp>
+#include <boost/range/adaptor/reversed.hpp>
+#include <boost/foreach.hpp>
 
 namespace karrot
 {
@@ -17,9 +19,8 @@ static const Quark XMLNS = "xmlns";
 
 void XmlReader::lookup_namespace(Name& name)
   {
-  for (std::size_t i = ns_mappings.size() - 1; i >= 0; --i)
+  BOOST_FOREACH(const Mapping& mapping, boost::adaptors::reverse(ns_mappings))
     {
-    Mapping& mapping = ns_mappings[i];
     if (name.prefix == mapping.prefix)
       {
       name.namespace_uri = mapping.namespace_uri;
