@@ -12,7 +12,7 @@ project(Karrot CXX)
 enable_testing()
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost "1.48" REQUIRED COMPONENTS
+find_package(Boost "1.46" REQUIRED COMPONENTS
   filesystem
   system
   )

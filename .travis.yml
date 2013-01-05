@@ -18,7 +18,7 @@ env:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libboost-dev
+  - sudo apt-get install -qq libboost-filesystem-dev
 
 script:
   - mkdir _build
