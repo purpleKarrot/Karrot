@@ -7,6 +7,7 @@
  */
 
 #include <karrot/url.hpp>
+#include <karrot/quark.hpp>
 
 #include <cctype>
 #include <cstring>
@@ -61,7 +62,7 @@ Url::Url(const char* str, Url* base)
       }
     }
   length = std::strcspn(str, ":");
-  this->scheme = Quark(str, length);
+  this->scheme = string_to_quark(str, length);
   str += length;
   if (*str++ != ':')
     {
@@ -79,7 +80,7 @@ scheme_specific:
   length = std::strcspn(str, "@:[/?#");
   if (str[length] == '@')
     {
-    this->user_info = Quark(str, length);
+    this->user_info = string_to_quark(str, length);
     str += length + 1;
     }
   else if (str[length] == ':')
@@ -87,7 +88,7 @@ scheme_specific:
     std::size_t length2 = std::strcspn(str + length, "@/?#");
     if (str[length + length2] == '@')
       {
-      this->user_info = Quark(str, length + length2);
+      this->user_info = string_to_quark(str, length + length2);
       str += length + length2 + 1;
       }
     }
@@ -98,7 +99,7 @@ scheme_specific:
       {
       goto error;
       }
-    this->host = Quark(str, length + 1);
+    this->host = string_to_quark(str, length + 1);
     str += length + 1;
     if (std::strcspn(str, ":/?#") != 0)
       {
@@ -108,7 +109,7 @@ scheme_specific:
   else
     {
     length = std::strcspn(str, ":/?#");
-    this->host = Quark(str, length);
+    this->host = string_to_quark(str, length);
     str += length;
     }
   if (*str == ':')
@@ -125,32 +126,32 @@ scheme_specific:
         goto error;
         }
       }
-    this->port = Quark(str, length);
+    this->port = string_to_quark(str, length);
     str += length;
     }
   if (*str == '/')
     {
 path:
     length = std::strcspn(str, "?#");
-    this->path = Quark(str, length);
+    this->path = string_to_quark(str, length);
     str += length;
     }
   else
     {
-    this->path = Quark("/", 1);
+    this->path = string_to_quark("/", 1);
     }
   if (*str == '?')
     {
 query:
     length = std::strcspn(++str, "#");
-    this->query = Quark(str, length);
+    this->query = string_to_quark(str, length);
     str += length;
     }
   if (*str == '#')
     {
 fragment:
     ++str;
-    this->fragment = Quark(str, strlen(str));
+    this->fragment = string_to_quark(str, strlen(str));
     }
   return;
 error:

@@ -9,8 +9,6 @@
 #ifndef KARROT_URL_HPP
 #define KARROT_URL_HPP
 
-#include <karrot/quark.hpp>
-
 namespace karrot
 {
 
@@ -21,13 +19,13 @@ class Url
       {
       }
     Url(const char* str, Url* base = 0);
-    Quark scheme;
-    Quark user_info;
-    Quark host;
-    Quark port;
-    Quark path;
-    Quark query;
-    Quark fragment;
+    int scheme;
+    int user_info;
+    int host;
+    int port;
+    int path;
+    int query;
+    int fragment;
   };
 
 } // namespace karrot

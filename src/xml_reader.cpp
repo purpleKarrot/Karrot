@@ -8,6 +8,7 @@
 
 #include "xml_reader.hpp"
 #include "xml_re2c.hpp"
+#include <karrot/quark.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/foreach.hpp>
@@ -15,7 +16,7 @@
 namespace karrot
 {
 
-static const Quark XMLNS = "xmlns";
+static const int XMLNS = string_to_quark("xmlns");
 
 void XmlReader::lookup_namespace(Name& name)
   {
@@ -27,7 +28,7 @@ void XmlReader::lookup_namespace(Name& name)
       return;
       }
     }
-  name.namespace_uri = Quark();
+  name.namespace_uri = 0;
   }
 
 std::size_t XmlReader::push_namespaces()
@@ -41,7 +42,7 @@ std::size_t XmlReader::push_namespaces()
     {
     if (!attr->name.prefix && attr->name.local == XMLNS)
       {
-      mapping.prefix = Quark();
+      mapping.prefix = 0;
       mapping.namespace_uri = attr->value;
       ns_mappings.push_back(mapping);
       }
@@ -110,17 +111,17 @@ XmlToken XmlReader::token() const
   return token_;
   }
 
-Quark XmlReader::name() const
+int XmlReader::name() const
   {
   return current_name.local;
   }
 
-Quark XmlReader::namespace_uri() const
+int XmlReader::namespace_uri() const
   {
   return current_name.namespace_uri;
   }
 
-Quark XmlReader::attribute(Quark name, Quark namespace_uri) const
+int XmlReader::attribute(int name, int namespace_uri) const
   {
   std::vector<Attribute>::const_iterator begin = attributes.begin();
   std::vector<Attribute>::const_iterator end = attributes.end();
@@ -132,7 +133,7 @@ Quark XmlReader::attribute(Quark name, Quark namespace_uri) const
       return attr->value;
       }
     }
-  return Quark();
+  return 0;
   }
 
 void XmlReader::skip()

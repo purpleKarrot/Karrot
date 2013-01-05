@@ -9,7 +9,6 @@
 #ifndef KARROT_XML_READER_HPP
 #define KARROT_XML_READER_HPP
 
-#include <karrot/quark.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
@@ -35,18 +34,18 @@ class XmlReader: boost::noncopyable
     XmlReader(const boost::filesystem::path& filepath);
     bool read();
     XmlToken token() const;
-    Quark name() const;
-    Quark namespace_uri() const;
-    Quark attribute(Quark name, Quark namespace_uri) const;
+    int name() const;
+    int namespace_uri() const;
+    int attribute(int name, int namespace_uri) const;
     void skip();
     bool start_element();
     std::string content();
   private:
     struct Name
       {
-      Quark prefix;
-      Quark local;
-      Quark namespace_uri;
+      int prefix;
+      int local;
+      int namespace_uri;
       };
     struct Tag
       {
@@ -56,12 +55,12 @@ class XmlReader: boost::noncopyable
     struct Attribute
       {
       Name name;
-      Quark value;
+      int value;
       };
     struct Mapping
       {
-      Quark prefix;
-      Quark namespace_uri;
+      int prefix;
+      int namespace_uri;
       };
   private:
     void push_tag();

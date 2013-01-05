@@ -6,12 +6,18 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/quark.hpp>
-#include <boost/detail/lightweight_test.hpp>
+#ifndef KARROT_QUARK_INTERNAL_HPP
+#define KARROT_QUARK_INTERNAL_HPP
 
-int quark(int argc, char* argv[])
-  {
-  using karrot::string_to_quark;
-  BOOST_TEST_EQ(string_to_quark("Hello World", 5), string_to_quark("Hello"));
-  return boost::report_errors();
-  }
+#include <karrot/quark.hpp>
+
+namespace karrot
+{
+
+int array_to_quark(const int* array, std::size_t size);
+
+const int* quark_to_array(int quark);
+
+} // namespace karrot
+
+#endif /* KARROT_QUARK_INTERNAL_HPP */

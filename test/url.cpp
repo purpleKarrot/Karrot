@@ -7,28 +7,24 @@
  */
 
 #include <karrot/url.hpp>
+#include <karrot/quark.hpp>
 #include <boost/detail/lightweight_test.hpp>
-
-static std::ostream& operator<<(std::ostream& out, karrot::Quark quark)
-  {
-  return out << quark.str();
-  }
 
 int url(int argc, char* argv[])
   {
   karrot::Url url1("scheme://host/path?query#fragment");
-  BOOST_TEST_EQ(url1.scheme, "scheme");
-  BOOST_TEST_EQ(url1.host, "host");
-  BOOST_TEST_EQ(url1.path, "/path");
-  BOOST_TEST_EQ(url1.query, "query");
-  BOOST_TEST_EQ(url1.fragment, "fragment");
+  BOOST_TEST_EQ(url1.scheme, karrot::string_to_quark("scheme"));
+  BOOST_TEST_EQ(url1.host, karrot::string_to_quark("host"));
+  BOOST_TEST_EQ(url1.path, karrot::string_to_quark("/path"));
+  BOOST_TEST_EQ(url1.query, karrot::string_to_quark("query"));
+  BOOST_TEST_EQ(url1.fragment, karrot::string_to_quark("fragment"));
 
   karrot::Url url2("?query2#fragment2", &url1);
-  BOOST_TEST_EQ(url2.scheme, "scheme");
-  BOOST_TEST_EQ(url2.host, "host");
-  BOOST_TEST_EQ(url2.path, "/path");
-  BOOST_TEST_EQ(url2.query, "query2");
-  BOOST_TEST_EQ(url2.fragment, "fragment2");
+  BOOST_TEST_EQ(url2.scheme, karrot::string_to_quark("scheme"));
+  BOOST_TEST_EQ(url2.host, karrot::string_to_quark("host"));
+  BOOST_TEST_EQ(url2.path, karrot::string_to_quark("/path"));
+  BOOST_TEST_EQ(url2.query, karrot::string_to_quark("query2"));
+  BOOST_TEST_EQ(url2.fragment, karrot::string_to_quark("fragment2"));
 
   return boost::report_errors();
   }

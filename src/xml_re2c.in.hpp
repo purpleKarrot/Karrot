@@ -7,14 +7,15 @@
  */
 
 #include <cstdio>
+#include <karrot/quark.hpp>
 
 namespace karrot
 {
 
 typedef std::vector<char>::iterator iter_t;
-static Quark parse_quark(iter_t begin, iter_t end)
+static int parse_quark(iter_t begin, iter_t end)
   {
-  return Quark(&(*begin), end - begin);
+  return string_to_quark(&(*begin), end - begin);
   }
 
 /*!re2c
@@ -33,8 +34,8 @@ else                 = [];
 
 bool XmlReader::parse_name(Name& name)
   {
-  Quark quark;
-  name.namespace_uri = Quark();
+  int quark;
+  name.namespace_uri = 0;
   marker = cursor;
   /*!re2c
   name
@@ -53,7 +54,7 @@ bool XmlReader::parse_name(Name& name)
     }
   else
     {
-    name.prefix = Quark();
+    name.prefix = 0;
     name.local = quark;
     return true;
     }
@@ -210,10 +211,10 @@ bool XmlReader::parse_end_element()
   if (current_name.prefix != expected.prefix || current_name.local != expected.local)
     {
     printf("Wrong end tag! %s:%s != %s:%s\n",
-      current_name.prefix.str(),
-      current_name.local.str(),
-      expected.prefix.str(),
-      expected.local.str());
+      quark_to_string(current_name.prefix),
+      quark_to_string(current_name.local),
+      quark_to_string(expected.prefix),
+      quark_to_string(expected.local));
     return false;
     }
   token_ = token_end_element;
