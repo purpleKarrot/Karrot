@@ -7,6 +7,7 @@
  */
 
 #include <karrot/spec.hpp>
+#include <karrot/url.hpp>
 #include "query.hpp"
 
 namespace karrot

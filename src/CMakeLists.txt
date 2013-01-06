@@ -20,6 +20,7 @@ re2c_target(
   )
 
 add_library(karrot STATIC
+  engine.cpp
   hash.hpp
   quark_internal.hpp
   quark.cpp

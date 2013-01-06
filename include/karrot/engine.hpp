@@ -9,15 +9,15 @@
 #ifndef KARROT_ENGINE_HPP
 #define KARROT_ENGINE_HPP
 
-#include <karrot/deliverable.hpp>
-#include <karrot/driver.hpp>
-#include <karrot/spec.hpp>
-#include <karrot/url.hpp>
-
 #include <vector>
 
 namespace karrot
 {
+
+class Url;
+class Spec;
+class Driver;
+class Deliverable;
 
 class Engine
   {
@@ -33,9 +33,9 @@ class Engine
     Engine(const Engine&);
     void operator=(const Engine&);
   private:
-    struct Implementation;
+    class Implementation;
     Implementation* pimpl;
-  }
+  };
 
 } // namespace karrot
 

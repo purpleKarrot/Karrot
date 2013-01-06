@@ -11,22 +11,24 @@
 
 #include <vector>
 #include <karrot/identification.hpp>
-#include <karrot/driver.hpp>
+#include <karrot/spec.hpp>
 
 namespace karrot
 {
+
+class Driver;
 
 class Deliverable
   {
   public:
     Deliverable() :
-        channel(0), folder(0), href(0), hash(0)
+        driver(0), folder(0), href(0), hash(0)
       {
       }
   public:
     Identification id;
-    std::vector<Reference> depends;
-    std::vector<Reference> conflicts;
+    std::vector<Spec> depends;
+    std::vector<Spec> conflicts;
     Driver* driver;
     int folder;
     int href;

@@ -10,10 +10,12 @@
 #define KARROT_DRIVER_HPP
 
 #include <map>
-#include <karrot/identification.hpp>
 
 namespace karrot
 {
+
+class Deliverable;
+class Identification;
 
 class Driver
   {
@@ -40,7 +42,7 @@ class Driver
     virtual void finalize()
       {
       }
-  }
+  };
 
 } // namespace karrot
 
