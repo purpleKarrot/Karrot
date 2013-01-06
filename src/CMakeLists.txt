@@ -41,6 +41,8 @@ add_library(karrot STATIC
   query_re2c.in.hpp
   query.cpp
   query.hpp
+  solve.cpp
+  solve.hpp
   spec.cpp
   url.cpp
   variants.cpp

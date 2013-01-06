@@ -9,6 +9,7 @@
 #ifndef KARROT_ENGINE_HPP
 #define KARROT_ENGINE_HPP
 
+#include <set>
 #include <vector>
 
 namespace karrot
@@ -27,7 +28,7 @@ class Engine
   public:
     void add_driver(const char* name, Driver* driver);
     void load_feed(const Url& url);
-    std::vector<int> solve(const std::vector<Spec>& projects);
+    std::vector<int> solve(const std::set<Spec>& projects);
     const Deliverable& operator[](int index);
   private:
     Engine(const Engine&);

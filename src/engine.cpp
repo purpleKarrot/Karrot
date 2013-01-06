@@ -11,6 +11,7 @@
 #include <karrot/quark.hpp>
 #include <cstring>
 
+#include "solve.hpp"
 #include "feed_queue.hpp"
 #include "feed_cache.hpp"
 #include "package_handler.hpp"
@@ -58,9 +59,9 @@ void Engine::load_feed(const Url& url)
     }
   }
 
-std::vector<int> Engine::solve(const std::vector<Spec>& projects)
+std::vector<int> Engine::solve(const std::set<Spec>& projects)
   {
-  return std::vector<int>();
+  return karrot::solve(pimpl->deliverables, projects);
   }
 
 const Deliverable& Engine::operator[](int index)
