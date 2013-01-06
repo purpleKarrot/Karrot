@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Daniel Pfeifer <daniel@pfeifer-mail.de>
+ * Copyright (C) 2013 Daniel Pfeifer <daniel@pfeifer-mail.de>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file LICENSE_1_0.txt or copy at
@@ -21,6 +21,7 @@ static const int OR            = -10;
 
 #include "query_re2c.hpp"
 #include "quark_internal.hpp"
+#include "variants.hpp"
 
 #include <string>
 #include <vector>
@@ -272,7 +273,6 @@ bool evaluate(int query, int version, int variants)
   unsigned int stack[32];
   unsigned int sl = 0; // stack length
 
-  const int* variant_values = quark_to_array(variants);
   for (const int* value = quark_to_array(query); *value; ++value)
     {
     int c = *value;
@@ -296,7 +296,7 @@ bool evaluate(int query, int version, int variants)
         }
       else if (op1 > 1) // 1 == true!
         {
-        op1 = variant_values[op1];
+        op1 = lookup(variants, op1);
         }
       if (is_relation(c))
         {

@@ -29,6 +29,8 @@ add_library(karrot STATIC
   query.hpp
   spec.cpp
   url.cpp
+  variants.cpp
+  variants.hpp
   xml_re2c.hpp
   xml_re2c.in.hpp
   xml_reader.cpp
