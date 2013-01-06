@@ -8,6 +8,9 @@
 
 #include <karrot/engine.hpp>
 #include <karrot/deliverable.hpp>
+#include <karrot/quark.hpp>
+#include <cstring>
+#include "package_handler.hpp"
 
 namespace karrot
 {
@@ -15,6 +18,7 @@ namespace karrot
 class Engine::Implementation
   {
   public:
+    PackageHandler package_handler;
     std::vector<Deliverable> deliverables;
   };
 
@@ -30,6 +34,7 @@ Engine::~Engine()
 
 void Engine::add_driver(const char* name, Driver* driver)
   {
+  pimpl->package_handler.add(string_to_quark(name, std::strlen(name)), driver);
   }
 
 void Engine::load_feed(const Url& url)
