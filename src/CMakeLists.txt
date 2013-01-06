@@ -20,6 +20,13 @@ re2c_target(
   )
 
 add_library(karrot STATIC
+  minisat/Global.h
+  minisat/Heap.h
+  minisat/Solver.cpp
+  minisat/Solver.h
+  minisat/SolverTypes.h
+  minisat/Sort.h
+  minisat/VarOrder.h
   engine.cpp
   feed_cache.cpp
   feed_cache.hpp
@@ -43,6 +50,8 @@ add_library(karrot STATIC
   xml_reader.cpp
   xml_reader.hpp
   )
+
+source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 
 target_link_libraries(karrot
   ${CURL_LIBRARIES}
