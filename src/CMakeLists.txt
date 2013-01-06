@@ -9,15 +9,25 @@
 find_package(RE2C REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-RE2C_TARGET(
+re2c_target(
+  ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
+  ${CMAKE_CURRENT_BINARY_DIR}/query_re2c.hpp -s
+  )
+
+re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/xml_re2c.in.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
 
 add_library(karrot STATIC
   hash.hpp
-  quark_impl.hpp
+  quark_internal.hpp
   quark.cpp
+  query_re2c.hpp
+  query_re2c.in.hpp
+  query.cpp
+  query.hpp
+  spec.cpp
   url.cpp
   xml_re2c.hpp
   xml_re2c.in.hpp
