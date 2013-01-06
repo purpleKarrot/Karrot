@@ -9,12 +9,14 @@
 #ifndef KARROT_SPEC_HPP
 #define KARROT_SPEC_HPP
 
+#include <karrot/export.hpp>
+
 namespace karrot
 {
 
 class Url;
 
-class Spec
+class KARROT_DECL Spec
   {
   public:
     Spec() :

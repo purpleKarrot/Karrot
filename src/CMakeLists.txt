@@ -27,6 +27,8 @@ add_library(karrot STATIC
   minisat/SolverTypes.h
   minisat/Sort.h
   minisat/VarOrder.h
+  dependencies.hpp
+  driver.cpp
   engine.cpp
   feed_cache.cpp
   feed_cache.hpp

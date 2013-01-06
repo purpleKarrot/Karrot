@@ -10,6 +10,7 @@
 #define KARROT_DRIVER_HPP
 
 #include <map>
+#include <karrot/export.hpp>
 
 namespace karrot
 {
@@ -17,13 +18,12 @@ namespace karrot
 class Deliverable;
 class Identification;
 
-class Driver
+class KARROT_DECL Driver
   {
   public:
     typedef std::map<int, int> Fields;
-    virtual ~Driver()
-      {
-      }
+    virtual ~Driver();
+  public:
     virtual int namespace_uri() const
       {
       return 0;
@@ -42,6 +42,7 @@ class Driver
     virtual void finalize()
       {
       }
+  public:
     static const int INCOMPATIBLE  = 0;
     static const int NORMAL        = 1;
     static const int SYS_INSTALLED = 2;

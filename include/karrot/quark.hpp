@@ -10,11 +10,12 @@
 #define KARROT_QUARK_HPP
 
 #include <cstddef>
+#include <karrot/export.hpp>
 
 namespace karrot
 {
 
-int string_to_quark(const char* str, std::size_t len);
+int KARROT_DECL string_to_quark(const char* str, std::size_t len);
 
 template<std::size_t N>
 int string_to_quark(const char (&str)[N])
@@ -22,7 +23,7 @@ int string_to_quark(const char (&str)[N])
   return string_to_quark(str, N - 1);
   }
 
-const char* quark_to_string(int quark);
+const char* KARROT_DECL quark_to_string(int quark);
 
 } // namespace karrot
 

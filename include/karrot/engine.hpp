@@ -11,6 +11,7 @@
 
 #include <set>
 #include <vector>
+#include <karrot/export.hpp>
 
 namespace karrot
 {
@@ -20,7 +21,7 @@ class Spec;
 class Driver;
 class Deliverable;
 
-class Engine
+class KARROT_DECL Engine
   {
   public:
     Engine();
