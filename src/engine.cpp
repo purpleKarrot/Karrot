@@ -12,7 +12,9 @@
 #include <cstring>
 
 #include "feed_queue.hpp"
+#include "feed_cache.hpp"
 #include "package_handler.hpp"
+#include "xml_reader.hpp"
 
 namespace karrot
 {
@@ -21,6 +23,7 @@ class Engine::Implementation
   {
   public:
     FeedQueue feed_queue;
+    FeedCache feed_cache;
     PackageHandler package_handler;
     std::vector<Deliverable> deliverables;
   };
@@ -43,6 +46,16 @@ void Engine::add_driver(const char* name, Driver* driver)
 void Engine::load_feed(const Url& url)
   {
   pimpl->feed_queue.push(url);
+  const Url* purl;
+  while ((purl = pimpl->feed_queue.get_next()))
+    {
+    const Url url(*purl); //explicit copy!
+    XmlReader xml(pimpl->feed_cache.local_path(url));
+    if (!xml.start_element())
+      {
+      throw std::runtime_error("failed to read start of feed");
+      }
+    }
   }
 
 std::vector<int> Engine::solve(const std::vector<Spec>& projects)

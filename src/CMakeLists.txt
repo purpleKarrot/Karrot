@@ -21,6 +21,8 @@ re2c_target(
 
 add_library(karrot STATIC
   engine.cpp
+  feed_cache.cpp
+  feed_cache.hpp
   feed_queue.hpp
   hash.hpp
   package_handler.hpp
@@ -38,4 +40,9 @@ add_library(karrot STATIC
   xml_re2c.in.hpp
   xml_reader.cpp
   xml_reader.hpp
+  )
+
+target_link_libraries(karrot
+  ${CURL_LIBRARIES}
+  ${Boost_LIBRARIES}
   )
