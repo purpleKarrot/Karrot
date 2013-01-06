@@ -10,7 +10,7 @@
 #define KARROT_DRIVER_HPP
 
 #include <map>
-#include <karrot/types.hpp>
+#include <karrot/identification.hpp>
 
 namespace karrot
 {
@@ -30,7 +30,7 @@ class Driver
       {
       return Fields();
       }
-    virtual int filter(const Fields& fields, Id& id, int& href, int& hash)
+    virtual int filter(const Fields& fields, Identification& id, int& href, int& hash)
       {
       return 0;
       }

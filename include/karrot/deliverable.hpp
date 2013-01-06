@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <karrot/identification.hpp>
-#include <karrot/plug.hpp>
+#include <karrot/driver.hpp>
 
 namespace karrot
 {
@@ -27,7 +27,7 @@ class Deliverable
     Identification id;
     std::vector<Reference> depends;
     std::vector<Reference> conflicts;
-    Plug* channel;
+    Driver* driver;
     int folder;
     int href;
     int hash;

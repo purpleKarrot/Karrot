@@ -30,6 +30,9 @@ class Engine
     std::vector<int> solve(const std::vector<Spec>& projects);
     const Deliverable& operator[](int index);
   private:
+    Engine(const Engine&);
+    void operator=(const Engine&);
+  private:
     struct Implementation;
     Implementation* pimpl;
   }
