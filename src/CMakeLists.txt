@@ -23,6 +23,8 @@ add_library(karrot STATIC
   engine.cpp
   feed_cache.cpp
   feed_cache.hpp
+  feed_parser.cpp
+  feed_parser.hpp
   feed_queue.hpp
   hash.hpp
   package_handler.hpp

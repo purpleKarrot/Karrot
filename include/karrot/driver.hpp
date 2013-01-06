@@ -42,6 +42,10 @@ class Driver
     virtual void finalize()
       {
       }
+    static const int INCOMPATIBLE  = 0;
+    static const int NORMAL        = 1;
+    static const int SYS_INSTALLED = 2;
+    static const int SYS_AVAILABLE = 3;
   };
 
 } // namespace karrot
