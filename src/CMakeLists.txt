@@ -21,6 +21,7 @@ re2c_target(
 
 add_library(karrot STATIC
   engine.cpp
+  feed_queue.hpp
   hash.hpp
   package_handler.hpp
   quark_internal.hpp

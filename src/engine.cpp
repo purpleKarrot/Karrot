@@ -10,6 +10,8 @@
 #include <karrot/deliverable.hpp>
 #include <karrot/quark.hpp>
 #include <cstring>
+
+#include "feed_queue.hpp"
 #include "package_handler.hpp"
 
 namespace karrot
@@ -18,6 +20,7 @@ namespace karrot
 class Engine::Implementation
   {
   public:
+    FeedQueue feed_queue;
     PackageHandler package_handler;
     std::vector<Deliverable> deliverables;
   };
@@ -39,6 +42,7 @@ void Engine::add_driver(const char* name, Driver* driver)
 
 void Engine::load_feed(const Url& url)
   {
+  pimpl->feed_queue.push(url);
   }
 
 std::vector<int> Engine::solve(const std::vector<Spec>& projects)
