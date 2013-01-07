@@ -6,12 +6,33 @@
 #   http://www.boost.org/LICENSE_1_0.txt
 #=============================================================================
 
+option(KARROT_USE_ARCHIVE    "Build with Archive support"    OFF)
 option(KARROT_USE_GIT        "Build with Git support"        OFF)
 option(KARROT_USE_PACKAGEKIT "Build with PackageKit support" OFF)
 option(KARROT_USE_SUBVERSION "Build with Subversion support" OFF)
 
 set(sources)
 set(libraries)
+
+if(KARROT_USE_ARCHIVE)
+  find_package(CURL REQUIRED)
+  find_package(LibArchive REQUIRED)
+  include_directories(
+    ${CURL_INCLUDE_DIRS}
+    ${LibArchive_INCLUDE_DIRS}
+    )
+  list(APPEND sources
+    archive.cpp
+    archive.hpp
+    md5.c
+    md5.h
+    )
+  list(APPEND libraries
+    ${CURL_LIBRARIES}
+    ${LibArchive_LIBRARIES}
+    )
+  enable_language(C)
+endif()
 
 if(KARROT_USE_GIT)
   find_package(LibGit2 REQUIRED)
