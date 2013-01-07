@@ -9,6 +9,18 @@
 set(sources)
 set(libraries)
 
+find_package(LibGit2)
+if(LIBGIT2_FOUND)
+  list(APPEND sources
+    git.cpp
+    git.hpp
+    )
+  list(APPEND libraries
+    ${LibGit2_LIBRARY}
+    )
+  include_directories(${LibGit2_INCLUDE_DIR})
+endif()
+
 add_executable(karrot_tool
   main.cpp
   ${sources}
