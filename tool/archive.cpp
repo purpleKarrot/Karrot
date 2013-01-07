@@ -58,7 +58,7 @@ Archive::Archive()
 
 int Archive::namespace_uri() const
   {
-  static const int instance = string_to_quark("http://karrot.org/2012/archive");
+  static const int instance = string_to_quark("http://ryppl.org/2012/archive");
   return instance;
   }
 

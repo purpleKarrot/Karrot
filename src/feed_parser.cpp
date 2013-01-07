@@ -15,7 +15,7 @@
 namespace karrot
 {
 
-static const int NAMESPACE    = string_to_quark("http://karrot.org/2012/feed");
+static const int NAMESPACE    = string_to_quark("http://ryppl.org/2012/feed");
 
 static const int BUILD        = string_to_quark("build");
 static const int COMPONENT    = string_to_quark("component");

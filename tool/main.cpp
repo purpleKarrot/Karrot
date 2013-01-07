@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 #endif
 
   std::set<Spec> projects;
-  for (int i = 0; i < argc; ++i)
+  for (int i = 1; i < argc; ++i)
     {
     Url url(argv[i]);
     engine.load_feed(url);

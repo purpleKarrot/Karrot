@@ -14,6 +14,7 @@
 #include "solve.hpp"
 #include "feed_queue.hpp"
 #include "feed_cache.hpp"
+#include "feed_parser.hpp"
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
 
@@ -55,6 +56,11 @@ void Engine::load_feed(const Url& url)
     if (!xml.start_element())
       {
       throw std::runtime_error("failed to read start of feed");
+      }
+    FeedParser parser(pimpl->feed_queue, pimpl->deliverables, pimpl->package_handler);
+    if (!parser.parse(url, xml))
+      {
+      std::cerr << "not a valid ryppl feed" << std::endl;
       }
     }
   }

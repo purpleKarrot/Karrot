@@ -38,7 +38,7 @@ PackageKit::~PackageKit()
 
 int PackageKit::namespace_uri() const
   {
-  static const int instance = string_to_quark("http://karrot.org/2012/packagekit");
+  static const int instance = string_to_quark("http://ryppl.org/2012/packagekit");
   return instance;
   }
 

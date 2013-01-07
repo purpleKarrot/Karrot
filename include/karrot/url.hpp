@@ -17,9 +17,7 @@ namespace karrot
 class KARROT_DECL Url
   {
   public:
-    Url()
-      {
-      }
+    Url();
     Url(const char* str, Url* base = 0);
     int scheme;
     int user_info;

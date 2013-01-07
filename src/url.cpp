@@ -17,10 +17,16 @@
 namespace karrot
 {
 
+Url::Url() :
+    scheme(0), user_info(0), host(0), port(0), path(0), query(0), fragment(0)
+  {
+  }
+
 // TODO: relative paths are not supported.
 // TODO: replace by C++1y URI Proposal (http://github.com/glynos/uri_c--1y)
 
-Url::Url(const char* str, Url* base)
+Url::Url(const char* str, Url* base) :
+    scheme(0), user_info(0), host(0), port(0), path(0), query(0), fragment(0)
   {
   std::size_t length;
   if (base)
