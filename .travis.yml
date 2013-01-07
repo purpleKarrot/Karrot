@@ -16,12 +16,12 @@ env:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libboost-filesystem-dev re2c
+  - sudo apt-get install -qq libarchive-dev libboost-filesystem-dev re2c valac-0.16
 
 script:
   - mkdir _build
   - cd _build
-  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DKARROT_USE_ARCHIVE=ON  -DKARROT_USE_PACKAGEKIT=ON ..
   - cmake --build .
   - ctest -V
 
