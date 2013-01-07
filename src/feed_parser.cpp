@@ -166,7 +166,7 @@ void FeedParser::parse_releases(XmlReader& xml)
       {
       int version = xml.attribute(VERSION, NAMESPACE);
       int tag = xml.attribute(TAG, NAMESPACE);
-      releases.push_back(Release(version, tag));
+      releases.emplace_back(version, tag);
       }
     xml.skip();
     }
@@ -206,7 +206,7 @@ void FeedParser::parse_build(XmlReader& xml)
 
 void FeedParser::parse_runtime(XmlReader& xml)
   {
-  components.push_back(Dependencies());
+  components.emplace_back();
   parse_depends(xml, components.back());
   }
 
@@ -219,7 +219,7 @@ void FeedParser::parse_components(XmlReader& xml)
     if (name == COMPONENT && namespace_uri == NAMESPACE)
       {
       int name = xml.attribute(NAME, NAMESPACE);
-      components.push_back(Dependencies(name));
+      components.emplace_back(name);
       parse_depends(xml, components.back());
       }
     else

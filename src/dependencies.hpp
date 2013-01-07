@@ -30,7 +30,7 @@ class Dependencies
       }
     void start_if(int test)
       {
-      deps.push_back(Entry(IF, Spec(0, 0, 0, parse_query(test))));
+      deps.emplace_back(IF, Spec(0, 0, 0, parse_query(test)));
       }
     void start_else()
       {
@@ -52,15 +52,15 @@ class Dependencies
       }
     void end_if()
       {
-      deps.push_back(Entry(ENDIF, Spec()));
+      deps.emplace_back(ENDIF, Spec());
       }
     void depends(const Spec& spec)
       {
-      deps.push_back(Entry(DEPENDS, spec));
+      deps.emplace_back(DEPENDS, spec);
       }
     void conflicts(const Spec& spec)
       {
-      deps.push_back(Entry(CONFLICTS, spec));
+      deps.emplace_back(CONFLICTS, spec);
       }
     void replay(int component, int version, int values,
         std::vector<Spec>& depends,
@@ -114,7 +114,7 @@ class Dependencies
       };
     int name;
     typedef std::pair<Code, Spec> Entry;
-    std::vector<Entry> deps;
+    std::vector<std::pair<Code, Spec>> deps;
   };
 
 } // namespace

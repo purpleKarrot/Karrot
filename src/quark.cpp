@@ -107,7 +107,7 @@ class QuarkImpl
       hash.table[h] = quark;
       index.push_back(space.size());
       space.insert(space.end(), str, str + len);
-      space.push_back(C(0));
+      space.emplace_back(0);
       return quark;
       }
     const C* to_string(int quark) const
