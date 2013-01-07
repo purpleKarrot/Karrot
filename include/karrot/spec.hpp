@@ -29,6 +29,35 @@ class KARROT_DECL Spec
       }
     explicit Spec(const Url& url);
   public:
+    bool operator<(const Spec& other) const
+      {
+      if (domain < other.domain)
+        {
+        return true;
+        }
+      if (domain > other.domain)
+        {
+        return false;
+        }
+      if (project < other.project)
+        {
+        return true;
+        }
+      if (project > other.project)
+        {
+        return false;
+        }
+      if (component < other.component)
+        {
+        return true;
+        }
+      if (component > other.component)
+        {
+        return false;
+        }
+      return query < other.query;
+      }
+  public:
     int domain;
     int project;
     int component;

@@ -31,6 +31,7 @@ class KARROT_DECL Engine
     void load_feed(const Url& url);
     std::vector<int> solve(const std::set<Spec>& projects);
     const Deliverable& operator[](int index);
+    void finalize();
   private:
     Engine(const Engine&);
     void operator=(const Engine&);

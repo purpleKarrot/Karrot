@@ -32,6 +32,7 @@ if(KARROT_USE_ARCHIVE)
     ${LibArchive_LIBRARIES}
     )
   enable_language(C)
+  add_definitions(-DUSE_ARCHIVE)
 endif()
 
 if(KARROT_USE_GIT)
@@ -44,6 +45,7 @@ if(KARROT_USE_GIT)
     ${LibGit2_LIBRARY}
     )
   include_directories(${LibGit2_INCLUDE_DIR})
+  add_definitions(-DUSE_GIT)
 endif()
 
 if(KARROT_USE_PACKAGEKIT)
@@ -79,6 +81,7 @@ if(KARROT_USE_PACKAGEKIT)
     packagekit.hpp
     )
   enable_language(C)
+  add_definitions(-DUSE_PACKAGEKIT)
 endif()
 
 if(KARROT_USE_SUBVERSION)
@@ -96,6 +99,7 @@ if(KARROT_USE_SUBVERSION)
     ${APR_LIBRARIES}
     ${SVN_LIBRARIES}
     )
+  add_definitions(-DUSE_SUBVERSION)
 endif()
 
 add_executable(karrot_tool
