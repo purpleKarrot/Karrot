@@ -10,7 +10,6 @@
 #include "xml_reader.hpp"
 #include "variants.hpp"
 #include <karrot/deliverable.hpp>
-#include <boost/foreach.hpp>
 #include <iostream>
 
 namespace karrot
@@ -324,7 +323,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
           if ((flags | 0x2) == 0) // not SYSTEM
             {
             Identification& id = deliverable.id;
-            BOOST_FOREACH(const Dependencies& component, components)
+            for (const Dependencies& component : components)
               {
               component.replay(id.component, id.version, id.variant,
                   deliverable.depends, deliverable.conflicts);

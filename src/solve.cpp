@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
-#include <boost/foreach.hpp>
 
 namespace karrot
 {
@@ -65,7 +64,7 @@ static void dependency_clauses(const Hash& hash, const std::vector<Deliverable>&
   {
   for (std::size_t i = 0; i < entries.size(); ++i)
     {
-    BOOST_FOREACH(const Spec& dependency, entries[i].depends)
+    for (const Spec& dependency : entries[i].depends)
       {
       vec<Lit> clause;
       clause.push(~Lit(i));
@@ -90,7 +89,7 @@ static void explicit_conflict_clauses(const Hash& hash, const std::vector<Delive
   for (std::size_t i = 0; i < entries.size(); ++i)
     {
     Lit lit = ~Lit(i);
-    BOOST_FOREACH(const Spec& dependency, entries[i].conflicts)
+    for (const Spec& dependency : entries[i].conflicts)
       {
       vec<Lit> conflicts;
       query(hash, entries, dependency, conflicts);
@@ -151,7 +150,7 @@ std::vector<int> solve(
     }
 
   vec<Lit> request;
-  BOOST_FOREACH(const Spec& spec, projects)
+  for (const Spec& spec : projects)
     {
     vec<Lit> choices;
     query(hash, database, spec, choices);
