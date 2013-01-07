@@ -131,7 +131,7 @@ int string_to_quark(const char* str, std::size_t len)
   return QuarkImpl<char>::instance().to_quark(str, len);
   }
 
-const char* quark_to_stringing(int quark)
+const char* quark_to_string(int quark)
   {
   return QuarkImpl<char>::instance().to_string(quark);
   }

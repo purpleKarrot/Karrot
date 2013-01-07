@@ -317,11 +317,11 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
             deliverable.href, deliverable.hash);
         if (flags)
           {
-          if (flags | 0x1 != 0) // not INSTALLED
+          if ((flags | 0x1) != 0) // not INSTALLED
             {
             deliverable.driver = group.driver;
             }
-          if (flags | 0x2 == 0) // not SYSTEM
+          if ((flags | 0x2) == 0) // not SYSTEM
             {
             Identification& id = deliverable.id;
             BOOST_FOREACH(const Dependencies& component, components)

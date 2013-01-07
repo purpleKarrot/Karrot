@@ -98,7 +98,7 @@ XmlReader::XmlReader(const boost::filesystem::path& filepath) :
     }
   stream.unsetf(std::ios::skipws);
   stream.seekg(0, std::ios::end);
-  std::size_t size = stream.tellg();
+  std::size_t size = static_cast<std::size_t>(stream.tellg());
   stream.seekg(0);
   buffer.resize(size + 1);
   cursor = marker = buffer.begin();

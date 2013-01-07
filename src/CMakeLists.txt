@@ -9,6 +9,8 @@
 find_package(RE2C REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+add_definitions(-DKARROT_SOURCE)
+
 re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/query_re2c.hpp -s
@@ -19,7 +21,7 @@ re2c_target(
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
 
-add_library(karrot STATIC
+add_library(karrot
   minisat/Global.h
   minisat/Heap.h
   minisat/Solver.cpp

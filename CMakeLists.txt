@@ -13,6 +13,17 @@ list(APPEND CMAKE_MODULE_PATH "${Karrot_SOURCE_DIR}/CMake")
 
 enable_testing()
 
+if(BUILD_SHARED_LIBS)
+  add_definitions(-DKARROT_DYN_LINK)
+endif()
+
+if(MSVC)
+  add_definitions(
+    -D_CRT_SECURE_NO_WARNINGS
+    -D_SCL_SECURE_NO_WARNINGS
+    )
+endif()
+
 if(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
   set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
   set(CMAKE_CXX_LINK_FLAGS "-std=c++11 -stdlib=libc++")

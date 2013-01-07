@@ -15,7 +15,7 @@
 namespace karrot
 {
 
-int KARROT_DECL string_to_quark(const char* str, std::size_t len);
+KARROT_DECL int string_to_quark(const char* str, std::size_t len);
 
 template<std::size_t N>
 int string_to_quark(const char (&str)[N])
@@ -23,7 +23,7 @@ int string_to_quark(const char (&str)[N])
   return string_to_quark(str, N - 1);
   }
 
-const char* KARROT_DECL quark_to_string(int quark);
+KARROT_DECL const char* quark_to_string(int quark);
 
 } // namespace karrot
 

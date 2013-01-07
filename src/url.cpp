@@ -12,6 +12,7 @@
 #include <cctype>
 #include <cstring>
 #include <stdexcept>
+#include <string>
 
 namespace karrot
 {
