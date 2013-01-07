@@ -8,6 +8,7 @@
 
 option(KARROT_USE_GIT        "Build with Git support"        OFF)
 option(KARROT_USE_PACKAGEKIT "Build with PackageKit support" OFF)
+option(KARROT_USE_SUBVERSION "Build with Subversion support" OFF)
 
 set(sources)
 set(libraries)
@@ -57,6 +58,23 @@ if(KARROT_USE_PACKAGEKIT)
     packagekit.hpp
     )
   enable_language(C)
+endif()
+
+if(KARROT_USE_SUBVERSION)
+  find_package(APR       REQUIRED)
+  find_package(SVN "1.7" REQUIRED COMPONENTS client delta diff fs subr wc)
+  include_directories(
+    ${APR_INCLUDE_DIRS}
+    ${SVN_INCLUDE_DIRS}
+    )
+  list(APPEND sources
+    subversion.cpp
+    subversion.hpp
+    )
+  list(APPEND libraries
+    ${APR_LIBRARIES}
+    ${SVN_LIBRARIES}
+    )
 endif()
 
 add_executable(karrot_tool
