@@ -1,0 +1,102 @@
+#=============================================================================
+# Copyright (C) 2012 Daniel Pfeifer <daniel@pfeifer-mail.de>
+#
+# Distributed under the Boost Software License, Version 1.0.
+# See accompanying file LICENSE_1_0.txt or copy at
+#   http://www.boost.org/LICENSE_1_0.txt
+#=============================================================================
+
+default namespace = "http://ryppl.org/2012/feed"
+namespace ar = "http://ryppl.org/2012/archive"
+namespace pk = "http://ryppl.org/2012/packagekit"
+namespace vc = "http://ryppl.org/2012/versioncontrol"
+
+# TODO: maybe it should be allowed to put html inside the release element (log)?
+# any = element * { mixed { attribute * { text }*, any* } }
+
+start =
+  element project {
+    attribute name { xsd:string },
+    attribute href { xsd:anyURI },
+    meta,
+    variants?,
+    releases?,
+    build?,
+    (element runtime { dependency+ } | components)?,
+    element packages { (package | packagegroup)+ }?
+  }
+
+meta =
+  element meta {
+    element name { xsd:string },
+    element summary { xsd:string },
+    element description { xsd:token },
+    element homepage { xsd:string }
+  }
+
+variants =
+  element variants {
+    element variant {
+      attribute name { xsd:string },
+      attribute values { xsd:string }
+    }+
+  }
+
+releases =
+  element releases {
+    element release {
+      attribute version { xsd:string },
+      attribute tag { xsd:string }?,
+      attribute date { xsd:date }?,
+      xsd:string?
+    }+
+  }
+
+build = 
+  element build {
+    attribute vc:type { "git" | "svn" },
+    attribute vc:href { xsd:anyURI },
+    dependency*
+  }
+
+components =
+  element components {
+    element component {
+      attribute name { xsd:string },
+      attribute config { xsd:string }?,
+      dependency*
+    }+
+  }
+
+dependency =
+  element depends   { attribute href { xsd:anyURI }              } |
+  element conflicts { attribute href { xsd:anyURI }              } |
+  element if        { attribute test { xsd:string }, dependency+ } |
+  element elseif    { attribute test { xsd:string }, dependency+ } |
+  element else      {                                dependency+ }
+
+package =
+  element package {
+    attribute type { xsd:string }?,
+    attribute component { xsd:string }?,
+    attribute version { xsd:string }?,
+    attribute variant { xsd:string }?,
+    attribute ar:href { xsd:anyURI }?,
+    attribute ar:checksum { xsd:string }?,
+    attribute ar:sysname { xsd:string }?,
+    attribute ar:machine { xsd:string }?,
+    attribute pk:distro { xsd:string }?,
+    attribute pk:name { xsd:string }?
+  }
+
+packagegroup =
+  element group {
+    attribute type { xsd:string }?,
+    attribute component { xsd:string }?,
+    attribute version { xsd:string }?,
+    attribute variant { xsd:string }?,
+    attribute ar:sysname { xsd:string }?,
+    attribute ar:machine { xsd:string }?,
+    attribute pk:distro { xsd:string }?,
+    (package | packagegroup)+
+  }

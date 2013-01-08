@@ -22,7 +22,7 @@ class Deliverable
   {
   public:
     Deliverable() :
-        driver(0), folder(0), href(0), hash(0)
+        driver(0), name(0), href(0), hash(0)
       {
       }
   public:
@@ -30,7 +30,7 @@ class Deliverable
     std::vector<Spec> depends;
     std::vector<Spec> conflicts;
     Driver* driver;
-    int folder;
+    int name;
     int href;
     int hash;
   };
