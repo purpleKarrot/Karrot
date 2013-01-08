@@ -40,14 +40,14 @@ class FeedParser
   private:
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
-    void parse_build(XmlReader& xml);
+    void parse_build(XmlReader& xml, int type, int href);
     void parse_runtime(XmlReader& xml);
     void parse_components(XmlReader& xml);
     void parse_depends(XmlReader& xml, Dependencies& depends);
     void parse_packages(XmlReader& xml, Package group);
     void parse_package_fields(XmlReader& xml, Package& group);
   private:
-    int folder;
+    int name;
     std::vector<int> variants;
     std::vector<Release> releases;
     std::vector<Dependencies> components;
@@ -55,8 +55,6 @@ class FeedParser
     FeedQueue& queue;
     Database& db;
     PackageHandler& ph;
-    int repo_type;
-    int repo_href;
   };
 
 } // namespace karrot

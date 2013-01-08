@@ -155,7 +155,7 @@ void Subversion::download(const Deliverable& deliverable)
     }
 
   const char* abs_path;
-  svn_dirent_get_absolute(&abs_path, quark_to_string(deliverable.folder), pool);
+  svn_dirent_get_absolute(&abs_path, quark_to_string(deliverable.name), pool);
   const char* canonical_url = svn_uri_canonicalize(url.c_str(), pool);
   const char* canonical_path = svn_dirent_canonicalize(abs_path, pool);
 

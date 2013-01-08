@@ -83,9 +83,7 @@ void XmlReader::pop_tag()
 //#include "xml_re2c.h"
 
 XmlReader::XmlReader(const boost::filesystem::path& filepath) :
-    token_(token_none),
-    skip_content(false),
-    is_empty_element(false)
+    token_(token_none), is_empty_element(false)
   {
   boost::filesystem::ifstream stream(filepath, std::ios::binary);
   if (!stream)
@@ -131,13 +129,12 @@ int XmlReader::attribute(int name, int namespace_uri) const
 
 void XmlReader::skip()
   {
-  std::size_t depth = 0;
   if (is_empty_element)
     {
     is_empty_element = false;
     return;
     }
-  skip_content = true;
+  std::size_t depth = 0;
   do
     {
     if ((token_ == token_element) && (!is_empty_element))
@@ -150,7 +147,6 @@ void XmlReader::skip()
       }
     }
   while (read() && depth > 0);
-  skip_content = false;
   }
 
 bool XmlReader::start_element()
@@ -175,20 +171,9 @@ bool XmlReader::start_element()
 
 std::string XmlReader::content()
   {
-  int depth = 0;
-  do
-    {
-    if ((token_ == token_element) && (!is_empty_element))
-      {
-      ++depth;
-      }
-    else if (token_ == token_end_element)
-      {
-      --depth;
-      }
-    }
-  while (read() && depth > 0);
-  return "text";
+  std::vector<char>::iterator begin = cursor;
+  skip();
+  return std::string(begin, cursor);
   }
 
 } // namespace karrot

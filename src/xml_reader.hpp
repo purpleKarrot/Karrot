@@ -86,7 +86,6 @@ class XmlReader: boost::noncopyable
     std::vector<Mapping> ns_mappings;
     std::vector<Tag> open_tags;
     bool is_empty_element;
-    bool skip_content;
   };
 
 } // namespace karrot

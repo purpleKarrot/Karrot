@@ -16,6 +16,7 @@ namespace karrot
 {
 
 static const int NAMESPACE    = string_to_quark("http://ryppl.org/2012/feed");
+static const int VCS          = string_to_quark("http://ryppl.org/2012/versioncontrol");
 
 static const int BUILD        = string_to_quark("build");
 static const int COMPONENT    = string_to_quark("component");
@@ -80,10 +81,10 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     printf("not a karrot feed\n");
     return false;
     }
-  folder = xml.attribute(NAME, NAMESPACE);
-  if (!folder)
+  name = xml.attribute(NAME, NAMESPACE);
+  if (!name)
     {
-    printf("folder missing!\n");
+    printf("name missing!\n");
     return false;
     }
   //int href = xml.get_attribute (int.HREF, NAMESPACE);
@@ -101,13 +102,6 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     printf("meta expected!!\n");
     }
 
-  if (tag == REPOSITORY)
-    {
-    this->repo_type = xml.attribute(TYPE, NAMESPACE);
-    this->repo_href = xml.attribute(HREF, NAMESPACE);
-    xml.skip();
-    tag = next_element(xml);
-    }
   if (tag == VARIANTS)
     {
     parse_variants(xml);
@@ -120,7 +114,9 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     }
   if (tag == BUILD)
     {
-    parse_build(xml);
+    int type = xml.attribute(TYPE, VCS);
+    int href = xml.attribute(HREF, VCS);
+    parse_build(xml, type, href);
     tag = next_element(xml);
     }
   if (tag == RUNTIME)
@@ -135,7 +131,7 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     }
   if (tag == PACKAGES)
     {
-    Package group(Identification(this->url.host, this->url.path), folder);
+    Package group(this->url.host, this->url.path);
     parse_packages(xml, group);
     tag = next_element(xml);
     }
@@ -172,11 +168,11 @@ void FeedParser::parse_releases(XmlReader& xml)
     }
   }
 
-void FeedParser::parse_build(XmlReader& xml)
+void FeedParser::parse_build(XmlReader& xml, int type, int href)
   {
   Dependencies depends(ASTERISK);
   parse_depends(xml, depends);
-  Driver* driver = this->ph.get(repo_type);
+  Driver* driver = this->ph.get(type);
   if (!driver)
     {
     return;
@@ -185,8 +181,8 @@ void FeedParser::parse_build(XmlReader& xml)
   deliverable.id.domain = url.host;
   deliverable.id.project = url.path;
   deliverable.id.component = ASTERISK;
-  deliverable.folder = folder;
-  deliverable.href = repo_href;
+  deliverable.name = name;
+  deliverable.href = href;
   deliverable.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
@@ -311,7 +307,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
         {
         Deliverable deliverable;
         deliverable.id = group.id;
-        deliverable.folder = this->folder;
+        deliverable.name = this->name;
         int flags = group.driver->filter(group.fields, deliverable.id,
             deliverable.href, deliverable.hash);
         if (flags)
@@ -334,7 +330,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
         }
       else
         {
-        std::cout << this->folder << " is invalid!" << std::endl;
+        std::cout << quark_to_string(name) << " is invalid!" << std::endl;
         }
       xml.skip();
       }

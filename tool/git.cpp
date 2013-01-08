@@ -106,7 +106,7 @@ void Git::download(const Deliverable& artefact)
   {
   const char* href = quark_to_string(artefact.href);
   const char* hash = quark_to_string(artefact.hash ? artefact.hash : artefact.id.version);
-  const char* path = quark_to_string(artefact.folder);
+  const char* path = quark_to_string(artefact.name);
 
   progress_data pd;
   memset(&pd, 0, sizeof(pd));

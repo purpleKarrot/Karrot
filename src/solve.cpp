@@ -73,7 +73,7 @@ static void dependency_clauses(const Hash& hash, const std::vector<Deliverable>&
         {
         // TODO:
         //std::cout << "unsatisfied dependency: \n" << dependency << std::endl;
-        std::cout << "required by: " << entries[i].folder << std::endl;
+        std::cout << "required by: " << entries[i].name << std::endl;
         solver.addUnit(clause[0]);
         }
       else

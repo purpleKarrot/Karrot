@@ -20,15 +20,14 @@ class Driver;
 class Package
   {
   public:
-    Package(Identification id, int folder) :
-        id(id), driver(0), folder(folder)
+    Package(int domain, int project) :
+        id(domain, project), driver(0)
       {
       }
   public:
     Identification id;
     std::map<int, int> fields;
     Driver* driver;
-    int folder;
   };
 
 } // namespace karrot

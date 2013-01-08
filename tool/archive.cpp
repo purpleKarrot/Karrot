@@ -401,7 +401,7 @@ void Archive::download(const Deliverable& artefact)
   r_download_(file, quark_to_string(artefact.href));
   std::fclose(file);
 
-  std::string dir_name = quark_to_string(artefact.folder);
+  std::string dir_name = quark_to_string(artefact.name);
 
   fs::path current_path = fs::current_path();
   fs::path output_path = current_path / dir_name;
