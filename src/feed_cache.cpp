@@ -39,11 +39,11 @@ static std::string url_to_filename(const Url& url)
   {
   std::string str = quark_to_string(url.host);
   str += quark_to_string(url.path);
-  for (std::string::iterator i = str.begin(); i != str.end(); ++i)
+  for (char& c : str)
     {
-    if (*i == '/')
+    if (c == '/')
       {
-      *i = '-';
+      c = '-';
       }
     }
   return str;

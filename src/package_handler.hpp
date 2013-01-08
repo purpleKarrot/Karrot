@@ -33,9 +33,9 @@ class PackageHandler
       }
     void finalize()
       {
-      for (auto iter = handlers.begin(); iter != handlers.end(); ++iter)
+      for (const auto& elem : handlers)
         {
-        iter->second->finalize();
+        elem.second->finalize();
         }
       }
   private:

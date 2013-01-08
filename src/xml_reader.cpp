@@ -34,28 +34,25 @@ std::size_t XmlReader::push_namespaces()
   {
   Mapping mapping;
   std::size_t previous_mappings = ns_mappings.size();
-  std::vector<Attribute>::iterator begin = attributes.begin();
-  std::vector<Attribute>::iterator end = attributes.end();
-  std::vector<Attribute>::iterator attr;
-  for (attr = begin; attr != end; ++attr)
+  for (const Attribute& attr : attributes)
     {
-    if (!attr->name.prefix && attr->name.local == XMLNS)
+    if (!attr.name.prefix && attr.name.local == XMLNS)
       {
       mapping.prefix = 0;
-      mapping.namespace_uri = attr->value;
+      mapping.namespace_uri = attr.value;
       ns_mappings.push_back(mapping);
       }
-    else if (attr->name.prefix == XMLNS)
+    else if (attr.name.prefix == XMLNS)
       {
-      mapping.prefix = attr->name.local;
-      mapping.namespace_uri = attr->value;
+      mapping.prefix = attr.name.local;
+      mapping.namespace_uri = attr.value;
       ns_mappings.push_back(mapping);
       }
     }
   lookup_namespace(current_name);
-  for (attr = begin; attr != end; ++attr)
+  for (Attribute& attr : attributes)
     {
-    lookup_namespace(attr->name);
+    lookup_namespace(attr.name);
     }
   return previous_mappings;
   }
@@ -122,14 +119,11 @@ int XmlReader::namespace_uri() const
 
 int XmlReader::attribute(int name, int namespace_uri) const
   {
-  std::vector<Attribute>::const_iterator begin = attributes.begin();
-  std::vector<Attribute>::const_iterator end = attributes.end();
-  std::vector<Attribute>::const_iterator attr;
-  for (attr = begin; attr != end; ++attr)
+  for (const Attribute& attr : attributes)
     {
-    if (attr->name.local == name && attr->name.namespace_uri == namespace_uri)
+    if (attr.name.local == name && attr.name.namespace_uri == namespace_uri)
       {
-      return attr->value;
+      return attr.value;
       }
     }
   return 0;

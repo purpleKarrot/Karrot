@@ -7,6 +7,7 @@
  */
 
 #include <karrot/deliverable.hpp>
+#include <karrot/driver.hpp>
 #include <karrot/engine.hpp>
 #include <karrot/spec.hpp>
 #include <karrot/url.hpp>

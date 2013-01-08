@@ -37,9 +37,8 @@ class FeedQueue
       }
     void push(const Url& url)
       {
-      for (std::size_t i = 0; i < urls.size(); ++i)
+      for (const Url& cur : urls)
         {
-        const Url& cur = urls[i];
         if (cur.path == url.path && cur.host == url.host)
           {
           sanity_check(cur, url, scheme);

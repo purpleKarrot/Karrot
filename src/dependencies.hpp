@@ -72,10 +72,8 @@ class Dependencies
         }
       std::vector<bool> stack; //{true};
       stack.push_back(true);
-      //for (const auto& dep : self->deps)
-      for (std::size_t i = 0; i < deps.size(); ++i)
+      for (const Entry& entry : deps)
         {
-        const Entry& entry = deps[i];
         switch (entry.first)
           {
           case DEPENDS:
