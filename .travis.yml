@@ -16,7 +16,7 @@ env:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq docbook-xml docbook-xsl doxygen libarchive-dev libboost-filesystem-dev re2c valac-0.16
+  - sudo apt-get install -qq --no-install-recommends docbook-xml docbook-xsl doxygen libarchive-dev libboost-filesystem-dev re2c valac-0.16 xsltproc
 
 script:
   - mkdir _build
