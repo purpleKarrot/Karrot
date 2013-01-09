@@ -97,7 +97,7 @@ void PackageKit::download(const Deliverable& deliverable)
   packages.push_back((gchar*) quark_to_string(deliverable.href));
   }
 
-void PackageKit::finalize()
+void PackageKit::install()
   {
   if (!packages.empty())
     {

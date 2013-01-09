@@ -39,9 +39,6 @@ class KARROT_DECL Driver
     virtual void download(const Deliverable& deliverable)
       {
       }
-    virtual void finalize()
-      {
-      }
   public:
     static const int INCOMPATIBLE  = 0;
     static const int NORMAL        = 1;

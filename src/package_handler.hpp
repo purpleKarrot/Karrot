@@ -31,13 +31,6 @@ class PackageHandler
         }
       return 0;
       }
-    void finalize()
-      {
-      for (const auto& elem : handlers)
-        {
-        elem.second->finalize();
-        }
-      }
   private:
     std::map<int, Driver*> handlers;
   };

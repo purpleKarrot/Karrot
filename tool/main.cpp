@@ -74,7 +74,9 @@ int main(int argc, char* argv[])
       deliverable.driver->download(deliverable);
       }
     }
-  engine.finalize();
+#ifdef USE_PACKAGEKIT
+  package_kit.install();
+#endif
   return 0;
   }
 

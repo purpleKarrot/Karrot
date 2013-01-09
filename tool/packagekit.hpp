@@ -22,12 +22,12 @@ class PackageKit: public Driver
   public:
     PackageKit();
     ~PackageKit();
+    void install();
   private:
     int namespace_uri() const;
     Fields fields() const;
     int filter(const Fields& fields, Identification& id, int& href, int& hash);
     void download(const Deliverable& deliverable);
-    void finalize();
     //Type type() const
     //  {
     //  return INTERNAL;

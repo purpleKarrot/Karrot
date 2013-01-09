@@ -75,9 +75,4 @@ const Deliverable& Engine::operator[](int index)
   return pimpl->deliverables[index];
   }
 
-void Engine::finalize()
-  {
-  pimpl->package_handler.finalize();
-  }
-
 } // namespace karrot
