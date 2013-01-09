@@ -24,6 +24,7 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DKARROT_USE_ARCHIVE=ON -DKARROT_USE_PACKAGEKIT=ON ..
   - cmake --build .
   - ctest -V
+  - cmake --build . --target documentation
 
 branches:
   only:
