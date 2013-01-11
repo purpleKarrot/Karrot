@@ -22,7 +22,7 @@ class Archive: public Driver
     int namespace_uri() const;
     Fields fields() const;
     int filter(const Fields& fields, Identification& id, int& href, int& hash);
-    void download(const Deliverable& deliverable);
+    void download(const Implementation& impl);
     //Type type() const
     //  {
     //  return BINARY;

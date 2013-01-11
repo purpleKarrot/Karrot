@@ -19,7 +19,7 @@
 namespace karrot
 {
 
-typedef std::vector<Deliverable> Database;
+typedef std::vector<Implementation> Database;
 
 class XmlReader;
 

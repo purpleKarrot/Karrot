@@ -10,7 +10,7 @@
 #include <git2/remote.h>
 
 #include "git.hpp"
-#include <karrot/deliverable.hpp>
+#include <karrot/implementation.hpp>
 #include <karrot/quark.hpp>
 
 #include <cstdio>
@@ -102,11 +102,11 @@ static int cred_acquire(git_cred **cred, const char* url, unsigned int allowed_t
 namespace karrot
 {
 
-void Git::download(const Deliverable& artefact)
+void Git::download(const Implementation& impl)
   {
-  const char* href = quark_to_string(artefact.href);
-  const char* hash = quark_to_string(artefact.hash ? artefact.hash : artefact.id.version);
-  const char* path = quark_to_string(artefact.name);
+  const char* href = quark_to_string(impl.href);
+  const char* hash = quark_to_string(impl.hash ? impl.hash : impl.id.version);
+  const char* path = quark_to_string(impl.name);
 
   progress_data pd;
   memset(&pd, 0, sizeof(pd));

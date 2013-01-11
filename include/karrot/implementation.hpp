@@ -6,8 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef KARROT_DELIVERABLE_HPP
-#define KARROT_DELIVERABLE_HPP
+#ifndef KARROT_IMPLEMENTATION_HPP
+#define KARROT_IMPLEMENTATION_HPP
 
 #include <vector>
 #include <karrot/identification.hpp>
@@ -18,10 +18,10 @@ namespace karrot
 
 class Driver;
 
-class Deliverable
+class Implementation
   {
   public:
-    Deliverable() :
+    Implementation() :
         driver(0), name(0), href(0), hash(0)
       {
       }
@@ -37,4 +37,4 @@ class Deliverable
 
 } // namespace karrot
 
-#endif /* KARROT_DELIVERABLE_HPP */
+#endif /* KARROT_IMPLEMENTATION_HPP */

@@ -9,7 +9,7 @@
 #include "feed_parser.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
-#include <karrot/deliverable.hpp>
+#include <karrot/implementation.hpp>
 #include <iostream>
 
 namespace karrot
@@ -177,25 +177,25 @@ void FeedParser::parse_build(XmlReader& xml, int type, int href)
     {
     return;
     }
-  Deliverable deliverable;
-  deliverable.id.domain = url.host;
-  deliverable.id.project = url.path;
-  deliverable.id.component = ASTERISK;
-  deliverable.name = name;
-  deliverable.href = href;
-  deliverable.driver = driver;
+  Implementation impl;
+  impl.id.domain = url.host;
+  impl.id.project = url.path;
+  impl.id.component = ASTERISK;
+  impl.name = name;
+  impl.href = href;
+  impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
-    deliverable.id.version = releases[i].version;
-    deliverable.hash = releases[i].tag;
+    impl.id.version = releases[i].version;
+    impl.hash = releases[i].tag;
     foreach_variant(variants, [&](int variant)
       {
-      deliverable.id.variant = variant;
-      deliverable.depends.clear();
-      deliverable.conflicts.clear();
-      depends.replay(ASTERISK, deliverable.id.version, variant,
-          deliverable.depends, deliverable.conflicts);
-      db.push_back(deliverable);
+      impl.id.variant = variant;
+      impl.depends.clear();
+      impl.conflicts.clear();
+      depends.replay(ASTERISK, impl.id.version, variant,
+          impl.depends, impl.conflicts);
+      db.push_back(impl);
       });
     }
   }
@@ -305,27 +305,27 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
       parse_package_fields(xml, group);
       if (package_is_valid(group))
         {
-        Deliverable deliverable;
-        deliverable.id = group.id;
-        deliverable.name = this->name;
-        int flags = group.driver->filter(group.fields, deliverable.id,
-            deliverable.href, deliverable.hash);
+        Implementation impl;
+        impl.id = group.id;
+        impl.name = this->name;
+        int flags = group.driver->filter(group.fields, impl.id,
+            impl.href, impl.hash);
         if (flags)
           {
           if ((flags | 0x1) != 0) // not INSTALLED
             {
-            deliverable.driver = group.driver;
+            impl.driver = group.driver;
             }
           if ((flags | 0x2) == 0) // not SYSTEM
             {
-            Identification& id = deliverable.id;
+            Identification& id = impl.id;
             for (const Dependencies& component : components)
               {
               component.replay(id.component, id.version, id.variant,
-                  deliverable.depends, deliverable.conflicts);
+                  impl.depends, impl.conflicts);
               }
             }
-          this->db.push_back(deliverable);
+          this->db.push_back(impl);
           }
         }
       else

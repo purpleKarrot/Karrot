@@ -15,8 +15,8 @@
 namespace karrot
 {
 
-class Deliverable;
 class Identification;
+class Implementation;
 
 class KARROT_DECL Driver
   {
@@ -36,7 +36,7 @@ class KARROT_DECL Driver
       {
       return 0;
       }
-    virtual void download(const Deliverable& deliverable)
+    virtual void download(const Implementation& implementation)
       {
       }
   public:

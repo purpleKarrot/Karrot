@@ -31,7 +31,7 @@ static inline int hash_artefact(const Identification& ident)
   return hash_artefact(ident.domain, ident.project);
   }
 
-static void query(const Hash& hash, const std::vector<Deliverable>& entries,
+static void query(const Hash& hash, const std::vector<Implementation>& entries,
     const Spec& dep, vec<Lit>& res)
   {
   int id;
@@ -50,7 +50,7 @@ static void query(const Hash& hash, const std::vector<Deliverable>& entries,
     }
   }
 
-static void print(const std::vector<Deliverable>& entries, const vec<Lit>& lits)
+static void print(const std::vector<Implementation>& entries, const vec<Lit>& lits)
   {
   for (int i = 0; i < lits.size(); ++i)
     {
@@ -60,7 +60,7 @@ static void print(const std::vector<Deliverable>& entries, const vec<Lit>& lits)
     }
   }
 
-static void dependency_clauses(const Hash& hash, const std::vector<Deliverable>& entries, Solver& solver)
+static void dependency_clauses(const Hash& hash, const std::vector<Implementation>& entries, Solver& solver)
   {
   for (std::size_t i = 0; i < entries.size(); ++i)
     {
@@ -84,7 +84,7 @@ static void dependency_clauses(const Hash& hash, const std::vector<Deliverable>&
     }
   }
 
-static void explicit_conflict_clauses(const Hash& hash, const std::vector<Deliverable>& entries, Solver& solver)
+static void explicit_conflict_clauses(const Hash& hash, const std::vector<Implementation>& entries, Solver& solver)
   {
   for (std::size_t i = 0; i < entries.size(); ++i)
     {
@@ -101,12 +101,12 @@ static void explicit_conflict_clauses(const Hash& hash, const std::vector<Delive
     }
   }
 
-// Deliverables of the same project either complement or conflict each other.
+// Implementations of the same project either complement or conflict each other.
 // Example: the component runtime(exe, dll) and develop(lib, hpp) complement
 // each other when both have the same version and variant. If version and
-// variant differ, the version does not match, or one deliverable provides
+// variant differ, the version does not match, or one implementation provides
 // all components, there is a conflict.
-static void implicit_conflict_clauses(const std::vector<Deliverable>& entries, Solver& solver)
+static void implicit_conflict_clauses(const std::vector<Implementation>& entries, Solver& solver)
   {
   for (std::size_t i = 0; i < entries.size(); ++i)
     {
@@ -131,7 +131,7 @@ static void implicit_conflict_clauses(const std::vector<Deliverable>& entries, S
   }
 
 std::vector<int> solve(
-    const std::vector<Deliverable>& database,
+    const std::vector<Implementation>& database,
     const std::set<Spec>& projects)
   {
   Hash hash;

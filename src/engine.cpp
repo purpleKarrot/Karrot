@@ -7,7 +7,7 @@
  */
 
 #include <karrot/engine.hpp>
-#include <karrot/deliverable.hpp>
+#include <karrot/implementation.hpp>
 #include <karrot/quark.hpp>
 #include <cstring>
 
@@ -21,43 +21,43 @@
 namespace karrot
 {
 
-class Engine::Implementation
+class Engine::Private
   {
   public:
     FeedQueue feed_queue;
     FeedCache feed_cache;
     PackageHandler package_handler;
-    std::vector<Deliverable> deliverables;
+    std::vector<Implementation> implementations;
   };
 
 Engine::Engine() :
-    pimpl(new Implementation)
+    self(new Private)
   {
   }
 
 Engine::~Engine()
   {
-  delete pimpl;
+  delete self;
   }
 
 void Engine::add_driver(const char* name, Driver* driver)
   {
-  pimpl->package_handler.add(string_to_quark(name, std::strlen(name)), driver);
+  self->package_handler.add(string_to_quark(name, std::strlen(name)), driver);
   }
 
 void Engine::load_feed(const Url& url)
   {
-  pimpl->feed_queue.push(url);
+  self->feed_queue.push(url);
   const Url* purl;
-  while ((purl = pimpl->feed_queue.get_next()))
+  while ((purl = self->feed_queue.get_next()))
     {
     const Url url(*purl); //explicit copy!
-    XmlReader xml(pimpl->feed_cache.local_path(url));
+    XmlReader xml(self->feed_cache.local_path(url));
     if (!xml.start_element())
       {
       throw std::runtime_error("failed to read start of feed");
       }
-    FeedParser parser(pimpl->feed_queue, pimpl->deliverables, pimpl->package_handler);
+    FeedParser parser(self->feed_queue, self->implementations, self->package_handler);
     if (!parser.parse(url, xml))
       {
       std::cerr << "not a valid ryppl feed" << std::endl;
@@ -67,12 +67,12 @@ void Engine::load_feed(const Url& url)
 
 std::vector<int> Engine::solve(const std::set<Spec>& projects)
   {
-  return karrot::solve(pimpl->deliverables, projects);
+  return karrot::solve(self->implementations, projects);
   }
 
-const Deliverable& Engine::operator[](int index)
+const Implementation& Engine::operator[](int index)
   {
-  return pimpl->deliverables[index];
+  return self->implementations[index];
   }
 
 } // namespace karrot

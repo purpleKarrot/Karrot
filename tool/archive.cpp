@@ -14,7 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <karrot/deliverable.hpp>
+#include <karrot/implementation.hpp>
 #include <karrot/quark.hpp>
 #include <karrot/url.hpp>
 
@@ -382,10 +382,10 @@ static bool check_md5(FILE *file, const char *md5)
   return true;
   }
 
-void Archive::download(const Deliverable& artefact)
+void Archive::download(const Implementation& impl)
   {
-  const char* url = quark_to_string(artefact.href);
-  const char* md5 = quark_to_string(artefact.hash);
+  const char* url = quark_to_string(impl.href);
+  const char* md5 = quark_to_string(impl.hash);
   fs::path filepath = fs::path(".archives") / urlencode(url);
   FILE* file = std::fopen(filepath.string().c_str(), "rb");
   if (file)
@@ -398,10 +398,10 @@ void Archive::download(const Deliverable& artefact)
     std::fclose(file);
     }
   file = std::fopen(filepath.string().c_str(), "wb");
-  r_download_(file, quark_to_string(artefact.href));
+  r_download_(file, quark_to_string(impl.href));
   std::fclose(file);
 
-  std::string dir_name = quark_to_string(artefact.name);
+  std::string dir_name = quark_to_string(impl.name);
 
   fs::path current_path = fs::current_path();
   fs::path output_path = current_path / dir_name;

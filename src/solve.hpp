@@ -9,7 +9,7 @@
 #ifndef KARROT_SOLVE_HPP
 #define KARROT_SOLVE_HPP
 
-#include <karrot/deliverable.hpp>
+#include <karrot/implementation.hpp>
 #include <karrot/spec.hpp>
 #include <vector>
 #include <set>
@@ -18,7 +18,7 @@ namespace karrot
 {
 
 std::vector<int> solve(
-    const std::vector<Deliverable>& database,
+    const std::vector<Implementation>& database,
     const std::set<Spec>& projects);
 
 } // namespace karrot

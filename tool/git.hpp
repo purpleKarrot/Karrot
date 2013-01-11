@@ -21,7 +21,7 @@ class Git: public Driver
     //  {
     //  return SOURCE;
     //  }
-    void download(const Deliverable& deliverable);
+    void download(const Implementation& impl);
   };
 
 } // namespace karrot

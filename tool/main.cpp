@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/deliverable.hpp>
+#include <karrot/implementation.hpp>
 #include <karrot/driver.hpp>
 #include <karrot/engine.hpp>
 #include <karrot/spec.hpp>
@@ -68,10 +68,10 @@ int main(int argc, char* argv[])
     }
   for (int i : engine.solve(projects))
     {
-    const Deliverable& deliverable = engine[i];
-    if (deliverable.driver)
+    const Implementation& impl = engine[i];
+    if (impl.driver)
       {
-      deliverable.driver->download(deliverable);
+      impl.driver->download(impl);
       }
     }
 #ifdef USE_PACKAGEKIT

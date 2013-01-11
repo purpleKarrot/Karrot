@@ -27,7 +27,7 @@ class Subversion: public Driver
     //  {
     //  return SOURCE;
     //  }
-    void download(const Deliverable& deliverable);
+    void download(const Implementation& impl);
   private:
     apr_pool_t* pool;
     svn_client_ctx_t* ctx;

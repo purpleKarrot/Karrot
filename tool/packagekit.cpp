@@ -9,7 +9,7 @@
 #include "packagekit.hpp"
 #include "packagekit_g.h"
 
-#include <karrot/deliverable.hpp>
+#include <karrot/implementation.hpp>
 #include <karrot/quark.hpp>
 
 #include <iostream>
@@ -92,9 +92,9 @@ int PackageKit::filter(const Fields& fields, Identification& id, int& href, int&
   return Driver::INCOMPATIBLE;
   }
 
-void PackageKit::download(const Deliverable& deliverable)
+void PackageKit::download(const Implementation& impl)
   {
-  packages.push_back((gchar*) quark_to_string(deliverable.href));
+  packages.push_back((gchar*) quark_to_string(impl.href));
   }
 
 void PackageKit::install()

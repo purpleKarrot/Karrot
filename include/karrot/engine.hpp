@@ -19,7 +19,7 @@ namespace karrot
 class Url;
 class Spec;
 class Driver;
-class Deliverable;
+class Implementation;
 
 class KARROT_DECL Engine
   {
@@ -30,13 +30,13 @@ class KARROT_DECL Engine
     void add_driver(const char* name, Driver* driver);
     void load_feed(const Url& url);
     std::vector<int> solve(const std::set<Spec>& projects);
-    const Deliverable& operator[](int index);
+    const Implementation& operator[](int index);
   private:
     Engine(const Engine&);
     void operator=(const Engine&);
   private:
-    class Implementation;
-    Implementation* pimpl;
+    class Private;
+    Private* self;
   };
 
 } // namespace karrot
