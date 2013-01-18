@@ -9,14 +9,12 @@
 #ifndef KARROT_ENGINE_HPP
 #define KARROT_ENGINE_HPP
 
-#include <karrot/export.hpp>
-
 namespace karrot
 {
 
 class Driver;
 
-class KARROT_DECL Engine
+class Engine
   {
   public:
     Engine();

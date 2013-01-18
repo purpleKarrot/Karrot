@@ -9,12 +9,10 @@
 #ifndef KARROT_URL_HPP
 #define KARROT_URL_HPP
 
-#include <karrot/export.hpp>
-
 namespace karrot
 {
 
-class KARROT_DECL Url
+class Url
   {
   public:
     Url();

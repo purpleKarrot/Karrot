@@ -10,7 +10,6 @@
 #define KARROT_DRIVER_HPP
 
 #include <map>
-#include <karrot/export.hpp>
 
 namespace karrot
 {
@@ -18,7 +17,7 @@ namespace karrot
 class Identification;
 class Implementation;
 
-class KARROT_DECL Driver
+class Driver
   {
   public:
     typedef std::map<int, int> Fields;
