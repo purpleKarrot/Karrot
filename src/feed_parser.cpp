@@ -15,40 +15,13 @@
 namespace karrot
 {
 
-static const int NAMESPACE    = string_to_quark("http://ryppl.org/2012/feed");
-static const int VCS          = string_to_quark("http://ryppl.org/2012/versioncontrol");
+static const std::string feed_ns = "http://ryppl.org/2012/feed";
+static const std::string vcs_ns = "http://ryppl.org/2012/versioncontrol";
 
-static const int BUILD        = string_to_quark("build");
-static const int COMPONENT    = string_to_quark("component");
-static const int COMPONENTS   = string_to_quark("components");
-static const int CONFIG       = string_to_quark("config");
-static const int CONFLICTS    = string_to_quark("conflicts");
-static const int DATE         = string_to_quark("date");
-static const int DEPENDENCIES = string_to_quark("dependencies");
-static const int DEPENDS      = string_to_quark("depends");
-static const int ELSE         = string_to_quark("else");
-static const int ELSEIF       = string_to_quark("elseif");
-static const int ENDIF        = string_to_quark("endif");
-static const int GROUP        = string_to_quark("group");
-static const int HREF         = string_to_quark("href");
-static const int IF           = string_to_quark("if");
-static const int META         = string_to_quark("meta");
-static const int NAME         = string_to_quark("name");
-static const int PACKAGE      = string_to_quark("package");
-static const int PACKAGES     = string_to_quark("packages");
-static const int PROJECT      = string_to_quark("project");
-static const int RELEASE      = string_to_quark("release");
-static const int RELEASES     = string_to_quark("releases");
-static const int REPOSITORY   = string_to_quark("repository");
-static const int RUNTIME      = string_to_quark("runtime");
-static const int SUMMARY      = string_to_quark("summary");
-static const int TAG          = string_to_quark("tag");
-static const int TEST         = string_to_quark("test");
-static const int TYPE         = string_to_quark("type");
-static const int VALUES       = string_to_quark("values");
-static const int VARIANT      = string_to_quark("variant");
-static const int VARIANTS     = string_to_quark("variants");
-static const int VERSION      = string_to_quark("version");
+static int to_quark(const std::string& string)
+  {
+  return string_to_quark(string.c_str(), string.length());
+  }
 
 FeedParser::FeedParser(FeedQueue& queue, Database& db, PackageHandler& ph) :
     queue(queue),
@@ -57,41 +30,39 @@ FeedParser::FeedParser(FeedQueue& queue, Database& db, PackageHandler& ph) :
   {
   }
 
-static int next_element(XmlReader& xml)
+static std::string next_element(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    int name = xml.name();
-    int namespace_uri = xml.namespace_uri();
-    if (namespace_uri == NAMESPACE)
+    if (xml.namespace_uri() == feed_ns)
       {
-      return name;
+      return xml.name();
       }
-    printf("skipping %s:%s\n", quark_to_string(namespace_uri), quark_to_string(name));
+    std::cout << "skipping {" << xml.namespace_uri() << "}:" << xml.name() << std::endl;
     xml.skip();
     }
-  return int();
+  return std::string();
   }
 
 bool FeedParser::parse(const Url& url, XmlReader& xml)
   {
   this->url = url;
-  if (xml.name() != PROJECT || xml.namespace_uri() != NAMESPACE)
+  if (xml.name() != "project" || xml.namespace_uri() != feed_ns)
     {
     printf("not a karrot feed\n");
     return false;
     }
-  name = xml.attribute(NAME, NAMESPACE);
+  name = to_quark(xml.attribute("name", feed_ns));
   if (!name)
     {
     printf("name missing!\n");
     return false;
     }
-  //int href = xml.get_attribute (int.HREF, NAMESPACE);
+  //int href = xml.get_attribute (int.HREF, feed_ns);
   //stdout.printf ("href: %s\n", href.to_string());
 
-  int tag = next_element(xml);
-  if (tag == META)
+  std::string tag = next_element(xml);
+  if (tag == "meta")
     {
     // currently not interested in meta information!
     xml.skip();
@@ -102,42 +73,42 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     printf("meta expected!!\n");
     }
 
-  if (tag == VARIANTS)
+  if (tag == "variants")
     {
     parse_variants(xml);
     tag = next_element(xml);
     }
-  if (tag == RELEASES)
+  if (tag == "releases")
     {
     parse_releases(xml);
     tag = next_element(xml);
     }
-  if (tag == BUILD)
+  if (tag == "build")
     {
-    int type = xml.attribute(TYPE, VCS);
-    int href = xml.attribute(HREF, VCS);
-    parse_build(xml, type, href);
+    const std::string& type = xml.attribute("type", vcs_ns);
+    const std::string& href = xml.attribute("href", vcs_ns);
+    parse_build(xml, to_quark(type), to_quark(href));
     tag = next_element(xml);
     }
-  if (tag == RUNTIME)
+  if (tag == "runtime")
     {
     parse_runtime(xml);
     tag = next_element(xml);
     }
-  else if (tag == COMPONENTS)
+  else if (tag == "components")
     {
     parse_components(xml);
     tag = next_element(xml);
     }
-  if (tag == PACKAGES)
+  if (tag == "packages")
     {
     Package group(this->url.host, this->url.path);
     parse_packages(xml, group);
     tag = next_element(xml);
     }
-  if (tag)
+  if (!tag.empty())
     {
-    printf("tag %s not expected!!\n", quark_to_string(tag));
+    std::cerr << "element " << tag << " not expected!!" << std::endl;
     }
   return true;
   }
@@ -146,8 +117,8 @@ void FeedParser::parse_variants(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    variants.push_back(xml.attribute(NAME, NAMESPACE));
-    variants.push_back(xml.attribute(VALUES, NAMESPACE));
+    variants.push_back(to_quark(xml.attribute("name", feed_ns)));
+    variants.push_back(to_quark(xml.attribute("values", feed_ns)));
     xml.skip();
     }
   }
@@ -156,12 +127,10 @@ void FeedParser::parse_releases(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    int name = xml.name();
-    int namespace_uri = xml.namespace_uri();
-    if (name == RELEASE && namespace_uri == NAMESPACE)
+    if (xml.name() == "release" && xml.namespace_uri() == feed_ns)
       {
-      int version = xml.attribute(VERSION, NAMESPACE);
-      int tag = xml.attribute(TAG, NAMESPACE);
+      int version = to_quark(xml.attribute("version", feed_ns));
+      int tag = to_quark(xml.attribute("tag", feed_ns));
       releases.emplace_back(version, tag);
       }
     xml.skip();
@@ -210,12 +179,10 @@ void FeedParser::parse_components(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    int name = xml.name();
-    int namespace_uri = xml.namespace_uri();
-    if (name == COMPONENT && namespace_uri == NAMESPACE)
+    if (xml.name() == "component" && xml.namespace_uri() == feed_ns)
       {
-      int name = xml.attribute(NAME, NAMESPACE);
-      components.emplace_back(name);
+      const std::string& name = xml.attribute("name", feed_ns);
+      components.emplace_back(string_to_quark(name.c_str(), name.length()));
       parse_depends(xml, components.back());
       }
     else
@@ -229,36 +196,38 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
   {
   while (xml.start_element())
     {
-    int name = xml.name();
-    if (name == IF)
+    const std::string& name = xml.name();
+    if (name == "if")
       {
-      depends.start_if(xml.attribute(TEST, NAMESPACE));
+      const std::string& test = xml.attribute("test", feed_ns);
+      depends.start_if(string_to_quark(test.c_str(), test.length()));
       parse_depends(xml, depends);
       depends.end_if();
       }
-    else if (name == ELSEIF)
+    else if (name == "elseif")
       {
-      depends.start_elseif(xml.attribute(TEST, NAMESPACE));
+      const std::string& test = xml.attribute("test", feed_ns);
+      depends.start_elseif(string_to_quark(test.c_str(), test.length()));
       parse_depends(xml, depends);
       depends.end_if();
       }
-    else if (name == ELSE)
+    else if (name == "else")
       {
       depends.start_else();
       parse_depends(xml, depends);
       depends.end_if();
       }
-    else if (name == DEPENDS)
+    else if (name == "depends")
       {
-      std::string href = quark_to_string(xml.attribute(HREF, NAMESPACE));
+      const std::string& href = xml.attribute("href", feed_ns);
       Url dep(href.c_str(), &url);
       queue.push(dep);
       depends.depends(Spec(dep));
       xml.skip();
       }
-    else if (name == CONFLICTS)
+    else if (name == "conflicts")
       {
-      std::string href = quark_to_string(xml.attribute(HREF, NAMESPACE));
+      const std::string& href = xml.attribute("href", feed_ns);
       Url dep(href.c_str(), &url);
       depends.conflicts(Spec(dep));
       xml.skip();
@@ -293,14 +262,14 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
   {
   while (xml.start_element())
     {
-    int name = xml.name();
-    int namespace_uri = xml.namespace_uri();
-    if (name == GROUP && namespace_uri == NAMESPACE)
+    const std::string& name = xml.name();
+    const std::string& namespace_uri = xml.namespace_uri();
+    if (name == "group" && namespace_uri == feed_ns)
       {
       parse_package_fields(xml, group);
       parse_packages(xml, group);
       }
-    else if (name == PACKAGE && namespace_uri == NAMESPACE)
+    else if (name == "package" && namespace_uri == feed_ns)
       {
       parse_package_fields(xml, group);
       if (package_is_valid(group))
@@ -330,7 +299,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
         }
       else
         {
-        std::cout << quark_to_string(name) << " is invalid!" << std::endl;
+        std::cout << name << " is invalid!" << std::endl;
         }
       xml.skip();
       }
@@ -344,19 +313,19 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
 void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
   {
   int attr;
-  if ((attr = xml.attribute(COMPONENT, NAMESPACE)))
+  if ((attr = to_quark(xml.attribute("component", feed_ns))))
     {
     group.id.component = attr;
     }
-  if ((attr = xml.attribute(VERSION, NAMESPACE)))
+  if ((attr = to_quark(xml.attribute("version", feed_ns))))
     {
     group.id.version = attr;
     }
-  if ((attr = xml.attribute(VARIANT, NAMESPACE)))
+  if ((attr = to_quark(xml.attribute("variant", feed_ns))))
     {
     group.id.variant = parse_variant(attr);
     }
-  if ((attr = xml.attribute(TYPE, NAMESPACE)))
+  if ((attr = to_quark(xml.attribute("type", feed_ns))))
     {
     group.driver = this->ph.get(attr);
     if (group.driver)
@@ -370,7 +339,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     typedef std::map<int, int>::iterator map_iter;
     for (map_iter it = group.fields.begin(); it != group.fields.end(); ++it)
       {
-      if ((attr = xml.attribute(it->first, namespace_uri)))
+      if ((attr = to_quark(xml.attribute(quark_to_string(it->first), quark_to_string(namespace_uri)))))
         {
         it->second = attr;
         }

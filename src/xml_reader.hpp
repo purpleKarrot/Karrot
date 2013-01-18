@@ -9,7 +9,6 @@
 #ifndef KARROT_XML_READER_HPP
 #define KARROT_XML_READER_HPP
 
-#include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
@@ -37,7 +36,7 @@ class XmlReader: boost::noncopyable
     XmlToken token() const;
     const std::string& name() const;
     const std::string& namespace_uri() const;
-    boost::optional<std::string> attribute(
+    const std::string& attribute(
       const std::string& name,
       const std::string& namespace_uri) const;
     void skip();

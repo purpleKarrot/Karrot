@@ -115,7 +115,7 @@ const std::string& XmlReader::namespace_uri() const
   return *current_name.namespace_uri;
   }
 
-boost::optional<std::string> XmlReader::attribute(
+const std::string& XmlReader::attribute(
     const std::string& name,
     const std::string& namespace_uri) const
   {
@@ -126,7 +126,7 @@ boost::optional<std::string> XmlReader::attribute(
       return attr.value;
       }
     }
-  return boost::none;
+  return empty_string;
   }
 
 void XmlReader::skip()
