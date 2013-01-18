@@ -34,7 +34,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 
 #ifdef _MSC_VER
-typedef unsigned           uint;
 typedef __int64            int64;
 typedef unsigned __int64   uint64;
 typedef long               intp;
@@ -47,16 +46,13 @@ typedef __PTRDIFF_TYPE__   intp;
 typedef unsigned __PTRDIFF_TYPE__ uintp;
 #define I64_fmt "lld"
 #endif
+typedef unsigned      uint;
 typedef unsigned char uchar;
 typedef const char    cchar;
 
 
 template<class T> static inline T min(T x, T y) { return (x < y) ? x : y; }
 template<class T> static inline T max(T x, T y) { return (x > y) ? x : y; }
-
-template <bool> struct STATIC_ASSERTION_FAILURE;
-template <> struct STATIC_ASSERTION_FAILURE<true>{};
-#define TEMPLATE_FAIL STATIC_ASSERTION_FAILURE<false>()
 
 
 //=================================================================================================
@@ -193,8 +189,8 @@ public:
     T&       operator [] (int index)        { return data[index]; }
 
     // Don't allow copying (error prone):
-    vec<T>&  operator = (vec<T>& other) { TEMPLATE_FAIL; }
-             vec        (vec<T>& other) { TEMPLATE_FAIL; }
+    vec<T>&  operator = (vec<T>& other) = delete;
+             vec        (vec<T>& other) = delete;
 
     // Duplicatation (preferred instead):
     void copyTo(vec<T>& copy) const { copy.clear(); copy.growTo(sz); for (int i = 0; i < sz; i++) new (&copy[i]) T(data[i]); }
@@ -256,19 +252,6 @@ inline lbool toLbool(int   v) { return lbool(v);  }
 const lbool l_True  = toLbool( 1);
 const lbool l_False = toLbool(-1);
 const lbool l_Undef = toLbool( 0);
-
-
-//=================================================================================================
-// Relation operators -- extend definitions from '==' and '<'
-
-
-#ifndef __SGI_STL_INTERNAL_RELOPS   // (be aware of SGI's STL implementation...)
-#define __SGI_STL_INTERNAL_RELOPS
-template <class T> static inline bool operator != (const T& x, const T& y) { return !(x == y); }
-template <class T> static inline bool operator >  (const T& x, const T& y) { return y < x;     }
-template <class T> static inline bool operator <= (const T& x, const T& y) { return !(y < x);  }
-template <class T> static inline bool operator >= (const T& x, const T& y) { return !(x < y);  }
-#endif
 
 
 //=================================================================================================
