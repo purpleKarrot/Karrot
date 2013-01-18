@@ -45,10 +45,15 @@ void Engine::add_driver(const char* name, Driver* driver)
   self->package_handler.add(string_to_quark(name, std::strlen(name)), driver);
   }
 
-void Engine::load_feed(const Url& url)
+void Engine::add_request(const char* uri)
   {
-  self->feed_queue.push(url);
+  self->feed_queue.push(Url(uri));
+  }
+
+void Engine::run()
+  {
   const Url* purl;
+  std::set<Spec> requests;
   while ((purl = self->feed_queue.get_next()))
     {
     const Url url(*purl); //explicit copy!
@@ -62,17 +67,18 @@ void Engine::load_feed(const Url& url)
       {
       std::cerr << "not a valid ryppl feed" << std::endl;
       }
+    Spec spec(url);
+    spec.component = string_to_quark("SOURCE");
+    requests.insert(spec);
     }
-  }
-
-std::vector<int> Engine::solve(const std::set<Spec>& projects)
-  {
-  return karrot::solve(self->implementations, projects);
-  }
-
-const Implementation& Engine::operator[](int index)
-  {
-  return self->implementations[index];
+  for (int i : karrot::solve(self->implementations, requests))
+    {
+    const Implementation& impl = self->implementations[i];
+    if (impl.driver)
+      {
+      impl.driver->download(impl);
+      }
+    }
   }
 
 } // namespace karrot

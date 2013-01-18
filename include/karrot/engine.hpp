@@ -9,17 +9,12 @@
 #ifndef KARROT_ENGINE_HPP
 #define KARROT_ENGINE_HPP
 
-#include <set>
-#include <vector>
 #include <karrot/export.hpp>
 
 namespace karrot
 {
 
-class Url;
-class Spec;
 class Driver;
-class Implementation;
 
 class KARROT_DECL Engine
   {
@@ -28,9 +23,8 @@ class KARROT_DECL Engine
     ~Engine();
   public:
     void add_driver(const char* name, Driver* driver);
-    void load_feed(const Url& url);
-    std::vector<int> solve(const std::set<Spec>& projects);
-    const Implementation& operator[](int index);
+    void add_request(const char* url);
+    void run();
   private:
     Engine(const Engine&);
     void operator=(const Engine&);
