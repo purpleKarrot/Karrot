@@ -17,26 +17,6 @@
 namespace karrot
 {
 
-static int __sort_lt(int a, int b)
-  {
-  return std::strcmp(quark_to_string(a), quark_to_string(b)) < 0;
-  }
-
-static inline void builder_sort(std::vector<int>& builder)
-  {
-  std::vector<int>::iterator s = builder.begin();
-  std::vector<int>::iterator t = builder.end();
-  std::vector<int>::iterator i, j;
-  for (i = s + 2; i < t; i += 2)
-    {
-    for (j = i; j > s && __sort_lt(*j, *(j - 2)); j -= 2)
-      {
-      std::swap(*(j + 0), *(j - 2));
-      std::swap(*(j + 1), *(j - 1));
-      }
-    }
-  }
-
 Dictionary parse_variant(const std::string& string)
   {
   if (string.empty())
@@ -66,19 +46,6 @@ next:
     goto next;
     }
   return builder;
-  }
-
-int lookup(int variant, int var)
-  {
-  for (const int* quark = quark_to_array(variant); *quark; quark += 2)
-    {
-    if (var == *quark)
-      {
-      return *(quark + 1);
-      }
-    }
-  std::cout << "warning: unset variable: " << quark_to_string(var) << '!' << std::endl;
-  return 0;
   }
 
 static void r_variants_recurse(const std::string *dict, std::size_t size,

@@ -18,8 +18,6 @@ namespace karrot
 
 Dictionary parse_variant(const std::string& quark);
 
-int lookup(int variant, int var);
-
 void foreach_variant(const std::vector<std::string>& variants,
     const std::function<void(Dictionary)>& function);
 
