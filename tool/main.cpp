@@ -7,6 +7,10 @@
  */
 
 #include <karrot.hpp>
+#include <boost/program_options.hpp>
+#include <boost/exception/diagnostic_information.hpp>
+#include <iostream>
+#include <fstream>
 
 #ifdef USE_ARCHIVE
 #  include "archive.hpp"
@@ -24,10 +28,6 @@
 #  include "subversion.hpp"
 #endif
 
-#include <boost/exception/diagnostic_information.hpp>
-#include <iostream>
-#include <fstream>
-
 using namespace Karrot;
 
 template<typename Type, typename... Args>
@@ -38,6 +38,54 @@ std::unique_ptr<Driver> make_driver(Args&&... args)
 
 int main(int argc, char* argv[])
   {
+  std::string machine;
+  std::string sysname;
+  std::vector<std::string> request_urls;
+  try
+    {
+    namespace po = boost::program_options;
+    po::options_description allowed_options("Allowed options");
+    allowed_options.add_options()
+      ("help,h", "produce help message")
+      ("version,v", "print version string")
+      ("sysname,s", po::value(&sysname), "the system name")
+      ("machine,m", po::value(&machine), "the hardware name")
+      ;
+    po::options_description hidden_options("Hidden options");
+    hidden_options.add_options()
+      ("request-url", po::value(&request_urls), "request url")
+      ;
+    po::options_description all_options("All options");
+    all_options
+      .add(allowed_options)
+      .add(hidden_options)
+      ;
+    po::positional_options_description positional_options;
+    positional_options
+      .add("request-url", -1)
+      ;
+    po::variables_map variables;
+    store(po::command_line_parser(argc, argv)
+      .options(all_options)
+      .positional(positional_options)
+      .run(), variables);
+    if (variables.count("help"))
+      {
+      std::cout << allowed_options << std::endl;
+      return 0;
+      }
+    if (variables.count("version"))
+      {
+      std::cout << "Karrot 0.1" << std::endl;
+      return 0;
+      }
+    notify(variables);
+    }
+  catch (std::exception& error)
+    {
+    std::cout << error.what() << std::endl;
+    return -1;
+    }
   try
     {
     Engine engine;
@@ -59,9 +107,9 @@ int main(int argc, char* argv[])
     engine.add_driver("svn", make_driver<Subversion>());
 #endif
 
-    for (int i = 1; i < argc; ++i)
+    for (const std::string& url : request_urls)
       {
-      engine.add_request(argv[i], true);
+      engine.add_request(url.c_str(), true);
       }
     engine.run();
 
