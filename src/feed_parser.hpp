@@ -10,17 +10,14 @@
 #define KARROT_FEED_PARSER_HPP
 
 #include <vector>
+#include "database.hpp"
 #include "dependencies.hpp"
-//#include <karrot/variants.hpp>
 #include "feed_queue.hpp"
 #include "package_handler.hpp"
 #include "package.hpp"
 
 namespace karrot
 {
-class Implementation2;
-
-typedef std::vector<Implementation2> Database;
 
 class XmlReader;
 

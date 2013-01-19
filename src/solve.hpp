@@ -9,7 +9,7 @@
 #ifndef KARROT_SOLVE_HPP
 #define KARROT_SOLVE_HPP
 
-#include "implementation2.hpp"
+#include "database.hpp"
 #include "spec.hpp"
 #include "quark.hpp"
 #include <vector>
@@ -18,7 +18,7 @@
 namespace karrot
 {
 
-inline bool satisfies(const Implementation2& entry, const Spec& spec)
+inline bool satisfies(const DatabaseEntry& entry, const Spec& spec)
   {
   if (entry.domain != spec.domain)
     {
@@ -35,9 +35,9 @@ inline bool satisfies(const Implementation2& entry, const Spec& spec)
   return spec.query.evaluate(entry.base.version, entry.base.variant);
   }
 
-std::vector<int> solve(
-    const std::vector<Implementation2>& database,
-    const std::vector<Spec>& projects);
+typedef std::vector<Spec> Requests;
+
+std::vector<int> solve(const Database& database, const Requests& requests);
 
 } // namespace karrot
 

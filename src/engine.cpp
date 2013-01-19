@@ -7,7 +7,7 @@
  */
 
 #include <karrot.hpp>
-#include "implementation2.hpp"
+#include "database.hpp"
 #include "quark.hpp"
 #include <cstring>
 #include <algorithm>
@@ -28,8 +28,8 @@ class Engine::Private
     FeedQueue feed_queue;
     FeedCache feed_cache;
     PackageHandler package_handler;
-    std::vector<Spec> requests;
-    std::vector<Implementation2> implementations;
+    Requests requests;
+    Database database;
   };
 
 Engine::Engine() :
@@ -70,23 +70,23 @@ void Engine::run()
       {
       throw std::runtime_error("failed to read start of feed");
       }
-    FeedParser parser(self->feed_queue, self->implementations, self->package_handler);
+    FeedParser parser(self->feed_queue, self->database, self->package_handler);
     if (!parser.parse(url, xml))
       {
       std::cerr << "not a valid ryppl feed" << std::endl;
       }
     }
-  for (int i : karrot::solve(self->implementations, self->requests))
+  for (int i : karrot::solve(self->database, self->requests))
     {
-    const Implementation2& impl = self->implementations[i];
-    if (impl.driver)
+    const DatabaseEntry& entry = self->database[i];
+    if (entry.driver)
       {
       bool requested = std::any_of(self->requests.begin(), self->requests.end(),
-        [&impl](const Spec& spec)
+        [&entry](const Spec& spec)
         {
-        return satisfies(impl, spec);
+        return satisfies(entry, spec);
         });
-      impl.driver->download(impl.base, requested);
+      entry.driver->download(entry.base, requested);
       }
     }
   }

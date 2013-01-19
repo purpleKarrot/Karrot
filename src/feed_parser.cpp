@@ -9,7 +9,6 @@
 #include "feed_parser.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
-#include "implementation2.hpp"
 #include <iostream>
 
 namespace karrot
@@ -141,7 +140,7 @@ void FeedParser::parse_build(XmlReader& xml, int type, int href)
     {
     return;
     }
-  Implementation2 impl;
+  DatabaseEntry impl;
   impl.domain = url.host;
   impl.project = url.path;
   impl.base.component = "SOURCE";
@@ -267,7 +266,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
       parse_package_fields(xml, group);
       if (package_is_valid(group))
         {
-        Implementation2 impl;
+        DatabaseEntry impl;
         impl.domain = url.host;
         impl.project = url.path;
         impl.base = group.id;

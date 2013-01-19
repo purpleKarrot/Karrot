@@ -19,30 +19,28 @@
 namespace karrot
 {
 
-static const int ASTERISK = string_to_quark("*");
-
 static inline int hash_artefact(int domain, int project)
   {
   return domain << 3 ^ project ^ project << 11;
   }
 
-static inline int hash_artefact(const Implementation2& ident)
+static inline int hash_artefact(const DatabaseEntry& entry)
   {
-  return hash_artefact(ident.domain, ident.project);
+  return hash_artefact(entry.domain, entry.project);
   }
 
-static void query(const Hash& hash, const std::vector<Implementation2>& entries,
-    const Spec& dep, vec<Lit>& res)
+static void query(
+    const Hash& hash,
+    const Database& database,
+    const Spec& spec,
+    vec<Lit>& res)
   {
   int id;
-  std::size_t h = hash_artefact(dep.domain, dep.project) & hash.mask;
+  std::size_t h = hash_artefact(spec.domain, spec.project) & hash.mask;
   std::size_t hh = hash.begin();
   while ((id = hash.table[h]) != 0)
     {
-    const Implementation2& e = entries[id - 1];
-    if (dep.domain == e.domain && dep.project == e.project
-        && (quark_to_string(dep.component) == e.base.component || e.base.component == "*")
-        && dep.query.evaluate(e.base.version, e.base.variant))
+    if (satisfies(database[id - 1], spec))
       {
       res.push(Lit(id - 1));
       }
@@ -50,7 +48,7 @@ static void query(const Hash& hash, const std::vector<Implementation2>& entries,
     }
   }
 
-static void print(const std::vector<Implementation2>& entries, const vec<Lit>& lits)
+static void print(const Database& database, const vec<Lit>& lits)
   {
   for (int i = 0; i < lits.size(); ++i)
     {
@@ -60,15 +58,18 @@ static void print(const std::vector<Implementation2>& entries, const vec<Lit>& l
     }
   }
 
-static void dependency_clauses(const Hash& hash, const std::vector<Implementation2>& entries, Solver& solver)
+static void dependency_clauses(
+    const Hash& hash,
+    const Database& database,
+    Solver& solver)
   {
-  for (std::size_t i = 0; i < entries.size(); ++i)
+  for (std::size_t i = 0; i < database.size(); ++i)
     {
-    for (const Spec& dependency : entries[i].depends)
+    for (const Spec& spec : database[i].depends)
       {
       vec<Lit> clause;
       clause.push(~Lit(i));
-      query(hash, entries, dependency, clause);
+      query(hash, database, spec, clause);
       if (clause.size() == 1)
         {
         // TODO:
@@ -84,15 +85,18 @@ static void dependency_clauses(const Hash& hash, const std::vector<Implementatio
     }
   }
 
-static void explicit_conflict_clauses(const Hash& hash, const std::vector<Implementation2>& entries, Solver& solver)
+static void explicit_conflict_clauses(
+    const Hash& hash,
+    const Database& database,
+    Solver& solver)
   {
-  for (std::size_t i = 0; i < entries.size(); ++i)
+  for (std::size_t i = 0; i < database.size(); ++i)
     {
     Lit lit = ~Lit(i);
-    for (const Spec& dependency : entries[i].conflicts)
+    for (const Spec& spec : database[i].conflicts)
       {
       vec<Lit> conflicts;
-      query(hash, entries, dependency, conflicts);
+      query(hash, database, spec, conflicts);
       for (int k = 0; k < conflicts.size(); ++k)
         {
         solver.addBinary(lit, ~conflicts[k]);
@@ -106,14 +110,14 @@ static void explicit_conflict_clauses(const Hash& hash, const std::vector<Implem
 // each other when both have the same version and variant. If version and
 // variant differ, the version does not match, or one implementation provides
 // all components, there is a conflict.
-static void implicit_conflict_clauses(const std::vector<Implementation2>& entries, Solver& solver)
+static void implicit_conflict_clauses(const Database& database, Solver& solver)
   {
-  for (std::size_t i = 0; i < entries.size(); ++i)
+  for (std::size_t i = 0; i < database.size(); ++i)
     {
-    for (std::size_t k = i + 1; k < entries.size(); ++k)
+    for (std::size_t k = i + 1; k < database.size(); ++k)
       {
-      const Implementation2& id1 = entries[i];
-      const Implementation2& id2 = entries[k];
+      const DatabaseEntry& id1 = database[i];
+      const DatabaseEntry& id2 = database[k];
       if (id1.project != id2.project || id1.domain != id2.domain)
         {
         break;
@@ -121,8 +125,8 @@ static void implicit_conflict_clauses(const std::vector<Implementation2>& entrie
       if (id1.base.version != id2.base.version ||
           id1.base.variant != id2.base.variant ||
           id1.base.component == id2.base.component ||
-          id1.base.component == "*" ||
-          id2.base.component == "*")
+          id1.base.component == "*" || id2.base.component == "*" ||
+          id1.base.component == "SOURCE" || id2.base.component == "SOURCE")
         {
         solver.addBinary(~Lit(i), ~Lit(k));
         }
@@ -130,9 +134,7 @@ static void implicit_conflict_clauses(const std::vector<Implementation2>& entrie
     }
   }
 
-std::vector<int> solve(
-    const std::vector<Implementation2>& database,
-    const std::vector<Spec>& projects)
+std::vector<int> solve(const Database& database, const Requests& requests)
   {
   Hash hash;
   if (hash.rehash_needed(database.size()))
@@ -150,7 +152,7 @@ std::vector<int> solve(
     }
 
   vec<Lit> request;
-  for (const Spec& spec : projects)
+  for (const Spec& spec : requests)
     {
     vec<Lit> choices;
     query(hash, database, spec, choices);

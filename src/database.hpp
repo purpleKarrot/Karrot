@@ -6,29 +6,30 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef KARROT_IMPLEMENTATION2_HPP
-#define KARROT_IMPLEMENTATION2_HPP
+#ifndef KARROT_DATABASE_HPP
+#define KARROT_DATABASE_HPP
 
 #include <karrot.hpp>
-#include "spec.hpp"
 #include <vector>
 
 namespace karrot
 {
 
+class Spec;
 class Driver;
 
-class Implementation2
+struct DatabaseEntry
   {
-  public:
-    int domain;
-    int project;
-    Implementation base;
-    std::vector<Spec> depends;
-    std::vector<Spec> conflicts;
-    Driver* driver;
+  int domain;
+  int project;
+  Implementation base;
+  std::vector<Spec> depends;
+  std::vector<Spec> conflicts;
+  Driver* driver;
   };
+
+typedef std::vector<DatabaseEntry> Database;
 
 } // namespace karrot
 
-#endif /* KARROT_IMPLEMENTATION2_HPP */
+#endif /* KARROT_DATABASE_HPP */
