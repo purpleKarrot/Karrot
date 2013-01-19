@@ -44,7 +44,7 @@ class Driver
       {
       return 0;
       }
-    virtual void download(const Implementation& implementation)
+    virtual void download(const Implementation& implementation, bool requested)
       {
       }
   public:
@@ -61,7 +61,7 @@ class Engine
     ~Engine();
   public:
     void add_driver(const char* name, Driver* driver);
-    void add_request(const char* url);
+    void add_request(const char* url, bool source);
     void run();
   private:
     Engine(const Engine&);

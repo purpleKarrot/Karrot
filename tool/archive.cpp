@@ -352,7 +352,7 @@ static bool check_md5(FILE *file, const char *md5)
   return true;
   }
 
-void Archive::download(const Implementation& impl)
+void Archive::download(const Implementation& impl, bool requested)
   {
   const char* url = impl.values.at("href").c_str();
   const char* md5 = impl.values.at("checksum").c_str();

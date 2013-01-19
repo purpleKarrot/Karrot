@@ -102,7 +102,7 @@ static int cred_acquire(git_cred **cred, const char* url, unsigned int allowed_t
 namespace karrot
 {
 
-void Git::download(const Implementation& impl)
+void Git::download(const Implementation& impl, bool requested)
   {
   const char* href = quark_to_string(impl.href);
   const char* hash = quark_to_string(impl.hash ? impl.hash : impl.id.version);

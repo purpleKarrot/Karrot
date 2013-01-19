@@ -17,7 +17,7 @@ namespace karrot
 class Git: public Driver
   {
   private:
-    void download(const Implementation& impl) override;
+    void download(const Implementation& impl, bool requested) override;
   };
 
 } // namespace karrot

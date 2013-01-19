@@ -83,7 +83,7 @@ int PackageKit::filter(const Dictionary& fields, Implementation& impl)
   return Driver::INCOMPATIBLE;
   }
 
-void PackageKit::download(const Implementation& impl)
+void PackageKit::download(const Implementation& impl, bool requested)
   {
   packages.push_back((gchar*) impl.values.at("packageid").c_str());
   }

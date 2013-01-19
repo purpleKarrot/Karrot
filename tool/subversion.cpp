@@ -121,7 +121,7 @@ Subversion::~Subversion()
   svn_pool_destroy(pool);
   }
 
-void Subversion::download(const Implementation& impl)
+void Subversion::download(const Implementation& impl, bool requested)
   {
   svn_revnum_t result_rev;
   svn_opt_revision_t revision;
