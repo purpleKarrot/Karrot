@@ -9,6 +9,7 @@
 #ifndef KARROT_PACKAGE_HPP
 #define KARROT_PACKAGE_HPP
 
+#include <karrot/dictionary.hpp>
 #include <karrot/identification.hpp>
 #include <map>
 
@@ -26,7 +27,7 @@ class Package
       }
   public:
     Identification id;
-    std::map<int, int> fields;
+    Dictionary fields;
     Driver* driver;
   };
 

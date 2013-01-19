@@ -6,20 +6,17 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef KARROT_GIT_HPP
-#define KARROT_GIT_HPP
+#ifndef KARROT_DICTIONARY_HPP
+#define KARROT_DICTIONARY_HPP
 
-#include <karrot/driver.hpp>
+#include <map>
+#include <string>
 
 namespace karrot
 {
 
-class Git: public Driver
-  {
-  private:
-    void download(const Implementation& impl) override;
-  };
+typedef std::map<std::string, std::string> Dictionary;
 
 } // namespace karrot
 
-#endif /* KARROT_GIT_HPP */
+#endif /* KARROT_DICTIONARY_HPP */

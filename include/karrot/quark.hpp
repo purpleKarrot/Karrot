@@ -10,6 +10,7 @@
 #define KARROT_QUARK_HPP
 
 #include <cstddef>
+#include <string>
 
 namespace karrot
 {
@@ -20,6 +21,11 @@ template<std::size_t N>
 int string_to_quark(const char (&str)[N])
   {
   return string_to_quark(str, N - 1);
+  }
+
+static inline int to_quark(const std::string& string)
+  {
+  return string_to_quark(string.c_str(), string.length());
   }
 
 const char* quark_to_string(int quark);

@@ -9,7 +9,7 @@
 #ifndef KARROT_DRIVER_HPP
 #define KARROT_DRIVER_HPP
 
-#include <map>
+#include <karrot/dictionary.hpp>
 
 namespace karrot
 {
@@ -20,18 +20,17 @@ class Implementation;
 class Driver
   {
   public:
-    typedef std::map<int, int> Fields;
     virtual ~Driver();
   public:
-    virtual int namespace_uri() const
+    virtual const char* namespace_uri() const
       {
-      return 0;
+      return nullptr;
       }
-    virtual Fields fields() const
+    virtual Dictionary fields() const
       {
-      return Fields();
+      return Dictionary();
       }
-    virtual int filter(const Fields& fields, Identification& id, int& href, int& hash)
+    virtual int filter(const Dictionary& fields, Identification& id, int& href, int& hash)
       {
       return 0;
       }

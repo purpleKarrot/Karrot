@@ -18,11 +18,6 @@ namespace karrot
 static const std::string feed_ns = "http://ryppl.org/2012/feed";
 static const std::string vcs_ns = "http://ryppl.org/2012/versioncontrol";
 
-static int to_quark(const std::string& string)
-  {
-  return string_to_quark(string.c_str(), string.length());
-  }
-
 FeedParser::FeedParser(FeedQueue& queue, Database& db, PackageHandler& ph) :
     queue(queue),
     db(db),
@@ -246,12 +241,11 @@ static bool package_is_valid(const Package& package)
     return false;
     }
   bool valid = true;
-  typedef std::map<int, int>::const_iterator map_iter;
-  for (map_iter it = package.fields.begin(); it != package.fields.end(); ++it)
+  for (const auto& entry : package.fields)
     {
-    if (!it->second)
+    if (entry.second.empty())
       {
-      std::cerr << "required attribute not set: " << it->first << std::endl;
+      std::cerr << "required attribute not set: " << entry.first << std::endl;
       valid = false;
       }
     }
@@ -335,13 +329,12 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if (group.driver)
     {
-    int namespace_uri = group.driver->namespace_uri();
-    typedef std::map<int, int>::iterator map_iter;
-    for (map_iter it = group.fields.begin(); it != group.fields.end(); ++it)
+    const char* namespace_uri = group.driver->namespace_uri();
+    for (auto& entry : group.fields)
       {
-      if ((attr = to_quark(xml.attribute(quark_to_string(it->first), quark_to_string(namespace_uri)))))
+      if ((attr = to_quark(xml.attribute(entry.first, namespace_uri))))
         {
-        it->second = attr;
+        entry.second = attr;
         }
       }
     }

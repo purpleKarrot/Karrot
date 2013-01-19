@@ -36,39 +36,31 @@ namespace karrot
 {
 namespace fs = boost::filesystem;
 
-static const int ASTERISK = string_to_quark("*");
-static const int CHECKSUM = string_to_quark("checksum");
-static const int HREF     = string_to_quark("href");
-static const int MACHINE  = string_to_quark("machine");
-static const int SYSNAME  = string_to_quark("sysname");
-
 Archive::Archive()
   {
 #ifdef _WIN32
-  char* env = getenv("PROCESSOR_ARCHITECTURE");
-  machine = string_to_quark(env, std::strlen(env));
-  sysname = string_to_quark("Windows");
+  machine = getenv("PROCESSOR_ARCHITECTURE");
+  sysname = "Windows";
 #else
   struct utsname uts;
   uname(&uts);
-  machine = string_to_quark(uts.machine, std::strlen(uts.machine));
-  sysname = string_to_quark(uts.sysname, std::strlen(uts.sysname));
+  machine = uts.machine;
+  sysname = uts.sysname;
 #endif
   }
 
-int Archive::namespace_uri() const
+const char* Archive::namespace_uri() const
   {
-  static const int instance = string_to_quark("http://ryppl.org/2012/archive");
-  return instance;
+  return "http://ryppl.org/2012/archive";
   }
 
-Driver::Fields Archive::fields() const
+Dictionary Archive::fields() const
   {
-  Fields fields;
-  fields.insert(std::make_pair(SYSNAME, ASTERISK));
-  fields.insert(std::make_pair(MACHINE, ASTERISK));
-  fields.insert(std::make_pair(HREF, 0));
-  fields.insert(std::make_pair(CHECKSUM, 0));
+  Dictionary fields;
+  fields.insert(std::make_pair("sysname", "*"));
+  fields.insert(std::make_pair("machine", "*"));
+  fields.insert(std::make_pair("href", std::string()));
+  fields.insert(std::make_pair("checksum", std::string()));
   return fields;
   }
 
@@ -339,20 +331,20 @@ static fs::path analyze_extracted(fs::path root)
   return nested;
   }
 
-int Archive::filter(const Fields& fields, Identification& id, int& href, int& hash)
+int Archive::filter(const Dictionary& fields, Identification& id, int& href, int& hash)
   {
-  int p_sysname = fields.find(SYSNAME)->second;
-  if (p_sysname != ASTERISK && p_sysname != sysname)
+  const std::string& p_sysname = fields.at("sysname");
+  if (p_sysname != "*" && p_sysname != sysname)
     {
     return INCOMPATIBLE;
     }
-  int p_machine = fields.find(MACHINE)->second;
-  if (p_machine != ASTERISK && p_machine != machine)
+  const std::string& p_machine = fields.at("machine");
+  if (p_machine != "*" && p_machine != machine)
     {
     return INCOMPATIBLE;
     }
-  href = fields.find(HREF)->second;
-  hash = fields.find(CHECKSUM)->second;
+  href = to_quark(fields.at("href"));
+  hash = to_quark(fields.at("checksum"));
   return NORMAL;
   }
 

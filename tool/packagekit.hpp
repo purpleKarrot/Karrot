@@ -24,18 +24,14 @@ class PackageKit: public Driver
     ~PackageKit();
     void install();
   private:
-    int namespace_uri() const;
-    Fields fields() const;
-    int filter(const Fields& fields, Identification& id, int& href, int& hash);
-    void download(const Implementation& impl);
-    //Type type() const
-    //  {
-    //  return INTERNAL;
-    //  }
+    const char* namespace_uri() const override;
+    Dictionary fields() const override;
+    int filter(const Dictionary& fields, Identification& id, int& href, int& hash) override;
+    void download(const Implementation& impl) override;
   private:
     std::vector<char*> packages;
     KarrotPackageKit* impl;
-    int distro;
+    std::string distro;
   };
 
 } // namespace karrot

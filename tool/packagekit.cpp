@@ -18,16 +18,12 @@
 namespace karrot
 {
 
-static const int ASTERISK = string_to_quark("*");
-static const int DISTRO   = string_to_quark("distro");
-static const int NAME     = string_to_quark("name");
-
 PackageKit::PackageKit()
   {
   g_type_init();
   impl = karrot_package_kit_new(0);
   gchar *distro_id = karrot_package_kit_distro_id(impl);
-  distro = string_to_quark(distro_id, std::strcspn(distro_id, ";"));
+  distro = std::string(distro_id, std::strcspn(distro_id, ";"));
   g_free(distro_id);
   }
 
@@ -36,17 +32,16 @@ PackageKit::~PackageKit()
   karrot_package_kit_unref(impl);
   }
 
-int PackageKit::namespace_uri() const
+const char* PackageKit::namespace_uri() const
   {
-  static const int instance = string_to_quark("http://ryppl.org/2012/packagekit");
-  return instance;
+  return "http://ryppl.org/2012/packagekit";
   }
 
-Driver::Fields PackageKit::fields() const
+Dictionary PackageKit::fields() const
   {
-  Fields fields;
-  fields.insert(std::make_pair(DISTRO, ASTERISK));
-  fields.insert(std::make_pair(NAME, 0));
+  Dictionary fields;
+  fields.insert(std::make_pair("distro", "*"));
+  fields.insert(std::make_pair("name", std::string()));
   return fields;
   }
 
@@ -79,14 +74,14 @@ static void on_package(const gchar* info, const gchar* package_id, void* user_da
     }
   }
 
-int PackageKit::filter(const Fields& fields, Identification& id, int& href, int& hash)
+int PackageKit::filter(const Dictionary& fields, Identification& id, int& href, int& hash)
   {
-  int p_distro = fields.find(DISTRO)->second;
-  if (p_distro == ASTERISK || p_distro == distro)
+  const std::string& p_distro = fields.at("distro");
+  if (p_distro == "*" || p_distro == distro)
     {
-    int p_name = fields.find(NAME)->second;
+    const std::string& p_name = fields.at("name");
     OnPackageTarget target(id.version, href, this);
-    karrot_package_kit_resolve(impl, quark_to_string(p_name), on_package, &target);
+    karrot_package_kit_resolve(impl, p_name.c_str(), on_package, &target);
     return target.filter;
     }
   return Driver::INCOMPATIBLE;
