@@ -11,7 +11,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-namespace karrot
+namespace Karrot
 {
 
 class Url;
@@ -27,6 +27,6 @@ class FeedCache : boost::noncopyable
     void* curl_handle;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_FEED_CACHE_HPP */

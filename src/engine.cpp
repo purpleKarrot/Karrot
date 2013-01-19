@@ -19,7 +19,7 @@
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
 
-namespace karrot
+namespace Karrot
 {
 
 class Engine::Private
@@ -76,7 +76,7 @@ void Engine::run()
       std::cerr << "not a valid ryppl feed" << std::endl;
       }
     }
-  for (int i : karrot::solve(self->database, self->requests))
+  for (int i : solve(self->database, self->requests))
     {
     const DatabaseEntry& entry = self->database[i];
     if (entry.driver)
@@ -91,4 +91,4 @@ void Engine::run()
     }
   }
 
-} // namespace karrot
+} // namespace Karrot

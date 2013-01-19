@@ -21,7 +21,7 @@
 #include <svn_config.h>
 #include <svn_fs.h>
 
-namespace karrot
+namespace Karrot
 {
 
 class SubversionError: public std::exception
@@ -239,4 +239,4 @@ void Subversion::download(const Implementation& impl, bool requested)
     }
   }
 
-} // namespace karrot
+} // namespace Karrot

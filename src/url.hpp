@@ -9,7 +9,7 @@
 #ifndef KARROT_URL_HPP
 #define KARROT_URL_HPP
 
-namespace karrot
+namespace Karrot
 {
 
 class Url
@@ -26,6 +26,6 @@ class Url
     int fragment;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_URL_HPP */

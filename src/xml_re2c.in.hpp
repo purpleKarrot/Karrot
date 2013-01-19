@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-namespace karrot
+namespace Karrot
 {
 
 /*!re2c
@@ -258,4 +258,4 @@ bool XmlReader::read()
   */
   }
 
-} // namespace karrot
+} // namespace Karrot

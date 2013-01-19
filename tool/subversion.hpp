@@ -14,7 +14,7 @@
 struct apr_pool_t;
 struct svn_client_ctx_t;
 
-namespace karrot
+namespace Karrot
 {
 
 class Subversion: public Driver
@@ -22,13 +22,13 @@ class Subversion: public Driver
   public:
     Subversion();
     ~Subversion();
-  private:
+  protected:
     void download(const Implementation& impl, bool requested) override;
   private:
     apr_pool_t* pool;
     svn_client_ctx_t* ctx;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_SUBVERSION_HPP */

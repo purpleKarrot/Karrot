@@ -14,7 +14,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace karrot
+namespace Karrot
 {
 
 Url::Url() :
@@ -165,4 +165,4 @@ error:
   throw std::runtime_error(std::string("invalid url: ") + str);
   }
 
-} // namespace karrot
+} // namespace Karrot

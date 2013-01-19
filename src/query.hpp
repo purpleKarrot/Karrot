@@ -12,7 +12,7 @@
 #include <karrot.hpp>
 #include <vector>
 
-namespace karrot
+namespace Karrot
 {
 
 class Query
@@ -25,6 +25,6 @@ class Query
     std::vector<int> queryspace;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_QUERY_HPP */

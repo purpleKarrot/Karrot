@@ -10,7 +10,7 @@
 #include "url.hpp"
 #include "quark.hpp"
 
-namespace karrot
+namespace Karrot
 {
 
 Spec::Spec(const Url& url)
@@ -20,4 +20,4 @@ Spec::Spec(const Url& url)
   {
   }
 
-} // namespace karrot
+} // namespace Karrot

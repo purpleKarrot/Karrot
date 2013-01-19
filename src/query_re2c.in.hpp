@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include "quark.hpp"
 
-namespace karrot
+namespace Karrot
 {
 
 #define YYFILL                                                                 \
@@ -80,4 +80,4 @@ static int query_tokenize(std::string::const_iterator& cursor,std::string::const
   */
   }
 
-} // namespace karrot
+} // namespace Karrot

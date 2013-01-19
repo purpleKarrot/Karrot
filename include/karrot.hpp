@@ -12,7 +12,7 @@
 #include <map>
 #include <string>
 
-namespace karrot
+namespace Karrot
 {
 
 typedef std::map<std::string, std::string> Dictionary;
@@ -71,6 +71,6 @@ class Engine
     Private* self;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_HPP_INCLUDED */

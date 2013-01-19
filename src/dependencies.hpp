@@ -17,7 +17,7 @@
 #include <utility>
 #include <iostream>
 
-namespace karrot
+namespace Karrot
 {
 
 class Dependencies

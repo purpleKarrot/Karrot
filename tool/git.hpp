@@ -11,7 +11,7 @@
 
 #include <karrot/driver.hpp>
 
-namespace karrot
+namespace Karrot
 {
 
 class Git: public Driver
@@ -20,6 +20,6 @@ class Git: public Driver
     void download(const Implementation& impl, bool requested) override;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_GIT_HPP */

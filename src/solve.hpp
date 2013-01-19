@@ -15,7 +15,7 @@
 #include <vector>
 #include <set>
 
-namespace karrot
+namespace Karrot
 {
 
 inline bool satisfies(const DatabaseEntry& entry, const Spec& spec)
@@ -36,6 +36,6 @@ typedef std::vector<Spec> Requests;
 
 std::vector<int> solve(const Database& database, const Requests& requests);
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_SOLVE_HPP */

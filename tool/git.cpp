@@ -99,7 +99,7 @@ static int cred_acquire(git_cred **cred, const char* url, unsigned int allowed_t
 
 } // namespace
 
-namespace karrot
+namespace Karrot
 {
 
 void Git::download(const Implementation& impl, bool requested)

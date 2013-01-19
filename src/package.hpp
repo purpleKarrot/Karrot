@@ -11,7 +11,7 @@
 
 #include <karrot.hpp>
 
-namespace karrot
+namespace Karrot
 {
 
 class Driver;
@@ -28,6 +28,6 @@ class Package
     Driver* driver;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_PACKAGE_HPP */

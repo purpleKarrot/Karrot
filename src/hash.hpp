@@ -11,7 +11,7 @@
 
 #include <cstdlib>
 
-namespace karrot
+namespace Karrot
 {
 
 class Hash
@@ -53,6 +53,6 @@ class Hash
     int* table;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_HASH_HPP */

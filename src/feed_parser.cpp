@@ -11,7 +11,7 @@
 #include "variants.hpp"
 #include <iostream>
 
-namespace karrot
+namespace Karrot
 {
 
 static const std::string feed_ns = "http://ryppl.org/2012/feed";
@@ -333,4 +333,4 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   }
 
-} // namespace karrot
+} // namespace Karrot

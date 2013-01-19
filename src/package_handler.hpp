@@ -12,7 +12,7 @@
 #include <map>
 #include <karrot.hpp>
 
-namespace karrot
+namespace Karrot
 {
 
 class PackageHandler
@@ -35,6 +35,6 @@ class PackageHandler
     std::map<std::string, Driver*> handlers;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_PACKAGE_HANDLER_HPP */

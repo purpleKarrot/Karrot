@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace karrot
+namespace Karrot
 {
 
 enum XmlToken
@@ -90,6 +90,6 @@ class XmlReader: boost::noncopyable
     bool is_empty_element;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_XML_READER_HPP */

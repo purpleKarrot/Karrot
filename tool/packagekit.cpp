@@ -12,7 +12,7 @@
 #include <iostream>
 #include <cstring>
 
-namespace karrot
+namespace Karrot
 {
 
 PackageKit::PackageKit()
@@ -96,4 +96,4 @@ void PackageKit::install()
     }
   }
 
-} // namespace karrot
+} // namespace Karrot

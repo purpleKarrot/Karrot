@@ -11,7 +11,7 @@
 
 #include "query.hpp"
 
-namespace karrot
+namespace Karrot
 {
 
 class Url;
@@ -36,6 +36,6 @@ class Spec
     Query query;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_SPEC_HPP */

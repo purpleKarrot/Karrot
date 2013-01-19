@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <iostream>
 
-namespace karrot
+namespace Karrot
 {
 
 static inline std::size_t hash_artefact(const std::string& id)
@@ -202,4 +202,4 @@ std::vector<int> solve(const Database& database, const Requests& requests)
   return result;
   }
 
-} // namespace karrot
+} // namespace Karrot

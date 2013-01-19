@@ -11,7 +11,7 @@
 
 int quark(int argc, char* argv[])
   {
-  using karrot::string_to_quark;
+  using Karrot::string_to_quark;
   BOOST_TEST_EQ(string_to_quark("Hello World", 5), string_to_quark("Hello"));
   return boost::report_errors();
   }

@@ -14,7 +14,7 @@
 #include <vector>
 #include <cstdio>
 
-namespace karrot
+namespace Karrot
 {
 
 #define sanity_check(url1, url2, elem) do {                                    \
@@ -67,6 +67,6 @@ class FeedQueue
     std::size_t next;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_FEED_QUEUE_HPP */

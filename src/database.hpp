@@ -12,7 +12,7 @@
 #include <karrot.hpp>
 #include <vector>
 
-namespace karrot
+namespace Karrot
 {
 
 class Spec;
@@ -34,6 +34,6 @@ class DatabaseEntry
 
 typedef std::vector<DatabaseEntry> Database;
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_DATABASE_HPP */

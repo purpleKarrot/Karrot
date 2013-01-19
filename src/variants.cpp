@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace karrot
+namespace Karrot
 {
 
 Dictionary parse_variant(const std::string& string)
@@ -100,4 +100,4 @@ void foreach_variant(const std::vector<std::string>& variants,
     }
   }
 
-} // namespace karrot
+} // namespace Karrot

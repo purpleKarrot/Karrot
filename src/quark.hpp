@@ -12,7 +12,7 @@
 #include <cstddef>
 #include <string>
 
-namespace karrot
+namespace Karrot
 {
 
 int string_to_quark(const char* str, std::size_t len);
@@ -30,6 +30,6 @@ static inline int to_quark(const std::string& string)
 
 const char* quark_to_string(int quark);
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_QUARK_HPP */

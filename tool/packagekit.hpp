@@ -14,7 +14,7 @@
 
 typedef struct _KarrotPackageKit KarrotPackageKit;
 
-namespace karrot
+namespace Karrot
 {
 
 class PackageKit: public Driver
@@ -34,6 +34,6 @@ class PackageKit: public Driver
     std::string distro;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_PACKAGEKIT_HPP */

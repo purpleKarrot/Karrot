@@ -28,7 +28,7 @@
 #include <iostream>
 #include <fstream>
 
-using namespace karrot;
+using namespace Karrot;
 
 int main(int argc, char* argv[])
   {

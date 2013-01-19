@@ -12,7 +12,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
-namespace karrot
+namespace Karrot
 {
 
 static const std::string empty_string;
@@ -200,4 +200,4 @@ std::string XmlReader::content()
   return std::string(begin, end);
   }
 
-} // namespace karrot
+} // namespace Karrot

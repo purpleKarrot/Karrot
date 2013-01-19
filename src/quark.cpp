@@ -11,7 +11,7 @@
 #include <vector>
 #include <cassert>
 
-namespace karrot
+namespace Karrot
 {
 
 static std::size_t str_hash(const char* str)
@@ -116,4 +116,4 @@ const char* quark_to_string(int quark)
   return QuarkImpl<char>::instance().to_string(quark);
   }
 
-} // namespace karrot
+} // namespace Karrot

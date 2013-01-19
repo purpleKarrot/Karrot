@@ -13,7 +13,7 @@
 #include <functional>
 #include <vector>
 
-namespace karrot
+namespace Karrot
 {
 
 Dictionary parse_variant(const std::string& quark);
@@ -21,6 +21,6 @@ Dictionary parse_variant(const std::string& quark);
 void foreach_variant(const std::vector<std::string>& variants,
     const std::function<void(Dictionary)>& function);
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_VARIANTS_HPP */

@@ -28,7 +28,7 @@ extern "C"
 #  include <sys/utsname.h>
 #endif
 
-namespace karrot
+namespace Karrot
 {
 namespace fs = boost::filesystem;
 
@@ -387,4 +387,4 @@ void Archive::download(const Implementation& impl, bool requested)
   remove_all(temp_path);
   }
 
-} // namespace karrot
+} // namespace Karrot

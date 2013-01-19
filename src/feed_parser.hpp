@@ -16,7 +16,7 @@
 #include "package_handler.hpp"
 #include "package.hpp"
 
-namespace karrot
+namespace Karrot
 {
 
 class XmlReader;
@@ -65,6 +65,6 @@ class FeedParser
     PackageHandler& ph;
   };
 
-} // namespace karrot
+} // namespace Karrot
 
 #endif /* KARROT_FEED_PARSER_HPP */

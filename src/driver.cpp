@@ -8,11 +8,11 @@
 
 #include <karrot.hpp>
 
-namespace karrot
+namespace Karrot
 {
 
 Driver::~Driver()
   {
   }
 
-} // namespace karrot
+} // namespace Karrot

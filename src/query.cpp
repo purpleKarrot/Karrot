@@ -31,7 +31,7 @@ static const int OR            = -10;
 #include <stdexcept>
 #include <iostream>
 
-namespace karrot
+namespace Karrot
 {
 
 static const int ASTERISK      = string_to_quark("*");
@@ -333,4 +333,4 @@ bool Query::evaluate(const std::string& version, const Dictionary& variants) con
   return stack[0] != 0;
   }
 
-} // namespace karrot
+} // namespace Karrot

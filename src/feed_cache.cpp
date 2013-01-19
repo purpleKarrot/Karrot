@@ -13,7 +13,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <curl/curl.h>
 
-namespace karrot
+namespace Karrot
 {
 
 static std::string url_to_string(const Url& url)
@@ -116,4 +116,4 @@ boost::filesystem::path FeedCache::local_path(const Url& url)
   return filepath;
   }
 
-} // namespace karrot
+} // namespace Karrot
