@@ -8,7 +8,7 @@
 
 #include "spec.hpp"
 #include "url.hpp"
-#include "query.hpp"
+#include "quark.hpp"
 
 namespace karrot
 {
@@ -17,7 +17,7 @@ Spec::Spec(const Url& url) :
     domain(url.host),
     project(url.path),
     component(url.fragment),
-    query(parse_query(url.query))
+    query(quark_to_string(url.query))
   {
   }
 

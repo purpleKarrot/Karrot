@@ -19,7 +19,7 @@ namespace karrot
 
 std::vector<int> solve(
     const std::vector<Implementation2>& database,
-    const std::set<Spec>& projects);
+    const std::vector<Spec>& projects);
 
 } // namespace karrot
 

@@ -53,7 +53,7 @@ void Engine::add_request(const char* uri)
 void Engine::run()
   {
   const Url* purl;
-  std::set<Spec> requests;
+  std::vector<Spec> requests;
   while ((purl = self->feed_queue.get_next()))
     {
     const Url url(*purl); //explicit copy!
@@ -69,7 +69,7 @@ void Engine::run()
       }
     Spec spec(url);
     spec.component = string_to_quark("SOURCE");
-    requests.insert(spec);
+    requests.push_back(std::move(spec));
     }
   for (int i : karrot::solve(self->implementations, requests))
     {

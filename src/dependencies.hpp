@@ -9,6 +9,7 @@
 #ifndef KARROT_DEPENDENCIES_HPP
 #define KARROT_DEPENDENCIES_HPP
 
+#include <karrot.hpp>
 #include <vector>
 #include "spec.hpp"
 #include "quark.hpp"
@@ -19,18 +20,15 @@
 namespace karrot
 {
 
-static const int ASTERISK = string_to_quark("*");
-
 class Dependencies
   {
   public:
-    Dependencies(int name = 0) :
-        name(name)
+    Dependencies(const std::string& name = std::string()) : name(name)
       {
       }
     void start_if(int test)
       {
-      deps.emplace_back(IF, Spec(0, 0, 0, parse_query(test)));
+      deps.emplace_back(IF, Spec(0, 0, 0, quark_to_string(test)));
       }
     void start_else()
       {
@@ -48,7 +46,7 @@ class Dependencies
         {
         std::cout << "ERROR: <elseif> has no matching <if>!" << std::endl;
         }
-      entry = Entry(ELSEIF, Spec(0, 0, 0, parse_query(test)));
+      entry = Entry(ELSEIF, Spec(0, 0, 0, quark_to_string(test)));
       }
     void end_if()
       {
@@ -62,11 +60,14 @@ class Dependencies
       {
       deps.emplace_back(CONFLICTS, spec);
       }
-    void replay(int component, int version, const Dictionary& values,
+    void replay(
+        const std::string& component,
+        const std::string& version,
+        const Dictionary& values,
         std::vector<Spec>& depends,
         std::vector<Spec>& conflicts) const
       {
-      if (component != name && component != ASTERISK)
+      if (component != name && component != "*")
         {
         return;
         }
@@ -89,10 +90,10 @@ class Dependencies
               }
             break;
           case IF:
-            stack.push_back(stack.back() && evaluate(entry.second.query, version, values));
+            stack.push_back(stack.back() && entry.second.query.evaluate(version, values));
             break;
           case ELSEIF:
-            stack.back() = !stack.back() && evaluate(entry.second.query, version, values);
+            stack.back() = !stack.back() && entry.second.query.evaluate(version, values);
             break;
           case ENDIF:
             stack.pop_back();
@@ -110,7 +111,7 @@ class Dependencies
       DEPENDS,
       CONFLICTS,
       };
-    int name;
+    std::string name;
     typedef std::pair<Code, Spec> Entry;
     std::vector<std::pair<Code, Spec>> deps;
   };

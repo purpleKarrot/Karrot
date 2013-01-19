@@ -80,16 +80,12 @@ static inline bool is_ident(int id)
   return id >= 0;
   }
 
-int parse_query(int atom)
+Query::Query(const std::string& string)
   {
-  if (!atom)
+  if (string.empty())
     {
-    return 0;
+    return;
     }
-  // make a copy because string_to_quark may realloc
-  std::string string(quark_to_string(atom));
-  std::vector<int> queryspace;
-
   std::string::const_iterator strpos = string.begin();
   std::string::const_iterator strend = string.end();
 
@@ -179,7 +175,6 @@ int parse_query(int atom)
     queryspace.push_back(sc);
     --sl;
     }
-  return array_to_quark(&queryspace[0], queryspace.size());
   }
 
 static int vercmp(const char *s1, const char *s2)
@@ -261,10 +256,9 @@ static int vercmp(const char *s1, const char *s2)
   return s1 ? 1 : s2 ? -1 : 0;
   }
 
-bool evaluate(int query, int version, const Dictionary& variants)
-//bool Query::eval(Atom version, Dict values) const
+bool Query::evaluate(const std::string& version, const Dictionary& variants) const
   {
-  if (!query)
+  if (!queryspace.empty())
     {
     return true;
     }
@@ -273,9 +267,8 @@ bool evaluate(int query, int version, const Dictionary& variants)
   unsigned int stack[32];
   unsigned int sl = 0; // stack length
 
-  for (const int* value = quark_to_array(query); *value; ++value)
+  for(int c : queryspace)
     {
-    int c = *value;
     if (is_ident(c))
       {
       stack[sl++] = c;
@@ -292,7 +285,7 @@ bool evaluate(int query, int version, const Dictionary& variants)
       int diff, res;
       if (op1 == VERSION)
         {
-        op1 = version;
+        op1 = to_quark(version);
         }
       else if (op1 > 1) // 1 == true!
         {

@@ -42,7 +42,7 @@ static void query(const Hash& hash, const std::vector<Implementation2>& entries,
     const Implementation2& e = entries[id - 1];
     if (dep.domain == e.domain && dep.project == e.project
         && (quark_to_string(dep.component) == e.base.component || e.base.component == "*")
-        && evaluate(dep.query, to_quark(e.base.version), e.base.variant))
+        && dep.query.evaluate(e.base.version, e.base.variant))
       {
       res.push(Lit(id - 1));
       }
@@ -132,7 +132,7 @@ static void implicit_conflict_clauses(const std::vector<Implementation2>& entrie
 
 std::vector<int> solve(
     const std::vector<Implementation2>& database,
-    const std::set<Spec>& projects)
+    const std::vector<Spec>& projects)
   {
   Hash hash;
   if (hash.rehash_needed(database.size()))

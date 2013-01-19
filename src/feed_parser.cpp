@@ -134,7 +134,7 @@ void FeedParser::parse_releases(XmlReader& xml)
 
 void FeedParser::parse_build(XmlReader& xml, int type, int href)
   {
-  Dependencies depends(ASTERISK);
+  Dependencies depends("*");
   parse_depends(xml, depends);
   Driver* driver = this->ph.get(type);
   if (!driver)
@@ -157,7 +157,7 @@ void FeedParser::parse_build(XmlReader& xml, int type, int href)
       impl.base.variant = variant;
       impl.depends.clear();
       impl.conflicts.clear();
-      depends.replay(string_to_quark("*"), to_quark(impl.base.version), variant,
+      depends.replay("*", impl.base.version, variant,
           impl.depends, impl.conflicts);
       db.push_back(impl);
       });
@@ -176,8 +176,7 @@ void FeedParser::parse_components(XmlReader& xml)
     {
     if (xml.name() == "component" && xml.namespace_uri() == feed_ns)
       {
-      const std::string& name = xml.attribute("name", feed_ns);
-      components.emplace_back(string_to_quark(name.c_str(), name.length()));
+      components.emplace_back(xml.attribute("name", feed_ns));
       parse_depends(xml, components.back());
       }
     else
@@ -285,9 +284,8 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
             //Identification& id = impl.id;
             for (const Dependencies& component : components)
               {
-              component.replay(to_quark(impl.base.component),
-                  to_quark(impl.base.version), impl.base.variant,
-                  impl.depends, impl.conflicts);
+              component.replay(impl.base.component, impl.base.version,
+                  impl.base.variant, impl.depends, impl.conflicts);
               }
             }
           this->db.push_back(impl);
