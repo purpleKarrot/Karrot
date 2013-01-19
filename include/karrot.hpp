@@ -6,16 +6,26 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef KARROT_DRIVER_HPP
-#define KARROT_DRIVER_HPP
+#ifndef KARROT_HPP_INCLUDED
+#define KARROT_HPP_INCLUDED
 
-#include <karrot/dictionary.hpp>
+#include <map>
+#include <string>
 
 namespace karrot
 {
 
-class Identification;
-class Implementation;
+typedef std::map<std::string, std::string> Dictionary;
+
+class Implementation
+  {
+  public:
+    std::string name;
+    std::string component;
+    std::string version;
+    int /*Dictionary*/ variant;
+    Dictionary values;
+  };
 
 class Driver
   {
@@ -30,7 +40,7 @@ class Driver
       {
       return Dictionary();
       }
-    virtual int filter(const Dictionary& fields, Identification& id, int& href, int& hash)
+    virtual int filter(const Dictionary& fields, Implementation& implementation)
       {
       return 0;
       }
@@ -44,6 +54,23 @@ class Driver
     static const int SYS_AVAILABLE = 3;
   };
 
+class Engine
+  {
+  public:
+    Engine();
+    ~Engine();
+  public:
+    void add_driver(const char* name, Driver* driver);
+    void add_request(const char* url);
+    void run();
+  private:
+    Engine(const Engine&);
+    void operator=(const Engine&);
+  private:
+    class Private;
+    Private* self;
+  };
+
 } // namespace karrot
 
-#endif /* KARROT_DRIVER_HPP */
+#endif /* KARROT_HPP_INCLUDED */

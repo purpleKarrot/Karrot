@@ -18,8 +18,9 @@
 
 namespace karrot
 {
+class Implementation2;
 
-typedef std::vector<Implementation> Database;
+typedef std::vector<Implementation2> Database;
 
 class XmlReader;
 

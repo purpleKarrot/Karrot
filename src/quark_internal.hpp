@@ -9,7 +9,7 @@
 #ifndef KARROT_QUARK_INTERNAL_HPP
 #define KARROT_QUARK_INTERNAL_HPP
 
-#include <karrot/quark.hpp>
+#include "quark.hpp"
 
 namespace karrot
 {

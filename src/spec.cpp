@@ -6,8 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/spec.hpp>
-#include <karrot/url.hpp>
+#include "spec.hpp"
+#include "url.hpp"
 #include "query.hpp"
 
 namespace karrot

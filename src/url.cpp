@@ -6,8 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/url.hpp>
-#include <karrot/quark.hpp>
+#include "url.hpp"
+#include "quark.hpp"
 
 #include <cctype>
 #include <cstring>

@@ -9,7 +9,7 @@
 #include "feed_parser.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
-#include <karrot/implementation.hpp>
+#include "implementation2.hpp"
 #include <iostream>
 
 namespace karrot
@@ -97,7 +97,7 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     }
   if (tag == "packages")
     {
-    Package group(this->url.host, this->url.path);
+    Package group;
     parse_packages(xml, group);
     tag = next_element(xml);
     }
@@ -141,23 +141,23 @@ void FeedParser::parse_build(XmlReader& xml, int type, int href)
     {
     return;
     }
-  Implementation impl;
-  impl.id.domain = url.host;
-  impl.id.project = url.path;
-  impl.id.component = ASTERISK;
-  impl.name = name;
-  impl.href = href;
+  Implementation2 impl;
+  impl.domain = url.host;
+  impl.project = url.path;
+  impl.base.component = "SOURCE";
+  impl.base.name = name;
+  impl.base.values["href"] = href;
   impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
-    impl.id.version = releases[i].version;
-    impl.hash = releases[i].tag;
+    impl.base.version = quark_to_string(releases[i].version);
+    impl.base.values["tag"] = quark_to_string(releases[i].tag);
     foreach_variant(variants, [&](int variant)
       {
-      impl.id.variant = variant;
+      impl.base.variant = variant;
       impl.depends.clear();
       impl.conflicts.clear();
-      depends.replay(ASTERISK, impl.id.version, variant,
+      depends.replay(string_to_quark("*"), to_quark(impl.base.version), variant,
           impl.depends, impl.conflicts);
       db.push_back(impl);
       });
@@ -268,11 +268,12 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
       parse_package_fields(xml, group);
       if (package_is_valid(group))
         {
-        Implementation impl;
-        impl.id = group.id;
-        impl.name = this->name;
-        int flags = group.driver->filter(group.fields, impl.id,
-            impl.href, impl.hash);
+        Implementation2 impl;
+        impl.domain = url.host;
+        impl.project = url.path;
+        impl.base = group.id;
+        impl.base.name = this->name;
+        int flags = group.driver->filter(group.fields, impl.base);
         if (flags)
           {
           if ((flags | 0x1) != 0) // not INSTALLED
@@ -281,10 +282,11 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
             }
           if ((flags | 0x2) == 0) // not SYSTEM
             {
-            Identification& id = impl.id;
+            //Identification& id = impl.id;
             for (const Dependencies& component : components)
               {
-              component.replay(id.component, id.version, id.variant,
+              component.replay(to_quark(impl.base.component),
+                  to_quark(impl.base.version), impl.base.variant,
                   impl.depends, impl.conflicts);
               }
             }

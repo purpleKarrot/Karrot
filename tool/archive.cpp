@@ -14,10 +14,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <karrot/implementation.hpp>
-#include <karrot/quark.hpp>
-#include <karrot/url.hpp>
-
 #include <iostream>
 #include <string>
 #include <cctype>
@@ -62,24 +58,6 @@ Dictionary Archive::fields() const
   fields.insert(std::make_pair("href", std::string()));
   fields.insert(std::make_pair("checksum", std::string()));
   return fields;
-  }
-
-void r_url_to_string (const Url& url, char *str)
-  {
-  strcpy(str, quark_to_string(url.scheme));
-  strcat(str, "://");
-  if (url.user_info)
-    {
-    strcat(str, quark_to_string(url.user_info));
-    strcat(str, "@");
-    }
-  strcat(str, quark_to_string(url.host));
-  if (url.port)
-    {
-    strcat(str, ":");
-    strcat(str, quark_to_string(url.port));
-    }
-  strcat(str, quark_to_string(url.path));
   }
 
 static int progress(void *clientp, double total, double now, double t, double n)
@@ -331,7 +309,7 @@ static fs::path analyze_extracted(fs::path root)
   return nested;
   }
 
-int Archive::filter(const Dictionary& fields, Identification& id, int& href, int& hash)
+int Archive::filter(const Dictionary& fields, Implementation& impl)
   {
   const std::string& p_sysname = fields.at("sysname");
   if (p_sysname != "*" && p_sysname != sysname)
@@ -343,8 +321,8 @@ int Archive::filter(const Dictionary& fields, Identification& id, int& href, int
     {
     return INCOMPATIBLE;
     }
-  href = to_quark(fields.at("href"));
-  hash = to_quark(fields.at("checksum"));
+  impl.values["href"] = fields.at("href");
+  impl.values["checksum"] = fields.at("checksum");
   return NORMAL;
   }
 
@@ -376,8 +354,8 @@ static bool check_md5(FILE *file, const char *md5)
 
 void Archive::download(const Implementation& impl)
   {
-  const char* url = quark_to_string(impl.href);
-  const char* md5 = quark_to_string(impl.hash);
+  const char* url = impl.values.at("href").c_str();
+  const char* md5 = impl.values.at("checksum").c_str();
   fs::path filepath = fs::path(".archives") / urlencode(url);
   FILE* file = std::fopen(filepath.string().c_str(), "rb");
   if (file)
@@ -390,14 +368,12 @@ void Archive::download(const Implementation& impl)
     std::fclose(file);
     }
   file = std::fopen(filepath.string().c_str(), "wb");
-  r_download_(file, quark_to_string(impl.href));
+  r_download_(file, url);
   std::fclose(file);
 
-  std::string dir_name = quark_to_string(impl.name);
-
   fs::path current_path = fs::current_path();
-  fs::path output_path = current_path / dir_name;
-  fs::path temp_path = current_path / (dir_name + "-tmp");
+  fs::path output_path = current_path / impl.name;
+  fs::path temp_path = current_path / (impl.name + "-tmp");
   output_path.replace_extension();
 
   create_directory(temp_path);

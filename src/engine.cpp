@@ -6,9 +6,9 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/engine.hpp>
-#include <karrot/implementation.hpp>
-#include <karrot/quark.hpp>
+#include <karrot.hpp>
+#include "implementation2.hpp"
+#include "quark.hpp"
 #include <cstring>
 
 #include "solve.hpp"
@@ -27,7 +27,7 @@ class Engine::Private
     FeedQueue feed_queue;
     FeedCache feed_cache;
     PackageHandler package_handler;
-    std::vector<Implementation> implementations;
+    std::vector<Implementation2> implementations;
   };
 
 Engine::Engine() :
@@ -73,10 +73,10 @@ void Engine::run()
     }
   for (int i : karrot::solve(self->implementations, requests))
     {
-    const Implementation& impl = self->implementations[i];
+    const Implementation2& impl = self->implementations[i];
     if (impl.driver)
       {
-      impl.driver->download(impl);
+      impl.driver->download(impl.base);
       }
     }
   }

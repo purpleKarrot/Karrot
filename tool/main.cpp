@@ -6,12 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/implementation.hpp>
-#include <karrot/driver.hpp>
-#include <karrot/engine.hpp>
-#include <karrot/spec.hpp>
-#include <karrot/url.hpp>
-#include <karrot/quark.hpp>
+#include <karrot.hpp>
 
 #ifdef USE_ARCHIVE
 #  include "archive.hpp"

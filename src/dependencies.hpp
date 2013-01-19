@@ -10,8 +10,8 @@
 #define KARROT_DEPENDENCIES_HPP
 
 #include <vector>
-#include <karrot/spec.hpp>
-#include <karrot/quark.hpp>
+#include "spec.hpp"
+#include "quark.hpp"
 #include "query.hpp"
 #include <utility>
 #include <iostream>

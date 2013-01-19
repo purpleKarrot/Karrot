@@ -9,7 +9,7 @@
 #ifndef KARROT_ARCHIVE_HPP
 #define KARROT_ARCHIVE_HPP
 
-#include <karrot/driver.hpp>
+#include <karrot.hpp>
 
 namespace karrot
 {
@@ -21,7 +21,7 @@ class Archive: public Driver
   private:
     const char* namespace_uri() const override;
     Dictionary fields() const override;
-    int filter(const Dictionary& fields, Identification& id, int& href, int& hash) override;
+    int filter(const Dictionary& fields, Implementation& impl) override;
     void download(const Implementation& impl) override;
   private:
     std::string machine;

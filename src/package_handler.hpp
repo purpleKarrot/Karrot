@@ -10,7 +10,7 @@
 #define KARROT_PACKAGE_HANDLER_HPP
 
 #include <map>
-#include <karrot/driver.hpp>
+#include <karrot.hpp>
 
 namespace karrot
 {
