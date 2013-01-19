@@ -132,6 +132,33 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
     }
   }
 
+// If a project is built from source, all dependent projects should be built
+// from source too.
+static void source_conflict_clauses(const Database& database, Solver& solver)
+  {
+  for (std::size_t i = 0; i < database.size(); ++i)
+    {
+    if (database[i].impl.component != "SOURCE")
+      {
+      continue;
+      }
+    for (std::size_t k = 0; k < database.size(); ++k)
+      {
+      if (database[k].impl.component == "SOURCE")
+        {
+        continue;
+        }
+      for (const Spec& spec : database[k].depends)
+        {
+        if (satisfies(database[i], spec))
+          {
+          solver.addBinary(~Lit(i), ~Lit(k));
+          }
+        }
+      }
+    }
+  }
+
 std::vector<int> solve(const Database& database, const Requests& requests)
   {
   Hash hash;
@@ -185,6 +212,7 @@ std::vector<int> solve(const Database& database, const Requests& requests)
   dependency_clauses(hash, database, solver);
   explicit_conflict_clauses(hash, database, solver);
   implicit_conflict_clauses(database, solver);
+  source_conflict_clauses(database, solver);
 
   if (!solver.solve(request))
     {
