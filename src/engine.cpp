@@ -42,9 +42,9 @@ Engine::~Engine()
   delete self;
   }
 
-void Engine::add_driver(const char* name, Driver* driver)
+void Engine::add_driver(std::string&& name, std::unique_ptr<Driver>&& driver)
   {
-  self->package_handler.add(name, driver);
+  self->package_handler.add(std::move(name), std::move(driver));
   }
 
 void Engine::add_request(const char* url_string, bool source)

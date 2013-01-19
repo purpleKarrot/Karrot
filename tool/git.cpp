@@ -10,8 +10,6 @@
 #include <git2/remote.h>
 
 #include "git.hpp"
-#include <karrot/implementation.hpp>
-#include <karrot/quark.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -104,9 +102,9 @@ namespace Karrot
 
 void Git::download(const Implementation& impl, bool requested)
   {
-  const char* href = quark_to_string(impl.href);
-  const char* hash = quark_to_string(impl.hash ? impl.hash : impl.id.version);
-  const char* path = quark_to_string(impl.name);
+  const char* href = impl.values.at("href").c_str();
+  const char* hash = impl.values.at("tag").c_str();
+  const char* path = impl.name.c_str();
 
   progress_data pd;
   memset(&pd, 0, sizeof(pd));

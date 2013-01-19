@@ -30,6 +30,12 @@
 
 using namespace Karrot;
 
+template<typename Type, typename... Args>
+std::unique_ptr<Driver> make_driver(Args&&... args)
+  {
+  return std::unique_ptr<Driver>(new Type(std::forward<Args>(args)...));
+  }
+
 int main(int argc, char* argv[])
   {
   try
@@ -37,23 +43,20 @@ int main(int argc, char* argv[])
     Engine engine;
 
 #ifdef USE_ARCHIVE
-    Archive archive;
-    engine.add_driver("archive", &archive);
+    engine.add_driver("archive", make_driver<Archive>());
 #endif
 
 #ifdef USE_PACKAGEKIT
     PackageKit package_kit;
-    engine.add_driver("packagekit", &package_kit);
+    engine.add_driver("packagekit", make_driver<PKDriver>(package_kit));
 #endif
 
 #ifdef USE_GIT
-    Git git;
-    engine.add_driver("git", &git);
+    engine.add_driver("git", make_driver<Git>());
 #endif
 
 #ifdef USE_SUBVERSION
-    Subversion subversion;
-    engine.add_driver("svn", &subversion);
+    engine.add_driver("svn", make_driver<Subversion>());
 #endif
 
     for (int i = 1; i < argc; ++i)
@@ -63,7 +66,7 @@ int main(int argc, char* argv[])
     engine.run();
 
 #ifdef USE_PACKAGEKIT
-    package_kit.install();
+    package_kit.install_queued();
 #endif
     }
   catch (...)

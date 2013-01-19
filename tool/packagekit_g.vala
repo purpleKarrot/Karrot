@@ -23,8 +23,6 @@ interface Transaction : Object
   public signal void finished(string exit, uint runtime);
   }
 
-public delegate void OnPackage(string info, string package_id);
-
 public class Karrot.PackageKit
   {
   public PackageKit() throws IOError
@@ -36,14 +34,16 @@ public class Karrot.PackageKit
     {
     return connection.distro_id;
     }
-  public void resolve(string name, OnPackage handler)
+  public void resolve(string name, out bool installed, out string package_id)
     {
     var loop = new MainLoop();
-    resolve_async.begin(name, handler, (source, res) =>
+    bool out_installed = false;
+    string out_package_id = null;
+    resolve_async.begin(name, (source, res) =>
       {
       try
         {
-        resolve_async.end(res);
+        resolve_async.end(res, out out_installed, out out_package_id);
         }
       catch(Error e)
         {
@@ -52,6 +52,8 @@ public class Karrot.PackageKit
       loop.quit();
       });
     loop.run();
+    installed = out_installed;
+    package_id = out_package_id;
     }
   public void install(string[] package_ids)
     {
@@ -70,13 +72,16 @@ public class Karrot.PackageKit
       });
     loop.run();
     }
-  private async void resolve_async(string name, OnPackage handler) throws IOError
+  private async void resolve_async(string name, out bool installed, out string package_id) throws IOError
     {
     Transaction transaction = Bus.get_proxy_sync(BusType.SYSTEM,
         "org.freedesktop.PackageKit", connection.get_tid());
-    transaction.package.connect((info, package_id, summary) =>
+    bool out_installed = false;
+    string out_package_id = null;
+    transaction.package.connect((info, package_id) =>
       {
-      handler(info, package_id);
+      out_installed = info == "installed";
+      out_package_id = package_id;
       });
     transaction.finished.connect((exit, runtime) =>
       {
@@ -84,6 +89,8 @@ public class Karrot.PackageKit
       });
     transaction.resolve("none", {name});
     yield;
+    installed = out_installed;
+    package_id = out_package_id;
     }
   private async void install_async(string[] package_ids) throws IOError
     {

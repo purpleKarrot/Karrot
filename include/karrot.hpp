@@ -11,6 +11,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 namespace Karrot
 {
@@ -60,7 +61,7 @@ class Engine
     Engine();
     ~Engine();
   public:
-    void add_driver(const char* name, Driver* driver);
+    void add_driver(std::string&& name, std::unique_ptr<Driver>&& driver);
     void add_request(const char* url, bool source);
     void run();
   private:

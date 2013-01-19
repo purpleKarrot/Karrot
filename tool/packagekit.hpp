@@ -17,22 +17,45 @@ typedef struct _KarrotPackageKit KarrotPackageKit;
 namespace Karrot
 {
 
-class PackageKit: public Driver
+class PackageKit
   {
   public:
     PackageKit();
     ~PackageKit();
-    void install();
+    const std::string& distro() const
+      {
+      return distro_;
+      }
+    bool resolve(
+        const std::string& name,
+        bool& installed,
+        std::string& package_id);
+    void queue_package(const std::string& package_id)
+      {
+      packages.push_back(package_id);
+      }
+    void install_queued();
+  private:
+    std::vector<std::string> packages;
+    KarrotPackageKit* self;
+    std::string distro_;
+  };
+
+class PKDriver: public Driver
+  {
+  public:
+    PKDriver(PackageKit& package_kit)
+        : package_kit(package_kit)
+      {
+      }
   private:
     const char* namespace_uri() const override;
     Dictionary fields() const override;
     int filter(const Dictionary& fields, Implementation& impl) override;
     void download(const Implementation& impl, bool requested) override;
-  private:
-    std::vector<char*> packages;
-    KarrotPackageKit* self;
-    std::string distro;
-  };
+    private:
+    PackageKit& package_kit;
+    };
 
 } // namespace Karrot
 

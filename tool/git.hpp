@@ -9,7 +9,7 @@
 #ifndef KARROT_GIT_HPP
 #define KARROT_GIT_HPP
 
-#include <karrot/driver.hpp>
+#include <karrot.hpp>
 
 namespace Karrot
 {
