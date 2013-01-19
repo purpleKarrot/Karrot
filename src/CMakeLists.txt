@@ -39,7 +39,6 @@ add_library(karrot STATIC
   feed_queue.hpp
   hash.hpp
   package_handler.hpp
-  quark_internal.hpp
   quark.cpp
   query_re2c.hpp
   query_re2c.in.hpp

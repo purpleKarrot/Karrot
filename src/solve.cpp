@@ -19,14 +19,10 @@
 namespace karrot
 {
 
-static inline int hash_artefact(int domain, int project)
+static inline std::size_t hash_artefact(const std::string& id)
   {
-  return domain << 3 ^ project ^ project << 11;
-  }
-
-static inline int hash_artefact(const DatabaseEntry& entry)
-  {
-  return hash_artefact(entry.domain, entry.project);
+  std::hash<std::string> hash_fn;
+  return hash_fn(id);
   }
 
 static void query(
@@ -36,7 +32,7 @@ static void query(
     vec<Lit>& res)
   {
   int id;
-  std::size_t h = hash_artefact(spec.domain, spec.project) & hash.mask;
+  std::size_t h = hash_artefact(spec.id) & hash.mask;
   std::size_t hh = hash.begin();
   while ((id = hash.table[h]) != 0)
     {
@@ -116,17 +112,19 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
     {
     for (std::size_t k = i + 1; k < database.size(); ++k)
       {
-      const DatabaseEntry& id1 = database[i];
-      const DatabaseEntry& id2 = database[k];
-      if (id1.project != id2.project || id1.domain != id2.domain)
+      const DatabaseEntry& entry1 = database[i];
+      const DatabaseEntry& entry2 = database[k];
+      if (entry1.id != entry2.id)
         {
         break;
         }
-      if (id1.base.version != id2.base.version ||
-          id1.base.variant != id2.base.variant ||
-          id1.base.component == id2.base.component ||
-          id1.base.component == "*" || id2.base.component == "*" ||
-          id1.base.component == "SOURCE" || id2.base.component == "SOURCE")
+      const Implementation& impl1 = entry1.impl;
+      const Implementation& impl2 = entry2.impl;
+      if (impl1.version != impl2.version ||
+          impl1.variant != impl2.variant ||
+          impl1.component == impl2.component ||
+          impl1.component == "*" || impl2.component == "*" ||
+          impl1.component == "SOURCE" || impl2.component == "SOURCE")
         {
         solver.addBinary(~Lit(i), ~Lit(k));
         }
@@ -141,7 +139,7 @@ std::vector<int> solve(const Database& database, const Requests& requests)
     {
     for (std::size_t i = 0; i < database.size(); ++i)
       {
-      std::size_t h = hash_artefact(database[i]) & hash.mask;
+      std::size_t h = hash_artefact(database[i].id) & hash.mask;
       std::size_t hh = hash.begin();
       while (hash.table[h] != 0)
         {

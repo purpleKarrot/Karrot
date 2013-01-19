@@ -19,19 +19,20 @@ class Url;
 class Spec
   {
   public:
-    Spec() :
-        domain(0), project(0), component(0), query("")
-      {
-      }
-    Spec(int domain, int project, int component, const std::string& query) :
-        domain(domain), project(project), component(component), query(query)
+    Spec() = default;
+    Spec(
+        const std::string& id,
+        const std::string& component,
+        const std::string& query)
+        : id(id)
+        , component(component)
+        , query(query)
       {
       }
     explicit Spec(const Url& url);
   public:
-    int domain;
-    int project;
-    int component;
+    std::string id;
+    std::string component;
     Query query;
   };
 

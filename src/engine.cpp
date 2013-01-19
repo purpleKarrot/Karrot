@@ -86,7 +86,7 @@ void Engine::run()
         {
         return satisfies(entry, spec);
         });
-      entry.driver->download(entry.base, requested);
+      entry.driver->download(entry.impl, requested);
       }
     }
   }

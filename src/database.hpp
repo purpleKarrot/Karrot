@@ -18,14 +18,18 @@ namespace karrot
 class Spec;
 class Driver;
 
-struct DatabaseEntry
+class DatabaseEntry
   {
-  int domain;
-  int project;
-  Implementation base;
-  std::vector<Spec> depends;
-  std::vector<Spec> conflicts;
-  Driver* driver;
+  public:
+    DatabaseEntry(const std::string& id) : id(id)
+      {
+      }
+  public:
+    std::string id;
+    Implementation impl;
+    std::vector<Spec> depends;
+    std::vector<Spec> conflicts;
+    Driver* driver;
   };
 
 typedef std::vector<DatabaseEntry> Database;

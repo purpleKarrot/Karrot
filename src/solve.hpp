@@ -20,19 +20,16 @@ namespace karrot
 
 inline bool satisfies(const DatabaseEntry& entry, const Spec& spec)
   {
-  if (entry.domain != spec.domain)
+  if (entry.id != spec.id)
     {
     return false;
     }
-  if (entry.project != spec.project)
+  const Implementation& impl = entry.impl;
+  if (impl.component != spec.component && impl.component != "*" && impl.component != "SOURCE")
     {
     return false;
     }
-  if (entry.base.component != quark_to_string(spec.component) && entry.base.component != "*" && entry.base.component != "SOURCE")
-    {
-    return false;
-    }
-  return spec.query.evaluate(entry.base.version, entry.base.variant);
+  return spec.query.evaluate(impl.version, impl.variant);
   }
 
 typedef std::vector<Spec> Requests;

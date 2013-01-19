@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "quark_internal.hpp"
+#include "quark.hpp"
 #include "hash.hpp"
 #include <vector>
 #include <cassert>
@@ -34,26 +34,6 @@ static std::size_t str_hash(const char* str, std::size_t len)
     r += (r << 3) + c;
     }
   return r;
-  }
-
-static std::size_t str_hash(const int* str)
-  {
-  std::size_t hash = 0;
-  for (; *str; ++str)
-    {
-    hash ^= *str + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-    }
-  return hash;
-  }
-
-static std::size_t str_hash(const int* str, std::size_t len)
-  {
-  std::size_t hash = 0;
-  for (std::size_t i = 0; i < len; ++i)
-    {
-    hash ^= str[i] + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-    }
-  return hash;
   }
 
 template<typename C>
@@ -134,16 +114,6 @@ int string_to_quark(const char* str, std::size_t len)
 const char* quark_to_string(int quark)
   {
   return QuarkImpl<char>::instance().to_string(quark);
-  }
-
-int array_to_quark(const int* str, std::size_t len)
-  {
-  return QuarkImpl<int>::instance().to_quark(str, len);
-  }
-
-const int* quark_to_array(int quark)
-  {
-  return QuarkImpl<int>::instance().to_string(quark);
   }
 
 } // namespace karrot

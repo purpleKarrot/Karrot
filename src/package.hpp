@@ -23,7 +23,7 @@ class Package
       {
       }
   public:
-    Implementation id;
+    Implementation impl;
     Dictionary fields;
     Driver* driver;
   };

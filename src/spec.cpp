@@ -13,11 +13,10 @@
 namespace karrot
 {
 
-Spec::Spec(const Url& url) :
-    domain(url.host),
-    project(url.path),
-    component(url.fragment),
-    query(quark_to_string(url.query))
+Spec::Spec(const Url& url)
+    : id(std::string(quark_to_string(url.host)) + quark_to_string(url.path))
+    , component(quark_to_string(url.fragment))
+    , query(quark_to_string(url.query))
   {
   }
 

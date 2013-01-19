@@ -7,7 +7,7 @@
  */
 
 #include "variants.hpp"
-#include "quark_internal.hpp"
+#include "quark.hpp"
 #include <cstring>
 #include <iostream>
 #include <stdexcept>

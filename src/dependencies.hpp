@@ -26,9 +26,9 @@ class Dependencies
     Dependencies(const std::string& name = std::string()) : name(name)
       {
       }
-    void start_if(int test)
+    void start_if(const std::string& test)
       {
-      deps.emplace_back(IF, Spec(0, 0, 0, quark_to_string(test)));
+      deps.emplace_back(IF, Spec(std::string(), std::string(), test));
       }
     void start_else()
       {
@@ -39,14 +39,14 @@ class Dependencies
         }
       entry.first = ELSE;
       }
-    void start_elseif(int test)
+    void start_elseif(const std::string& test)
       {
       Entry& entry = deps.back();
       if (entry.first != ENDIF)
         {
         std::cout << "ERROR: <elseif> has no matching <if>!" << std::endl;
         }
-      entry = Entry(ELSEIF, Spec(0, 0, 0, quark_to_string(test)));
+      entry = Entry(ELSEIF, Spec(std::string(), std::string(), test));
       }
     void end_if()
       {

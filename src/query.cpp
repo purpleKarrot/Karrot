@@ -20,7 +20,7 @@ static const int AND           = - 9;
 static const int OR            = -10;
 
 #include "query_re2c.hpp"
-#include "quark_internal.hpp"
+#include "quark.hpp"
 #include "variants.hpp"
 
 #include <string>

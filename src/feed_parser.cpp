@@ -140,25 +140,23 @@ void FeedParser::parse_build(XmlReader& xml, int type, int href)
     {
     return;
     }
-  DatabaseEntry impl;
-  impl.domain = url.host;
-  impl.project = url.path;
-  impl.base.component = "SOURCE";
-  impl.base.name = name;
-  impl.base.values["href"] = href;
-  impl.driver = driver;
+  DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
+  entry.impl.component = "SOURCE";
+  entry.impl.name = name;
+  entry.impl.values["href"] = href;
+  entry.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
-    impl.base.version = quark_to_string(releases[i].version);
-    impl.base.values["tag"] = quark_to_string(releases[i].tag);
+    entry.impl.version = quark_to_string(releases[i].version);
+    entry.impl.values["tag"] = quark_to_string(releases[i].tag);
     foreach_variant(variants, [&](Dictionary variant)
       {
-      impl.base.variant = variant;
-      impl.depends.clear();
-      impl.conflicts.clear();
-      depends.replay("*", impl.base.version, variant,
-          impl.depends, impl.conflicts);
-      db.push_back(impl);
+      entry.impl.variant = variant;
+      entry.depends.clear();
+      entry.conflicts.clear();
+      depends.replay("*", entry.impl.version, variant,
+          entry.depends, entry.conflicts);
+      db.push_back(entry);
       });
     }
   }
@@ -192,15 +190,13 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
     const std::string& name = xml.name();
     if (name == "if")
       {
-      const std::string& test = xml.attribute("test", feed_ns);
-      depends.start_if(string_to_quark(test.c_str(), test.length()));
+      depends.start_if(xml.attribute("test", feed_ns));
       parse_depends(xml, depends);
       depends.end_if();
       }
     else if (name == "elseif")
       {
-      const std::string& test = xml.attribute("test", feed_ns);
-      depends.start_elseif(string_to_quark(test.c_str(), test.length()));
+      depends.start_elseif(xml.attribute("test", feed_ns));
       parse_depends(xml, depends);
       depends.end_if();
       }
@@ -266,28 +262,26 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
       parse_package_fields(xml, group);
       if (package_is_valid(group))
         {
-        DatabaseEntry impl;
-        impl.domain = url.host;
-        impl.project = url.path;
-        impl.base = group.id;
-        impl.base.name = this->name;
-        int flags = group.driver->filter(group.fields, impl.base);
+        DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
+        entry.impl = group.impl;
+        entry.impl.name = this->name;
+        int flags = group.driver->filter(group.fields, entry.impl);
         if (flags)
           {
           if ((flags | 0x1) != 0) // not INSTALLED
             {
-            impl.driver = group.driver;
+            entry.driver = group.driver;
             }
           if ((flags | 0x2) == 0) // not SYSTEM
             {
             //Identification& id = impl.id;
             for (const Dependencies& component : components)
               {
-              component.replay(impl.base.component, impl.base.version,
-                  impl.base.variant, impl.depends, impl.conflicts);
+              component.replay(entry.impl.component, entry.impl.version,
+                  entry.impl.variant, entry.depends, entry.conflicts);
               }
             }
-          this->db.push_back(impl);
+          this->db.push_back(entry);
           }
         }
       else
@@ -308,15 +302,15 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
   int attr;
   if ((attr = to_quark(xml.attribute("component", feed_ns))))
     {
-    group.id.component = attr;
+    group.impl.component = attr;
     }
   if ((attr = to_quark(xml.attribute("version", feed_ns))))
     {
-    group.id.version = attr;
+    group.impl.version = attr;
     }
   if ((attr = to_quark(xml.attribute("variant", feed_ns))))
     {
-    group.id.variant = parse_variant(quark_to_string(attr));
+    group.impl.variant = parse_variant(quark_to_string(attr));
     }
   if ((attr = to_quark(xml.attribute("type", feed_ns))))
     {
