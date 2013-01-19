@@ -81,7 +81,7 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     {
     const std::string& type = xml.attribute("type", vcs_ns);
     const std::string& href = xml.attribute("href", vcs_ns);
-    parse_build(xml, to_quark(type), to_quark(href));
+    parse_build(xml, type, href);
     tag = next_element(xml);
     }
   if (tag == "runtime")
@@ -123,15 +123,15 @@ void FeedParser::parse_releases(XmlReader& xml)
     {
     if (xml.name() == "release" && xml.namespace_uri() == feed_ns)
       {
-      int version = to_quark(xml.attribute("version", feed_ns));
-      int tag = to_quark(xml.attribute("tag", feed_ns));
+      const std::string& version = xml.attribute("version", feed_ns);
+      const std::string& tag = xml.attribute("tag", feed_ns);
       releases.emplace_back(version, tag);
       }
     xml.skip();
     }
   }
 
-void FeedParser::parse_build(XmlReader& xml, int type, int href)
+void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std::string& href)
   {
   Dependencies depends("*");
   parse_depends(xml, depends);
@@ -147,8 +147,8 @@ void FeedParser::parse_build(XmlReader& xml, int type, int href)
   entry.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
-    entry.impl.version = quark_to_string(releases[i].version);
-    entry.impl.values["tag"] = quark_to_string(releases[i].tag);
+    entry.impl.version = releases[i].version();
+    entry.impl.values["tag"] = releases[i].tag();
     foreach_variant(variants, [&](Dictionary variant)
       {
       entry.impl.variant = variant;
@@ -314,7 +314,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if ((attr = to_quark(xml.attribute("type", feed_ns))))
     {
-    group.driver = this->ph.get(attr);
+    group.driver = this->ph.get(quark_to_string(attr));
     if (group.driver)
       {
       group.fields = group.driver->fields();

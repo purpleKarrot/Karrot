@@ -24,13 +24,23 @@ class XmlReader;
 class FeedParser
   {
   private:
-    struct Release
+    class Release
       {
-      Release(int version, int tag) :
-          version(version), tag(tag)
-        {
-        }
-      int version, tag;
+      public:
+        Release(const std::string& version, const std::string& tag)
+            : version_(version), tag_(tag)
+          {
+          }
+        const std::string& version() const
+          {
+          return version_;
+          }
+        const std::string& tag() const
+          {
+          return tag_.empty() ? version_ : tag_;
+          }
+      private:
+        std::string version_, tag_;
       };
   public:
     FeedParser(FeedQueue& qq, Database& db, PackageHandler& ph);
@@ -38,7 +48,7 @@ class FeedParser
   private:
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
-    void parse_build(XmlReader& xml, int type, int href);
+    void parse_build(XmlReader& xml, const std::string& type, const std::string& href);
     void parse_runtime(XmlReader& xml);
     void parse_components(XmlReader& xml);
     void parse_depends(XmlReader& xml, Dependencies& depends);

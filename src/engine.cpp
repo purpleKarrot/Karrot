@@ -44,7 +44,7 @@ Engine::~Engine()
 
 void Engine::add_driver(const char* name, Driver* driver)
   {
-  self->package_handler.add(string_to_quark(name, std::strlen(name)), driver);
+  self->package_handler.add(name, driver);
   }
 
 void Engine::add_request(const char* url_string, bool source)

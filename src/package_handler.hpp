@@ -18,11 +18,11 @@ namespace karrot
 class PackageHandler
   {
   public:
-    void add(int name, Driver* driver)
+    void add(const std::string& name, Driver* driver)
       {
       handlers.insert(std::make_pair(name, driver));
       }
-    Driver* get(int name) const
+    Driver* get(const std::string& name) const
       {
       auto it = handlers.find(name);
       if (it != handlers.end())
@@ -32,7 +32,7 @@ class PackageHandler
       return 0;
       }
   private:
-    std::map<int, Driver*> handlers;
+    std::map<std::string, Driver*> handlers;
   };
 
 } // namespace karrot
