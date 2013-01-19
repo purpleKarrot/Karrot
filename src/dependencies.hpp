@@ -14,6 +14,7 @@
 #include "spec.hpp"
 #include "quark.hpp"
 #include "query.hpp"
+#include <boost/logic/tribool.hpp>
 #include <utility>
 #include <iostream>
 
@@ -71,12 +72,44 @@ class Dependencies
         {
         return;
         }
-      std::vector<bool> stack; //{true};
-      stack.push_back(true);
+      std::vector<boost::tribool> stack{true};
       for (const Entry& entry : deps)
         {
         switch (entry.first)
           {
+          case IF:
+            if (stack.back() == true)
+              {
+              stack.push_back(entry.second.query.evaluate(version, values));
+              }
+            else
+              {
+              stack.push_back(boost::indeterminate);
+              }
+            break;
+          case ELSE:
+            if (stack.back() == true)
+              {
+              stack.back() = boost::indeterminate;
+              }
+            else if (stack.back() == false)
+              {
+              stack.back() = true;
+              }
+            break;
+          case ELSEIF:
+            if (stack.back() == true)
+              {
+              stack.back() = boost::indeterminate;
+              }
+            else if (stack.back() == false)
+              {
+              stack.back() = entry.second.query.evaluate(version, values);
+              }
+            break;
+          case ENDIF:
+            stack.pop_back();
+            break;
           case DEPENDS:
             if (stack.back())
               {
@@ -88,15 +121,6 @@ class Dependencies
               {
               conflicts.push_back(entry.second);
               }
-            break;
-          case IF:
-            stack.push_back(stack.back() && entry.second.query.evaluate(version, values));
-            break;
-          case ELSEIF:
-            stack.back() = !stack.back() && entry.second.query.evaluate(version, values);
-            break;
-          case ENDIF:
-            stack.pop_back();
             break;
           }
         }
@@ -113,7 +137,7 @@ class Dependencies
       };
     std::string name;
     typedef std::pair<Code, Spec> Entry;
-    std::vector<std::pair<Code, Spec>> deps;
+    std::vector<Entry> deps;
   };
 
 } // namespace
