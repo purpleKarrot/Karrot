@@ -49,7 +49,7 @@ class FeedParser
     void parse_package_fields(XmlReader& xml, Package& group);
   private:
     int name;
-    std::vector<int> variants;
+    std::vector<std::string> variants;
     std::vector<Release> releases;
     std::vector<Dependencies> components;
     Url url;

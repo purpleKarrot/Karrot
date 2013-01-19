@@ -23,7 +23,7 @@ class Implementation
     std::string name;
     std::string component;
     std::string version;
-    int /*Dictionary*/ variant;
+    Dictionary variant;
     Dictionary values;
   };
 

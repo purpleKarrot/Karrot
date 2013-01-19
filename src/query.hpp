@@ -9,12 +9,14 @@
 #ifndef KARROT_QUERY_HPP
 #define KARROT_QUERY_HPP
 
+#include <karrot.hpp>
+
 namespace karrot
 {
 
 int parse_query(int quark);
 
-bool evaluate(int query, int version, int variants);
+bool evaluate(int query, int version, const Dictionary& variants);
 
 } // namespace karrot
 

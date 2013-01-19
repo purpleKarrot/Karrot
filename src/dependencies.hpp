@@ -62,7 +62,7 @@ class Dependencies
       {
       deps.emplace_back(CONFLICTS, spec);
       }
-    void replay(int component, int version, int values,
+    void replay(int component, int version, const Dictionary& values,
         std::vector<Spec>& depends,
         std::vector<Spec>& conflicts) const
       {

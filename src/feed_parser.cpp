@@ -112,8 +112,8 @@ void FeedParser::parse_variants(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    variants.push_back(to_quark(xml.attribute("name", feed_ns)));
-    variants.push_back(to_quark(xml.attribute("values", feed_ns)));
+    variants.push_back(xml.attribute("name", feed_ns));
+    variants.push_back(xml.attribute("values", feed_ns));
     xml.skip();
     }
   }
@@ -152,7 +152,7 @@ void FeedParser::parse_build(XmlReader& xml, int type, int href)
     {
     impl.base.version = quark_to_string(releases[i].version);
     impl.base.values["tag"] = quark_to_string(releases[i].tag);
-    foreach_variant(variants, [&](int variant)
+    foreach_variant(variants, [&](Dictionary variant)
       {
       impl.base.variant = variant;
       impl.depends.clear();
@@ -319,7 +319,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if ((attr = to_quark(xml.attribute("variant", feed_ns))))
     {
-    group.id.variant = parse_variant(attr);
+    group.id.variant = parse_variant(quark_to_string(attr));
     }
   if ((attr = to_quark(xml.attribute("type", feed_ns))))
     {

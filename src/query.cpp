@@ -261,7 +261,7 @@ static int vercmp(const char *s1, const char *s2)
   return s1 ? 1 : s2 ? -1 : 0;
   }
 
-bool evaluate(int query, int version, int variants)
+bool evaluate(int query, int version, const Dictionary& variants)
 //bool Query::eval(Atom version, Dict values) const
   {
   if (!query)
@@ -296,7 +296,7 @@ bool evaluate(int query, int version, int variants)
         }
       else if (op1 > 1) // 1 == true!
         {
-        op1 = lookup(variants, op1);
+        op1 = to_quark(variants.at(quark_to_string(op1)));
         }
       if (is_relation(c))
         {
