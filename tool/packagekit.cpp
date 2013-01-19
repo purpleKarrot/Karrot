@@ -9,55 +9,46 @@
 #include "packagekit.hpp"
 #include "packagekit_g.h"
 
-#include <karrot/implementation.hpp>
-#include <karrot/quark.hpp>
-
 #include <iostream>
 #include <cstring>
 
 namespace karrot
 {
 
-static const int ASTERISK = string_to_quark("*");
-static const int DISTRO   = string_to_quark("distro");
-static const int NAME     = string_to_quark("name");
-
 PackageKit::PackageKit()
   {
   g_type_init();
-  impl = karrot_package_kit_new(0);
-  gchar *distro_id = karrot_package_kit_distro_id(impl);
-  distro = string_to_quark(distro_id, std::strcspn(distro_id, ";"));
+  self = karrot_package_kit_new(0);
+  gchar *distro_id = karrot_package_kit_distro_id(self);
+  distro = std::string(distro_id, std::strcspn(distro_id, ";"));
   g_free(distro_id);
   }
 
 PackageKit::~PackageKit()
   {
-  karrot_package_kit_unref(impl);
+  karrot_package_kit_unref(self);
   }
 
-int PackageKit::namespace_uri() const
+const char* PackageKit::namespace_uri() const
   {
-  static const int instance = string_to_quark("http://ryppl.org/2012/packagekit");
-  return instance;
+  return "http://ryppl.org/2012/packagekit";
   }
 
-Driver::Fields PackageKit::fields() const
+Dictionary PackageKit::fields() const
   {
-  Fields fields;
-  fields.insert(std::make_pair(DISTRO, ASTERISK));
-  fields.insert(std::make_pair(NAME, 0));
+  Dictionary fields;
+  fields.insert(std::make_pair("distro", "*"));
+  fields.insert(std::make_pair("name", std::string()));
   return fields;
   }
 
 struct OnPackageTarget
   {
-  OnPackageTarget(int& version, int& href, PackageKit* channel) :
-      version(version), href(href), channel(channel), filter(Driver::INCOMPATIBLE)
+  OnPackageTarget(Implementation& impl, PackageKit* channel) :
+      impl(impl), channel(channel), filter(Driver::INCOMPATIBLE)
     {
     }
-  int& version;
-  int& href;
+  Implementation& impl;
   PackageKit* channel;
   int filter;
   };
@@ -67,8 +58,8 @@ static void on_package(const gchar* info, const gchar* package_id, void* user_da
   OnPackageTarget& target = *reinterpret_cast<OnPackageTarget*>(user_data);
   const char* begin = std::strchr(package_id, ';') + 1;
   const char* end = std::strchr(begin, ';');
-  target.version = string_to_quark(begin, end - begin);
-  target.href = string_to_quark(package_id, std::strlen(package_id));
+  target.impl.version = std::string(begin, end);
+  target.impl.values["packageid"] = package_id;
   if (std::strcmp(info, "installed") == 0)
     {
     target.filter = Driver::SYS_INSTALLED;
@@ -79,29 +70,29 @@ static void on_package(const gchar* info, const gchar* package_id, void* user_da
     }
   }
 
-int PackageKit::filter(const Fields& fields, Identification& id, int& href, int& hash)
+int PackageKit::filter(const Dictionary& fields, Implementation& impl)
   {
-  int p_distro = fields.find(DISTRO)->second;
-  if (p_distro == ASTERISK || p_distro == distro)
+  const std::string& p_distro = fields.at("distro");
+  if (p_distro == "*" || p_distro == distro)
     {
-    int p_name = fields.find(NAME)->second;
-    OnPackageTarget target(id.version, href, this);
-    karrot_package_kit_resolve(impl, quark_to_string(p_name), on_package, &target);
+    const std::string& p_name = fields.at("name");
+    OnPackageTarget target(impl, this);
+    karrot_package_kit_resolve(self, p_name.c_str(), on_package, &target);
     return target.filter;
     }
   return Driver::INCOMPATIBLE;
   }
 
-void PackageKit::download(const Implementation& impl)
+void PackageKit::download(const Implementation& impl, bool requested)
   {
-  packages.push_back((gchar*) quark_to_string(impl.href));
+  packages.push_back((gchar*) impl.values.at("packageid").c_str());
   }
 
 void PackageKit::install()
   {
   if (!packages.empty())
     {
-    karrot_package_kit_install(impl, &packages[0], packages.size());
+    karrot_package_kit_install(self, &packages[0], packages.size());
     }
   }
 

@@ -8,14 +8,14 @@
 
 #include "xml_reader.hpp"
 #include "xml_re2c.hpp"
-#include <karrot/quark.hpp>
+
 #include <boost/filesystem/fstream.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 namespace karrot
 {
 
-static const int XMLNS = string_to_quark("xmlns");
+static const std::string empty_string;
 
 void XmlReader::lookup_namespace(Name& name)
   {
@@ -23,11 +23,11 @@ void XmlReader::lookup_namespace(Name& name)
     {
     if (name.prefix == mapping.prefix)
       {
-      name.namespace_uri = mapping.namespace_uri;
+      name.namespace_uri = &mapping.namespace_uri;
       return;
       }
     }
-  name.namespace_uri = 0;
+  name.namespace_uri = &empty_string;
   }
 
 std::size_t XmlReader::push_namespaces()
@@ -36,13 +36,13 @@ std::size_t XmlReader::push_namespaces()
   std::size_t previous_mappings = ns_mappings.size();
   for (const Attribute& attr : attributes)
     {
-    if (!attr.name.prefix && attr.name.local == XMLNS)
+    if (attr.name.prefix.empty() && attr.name.local == "xmlns")
       {
-      mapping.prefix = 0;
+      mapping.prefix.clear();
       mapping.namespace_uri = attr.value;
       ns_mappings.push_back(mapping);
       }
-    else if (attr.name.prefix == XMLNS)
+    else if (attr.name.prefix == "xmlns")
       {
       mapping.prefix = attr.name.local;
       mapping.namespace_uri = attr.value;
@@ -105,26 +105,28 @@ XmlToken XmlReader::token() const
   return token_;
   }
 
-int XmlReader::name() const
+const std::string& XmlReader::name() const
   {
   return current_name.local;
   }
 
-int XmlReader::namespace_uri() const
+const std::string& XmlReader::namespace_uri() const
   {
-  return current_name.namespace_uri;
+  return *current_name.namespace_uri;
   }
 
-int XmlReader::attribute(int name, int namespace_uri) const
+const std::string& XmlReader::attribute(
+    const std::string& name,
+    const std::string& namespace_uri) const
   {
   for (const Attribute& attr : attributes)
     {
-    if (attr.name.local == name && attr.name.namespace_uri == namespace_uri)
+    if (attr.name.local == name && *attr.name.namespace_uri == namespace_uri)
       {
       return attr.value;
       }
     }
-  return 0;
+  return empty_string;
   }
 
 void XmlReader::skip()
@@ -134,7 +136,7 @@ void XmlReader::skip()
     is_empty_element = false;
     return;
     }
-  std::size_t depth = 0;
+  int depth = 0;
   do
     {
     if ((token_ == token_element) && (!is_empty_element))
@@ -171,9 +173,31 @@ bool XmlReader::start_element()
 
 std::string XmlReader::content()
   {
+  if (is_empty_element)
+    {
+    is_empty_element = false;
+    return std::string();
+    }
   std::vector<char>::iterator begin = cursor;
-  skip();
-  return std::string(begin, cursor);
+  std::vector<char>::iterator end;
+  std::size_t depth = 0;
+  do
+    {
+    if ((token_ == token_element) && (!is_empty_element))
+      {
+      ++depth;
+      }
+    else if (token_ == token_end_element)
+      {
+      --depth;
+      }
+    if (depth > 0)
+      {
+      end = cursor;
+      }
+    }
+  while (read() && depth > 0);
+  return std::string(begin, end);
   }
 
 } // namespace karrot

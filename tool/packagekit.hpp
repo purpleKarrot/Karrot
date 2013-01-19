@@ -9,7 +9,7 @@
 #ifndef KARROT_PACKAGEKIT_HPP
 #define KARROT_PACKAGEKIT_HPP
 
-#include <karrot/driver.hpp>
+#include <karrot.hpp>
 #include <vector>
 
 typedef struct _KarrotPackageKit KarrotPackageKit;
@@ -24,18 +24,14 @@ class PackageKit: public Driver
     ~PackageKit();
     void install();
   private:
-    int namespace_uri() const;
-    Fields fields() const;
-    int filter(const Fields& fields, Identification& id, int& href, int& hash);
-    void download(const Implementation& impl);
-    //Type type() const
-    //  {
-    //  return INTERNAL;
-    //  }
+    const char* namespace_uri() const override;
+    Dictionary fields() const override;
+    int filter(const Dictionary& fields, Implementation& impl) override;
+    void download(const Implementation& impl, bool requested) override;
   private:
     std::vector<char*> packages;
-    KarrotPackageKit* impl;
-    int distro;
+    KarrotPackageKit* self;
+    std::string distro;
   };
 
 } // namespace karrot

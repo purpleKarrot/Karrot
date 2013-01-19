@@ -9,8 +9,8 @@
 #ifndef KARROT_FEED_QUEUE_HPP
 #define KARROT_FEED_QUEUE_HPP
 
-#include <karrot/url.hpp>
-#include <karrot/quark.hpp>
+#include "url.hpp"
+#include "quark.hpp"
 #include <vector>
 #include <cstdio>
 

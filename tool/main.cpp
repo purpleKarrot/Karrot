@@ -6,11 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/implementation.hpp>
-#include <karrot/driver.hpp>
-#include <karrot/engine.hpp>
-#include <karrot/spec.hpp>
-#include <karrot/url.hpp>
+#include <karrot.hpp>
 
 #ifdef USE_ARCHIVE
 #  include "archive.hpp"
@@ -32,61 +28,43 @@
 #include <iostream>
 #include <fstream>
 
-namespace karrot
-{
-
-int main(int argc, char* argv[])
-  {
-  Engine engine;
-
-#ifdef USE_ARCHIVE
-  Archive archive;
-  engine.add_driver("archive", &archive);
-#endif
-
-#ifdef USE_PACKAGEKIT
-  PackageKit package_kit;
-  engine.add_driver("packagekit", &package_kit);
-#endif
-
-#ifdef USE_GIT
-  Git git;
-  engine.add_driver("git", &git);
-#endif
-
-#ifdef USE_SUBVERSION
-  Subversion subversion;
-  engine.add_driver("svn", &subversion);
-#endif
-
-  std::set<Spec> projects;
-  for (int i = 1; i < argc; ++i)
-    {
-    Url url(argv[i]);
-    engine.load_feed(url);
-    projects.insert(Spec(url));
-    }
-  for (int i : engine.solve(projects))
-    {
-    const Implementation& impl = engine[i];
-    if (impl.driver)
-      {
-      impl.driver->download(impl);
-      }
-    }
-#ifdef USE_PACKAGEKIT
-  package_kit.install();
-#endif
-  return 0;
-  }
-
-} // namespace karrot
+using namespace karrot;
 
 int main(int argc, char* argv[])
   {
   try
     {
-    return karrot::main(argc, argv);
+    Engine engine;
+
+#ifdef USE_ARCHIVE
+    Archive archive;
+    engine.add_driver("archive", &archive);
+#endif
+
+#ifdef USE_PACKAGEKIT
+    PackageKit package_kit;
+    engine.add_driver("packagekit", &package_kit);
+#endif
+
+#ifdef USE_GIT
+    Git git;
+    engine.add_driver("git", &git);
+#endif
+
+#ifdef USE_SUBVERSION
+    Subversion subversion;
+    engine.add_driver("svn", &subversion);
+#endif
+
+    for (int i = 1; i < argc; ++i)
+      {
+      engine.add_request(argv[i], true);
+      }
+    engine.run();
+
+#ifdef USE_PACKAGEKIT
+    package_kit.install();
+#endif
     }
   catch (...)
     {
@@ -94,6 +72,7 @@ int main(int argc, char* argv[])
       << "\nUnhandled exception caught!\n"
       << boost::current_exception_diagnostic_information()
       ;
+    return -1;
     }
-  return -1;
+  return 0;
   }

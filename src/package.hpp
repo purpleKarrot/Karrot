@@ -9,8 +9,7 @@
 #ifndef KARROT_PACKAGE_HPP
 #define KARROT_PACKAGE_HPP
 
-#include <karrot/identification.hpp>
-#include <map>
+#include <karrot.hpp>
 
 namespace karrot
 {
@@ -20,13 +19,12 @@ class Driver;
 class Package
   {
   public:
-    Package(int domain, int project) :
-        id(domain, project), driver(0)
+    Package() : driver(nullptr)
       {
       }
   public:
-    Identification id;
-    std::map<int, int> fields;
+    Implementation impl;
+    Dictionary fields;
     Driver* driver;
   };
 

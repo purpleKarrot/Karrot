@@ -9,8 +9,6 @@
 #include "subversion.hpp"
 
 #include <boost/filesystem.hpp>
-#include <karrot/implementation.hpp>
-#include <karrot/quark.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -123,15 +121,15 @@ Subversion::~Subversion()
   svn_pool_destroy(pool);
   }
 
-void Subversion::download(const Implementation& impl)
+void Subversion::download(const Implementation& impl, bool requested)
   {
   svn_revnum_t result_rev;
   svn_opt_revision_t revision;
   svn_opt_revision_t peg_revision;
   peg_revision.kind = svn_opt_revision_unspecified;
 
-  std::string url = quark_to_string(impl.href);
-  std::string tag = quark_to_string(impl.hash ? impl.hash : impl.id.version);
+  std::string url = impl.values.at("href");
+  std::string tag = impl.values.at("tag");
 
   std::string::size_type loc = tag.rfind('@');
   if (loc != std::string::npos)
@@ -155,7 +153,7 @@ void Subversion::download(const Implementation& impl)
     }
 
   const char* abs_path;
-  svn_dirent_get_absolute(&abs_path, quark_to_string(impl.name), pool);
+  svn_dirent_get_absolute(&abs_path, impl.name.c_str(), pool);
   const char* canonical_url = svn_uri_canonicalize(url.c_str(), pool);
   const char* canonical_path = svn_dirent_canonicalize(abs_path, pool);
 

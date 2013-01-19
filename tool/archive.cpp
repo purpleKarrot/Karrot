@@ -14,10 +14,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include <karrot/implementation.hpp>
-#include <karrot/quark.hpp>
-#include <karrot/url.hpp>
-
 #include <iostream>
 #include <string>
 #include <cctype>
@@ -36,58 +32,32 @@ namespace karrot
 {
 namespace fs = boost::filesystem;
 
-static const int ASTERISK = string_to_quark("*");
-static const int CHECKSUM = string_to_quark("checksum");
-static const int HREF     = string_to_quark("href");
-static const int MACHINE  = string_to_quark("machine");
-static const int SYSNAME  = string_to_quark("sysname");
-
 Archive::Archive()
   {
 #ifdef _WIN32
-  char* env = getenv("PROCESSOR_ARCHITECTURE");
-  machine = string_to_quark(env, std::strlen(env));
-  sysname = string_to_quark("Windows");
+  machine = getenv("PROCESSOR_ARCHITECTURE");
+  sysname = "Windows";
 #else
   struct utsname uts;
   uname(&uts);
-  machine = string_to_quark(uts.machine, std::strlen(uts.machine));
-  sysname = string_to_quark(uts.sysname, std::strlen(uts.sysname));
+  machine = uts.machine;
+  sysname = uts.sysname;
 #endif
   }
 
-int Archive::namespace_uri() const
+const char* Archive::namespace_uri() const
   {
-  static const int instance = string_to_quark("http://ryppl.org/2012/archive");
-  return instance;
+  return "http://ryppl.org/2012/archive";
   }
 
-Driver::Fields Archive::fields() const
+Dictionary Archive::fields() const
   {
-  Fields fields;
-  fields.insert(std::make_pair(SYSNAME, ASTERISK));
-  fields.insert(std::make_pair(MACHINE, ASTERISK));
-  fields.insert(std::make_pair(HREF, 0));
-  fields.insert(std::make_pair(CHECKSUM, 0));
+  Dictionary fields;
+  fields.insert(std::make_pair("sysname", "*"));
+  fields.insert(std::make_pair("machine", "*"));
+  fields.insert(std::make_pair("href", std::string()));
+  fields.insert(std::make_pair("checksum", std::string()));
   return fields;
-  }
-
-void r_url_to_string (const Url& url, char *str)
-  {
-  strcpy(str, quark_to_string(url.scheme));
-  strcat(str, "://");
-  if (url.user_info)
-    {
-    strcat(str, quark_to_string(url.user_info));
-    strcat(str, "@");
-    }
-  strcat(str, quark_to_string(url.host));
-  if (url.port)
-    {
-    strcat(str, ":");
-    strcat(str, quark_to_string(url.port));
-    }
-  strcat(str, quark_to_string(url.path));
   }
 
 static int progress(void *clientp, double total, double now, double t, double n)
@@ -339,20 +309,20 @@ static fs::path analyze_extracted(fs::path root)
   return nested;
   }
 
-int Archive::filter(const Fields& fields, Identification& id, int& href, int& hash)
+int Archive::filter(const Dictionary& fields, Implementation& impl)
   {
-  int p_sysname = fields.find(SYSNAME)->second;
-  if (p_sysname != ASTERISK && p_sysname != sysname)
+  const std::string& p_sysname = fields.at("sysname");
+  if (p_sysname != "*" && p_sysname != sysname)
     {
     return INCOMPATIBLE;
     }
-  int p_machine = fields.find(MACHINE)->second;
-  if (p_machine != ASTERISK && p_machine != machine)
+  const std::string& p_machine = fields.at("machine");
+  if (p_machine != "*" && p_machine != machine)
     {
     return INCOMPATIBLE;
     }
-  href = fields.find(HREF)->second;
-  hash = fields.find(CHECKSUM)->second;
+  impl.values["href"] = fields.at("href");
+  impl.values["checksum"] = fields.at("checksum");
   return NORMAL;
   }
 
@@ -382,10 +352,10 @@ static bool check_md5(FILE *file, const char *md5)
   return true;
   }
 
-void Archive::download(const Implementation& impl)
+void Archive::download(const Implementation& impl, bool requested)
   {
-  const char* url = quark_to_string(impl.href);
-  const char* md5 = quark_to_string(impl.hash);
+  const char* url = impl.values.at("href").c_str();
+  const char* md5 = impl.values.at("checksum").c_str();
   fs::path filepath = fs::path(".archives") / urlencode(url);
   FILE* file = std::fopen(filepath.string().c_str(), "rb");
   if (file)
@@ -398,14 +368,12 @@ void Archive::download(const Implementation& impl)
     std::fclose(file);
     }
   file = std::fopen(filepath.string().c_str(), "wb");
-  r_download_(file, quark_to_string(impl.href));
+  r_download_(file, url);
   std::fclose(file);
 
-  std::string dir_name = quark_to_string(impl.name);
-
   fs::path current_path = fs::current_path();
-  fs::path output_path = current_path / dir_name;
-  fs::path temp_path = current_path / (dir_name + "-tmp");
+  fs::path output_path = current_path / impl.name;
+  fs::path temp_path = current_path / (impl.name + "-tmp");
   output_path.replace_extension();
 
   create_directory(temp_path);

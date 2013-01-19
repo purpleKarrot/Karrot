@@ -9,18 +9,17 @@
 #ifndef KARROT_VARIANTS_HPP
 #define KARROT_VARIANTS_HPP
 
-#include <vector>
+#include <karrot.hpp>
 #include <functional>
+#include <vector>
 
 namespace karrot
 {
 
-int parse_variant(int quark);
+Dictionary parse_variant(const std::string& quark);
 
-int lookup(int variant, int var);
-
-void foreach_variant(const std::vector<int>& variants,
-    const std::function<void(int)>& function);
+void foreach_variant(const std::vector<std::string>& variants,
+    const std::function<void(Dictionary)>& function);
 
 } // namespace karrot
 

@@ -7,8 +7,8 @@
  */
 
 #include "feed_cache.hpp"
-#include <karrot/url.hpp>
-#include <karrot/quark.hpp>
+#include "url.hpp"
+#include "quark.hpp"
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <curl/curl.h>

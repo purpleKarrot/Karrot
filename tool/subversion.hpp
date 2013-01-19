@@ -9,7 +9,7 @@
 #ifndef KARROT_SUBVERSION_HPP
 #define KARROT_SUBVERSION_HPP
 
-#include <karrot/driver.hpp>
+#include <karrot.hpp>
 
 struct apr_pool_t;
 struct svn_client_ctx_t;
@@ -23,11 +23,7 @@ class Subversion: public Driver
     Subversion();
     ~Subversion();
   private:
-    //Type type() const
-    //  {
-    //  return SOURCE;
-    //  }
-    void download(const Implementation& impl);
+    void download(const Implementation& impl, bool requested) override;
   private:
     apr_pool_t* pool;
     svn_client_ctx_t* ctx;

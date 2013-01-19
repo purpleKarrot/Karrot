@@ -9,12 +9,21 @@
 #ifndef KARROT_QUERY_HPP
 #define KARROT_QUERY_HPP
 
+#include <karrot.hpp>
+#include <vector>
+
 namespace karrot
 {
 
-int parse_query(int quark);
-
-bool evaluate(int query, int version, int variants);
+class Query
+  {
+  public:
+    Query() = default;
+    Query(const std::string& string);
+    bool evaluate(const std::string& version, const Dictionary& variants) const;
+  private:
+    std::vector<int> queryspace;
+  };
 
 } // namespace karrot
 

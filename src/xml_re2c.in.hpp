@@ -6,17 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <cstdio>
-#include <karrot/quark.hpp>
-
 namespace karrot
 {
-
-typedef std::vector<char>::iterator iter_t;
-static int parse_quark(iter_t begin, iter_t end)
-  {
-  return string_to_quark(&(*begin), end - begin);
-  }
 
 /*!re2c
 re2c:indent:string   = "  ";
@@ -34,13 +25,12 @@ else                 = [];
 
 bool XmlReader::parse_name(Name& name)
   {
-  int quark;
-  name.namespace_uri = 0;
+  std::string quark;
   marker = cursor;
   /*!re2c
   name
     {
-    quark = parse_quark(marker, cursor);
+    quark = std::string(marker, cursor);
     }
   else
     {
@@ -54,7 +44,7 @@ bool XmlReader::parse_name(Name& name)
     }
   else
     {
-    name.prefix = 0;
+    name.prefix.clear();
     name.local = quark;
     return true;
     }
@@ -63,7 +53,7 @@ bool XmlReader::parse_name(Name& name)
   name
     {
     name.prefix = quark;
-    name.local = parse_quark(marker, cursor);
+    name.local = std::string(marker, cursor);
     return true;
     }
   else
@@ -92,7 +82,7 @@ bool XmlReader::parse_attribute(Attribute& attribute)
   /*!re2c
   ["] [^"]* ["] | ['] [^']* [']
     {
-    attribute.value = parse_quark(marker + 1, cursor - 1);
+    attribute.value = std::string(marker + 1, cursor - 1);
     return true;
     }
   else
@@ -211,10 +201,10 @@ bool XmlReader::parse_end_element()
   if (current_name.prefix != expected.prefix || current_name.local != expected.local)
     {
     printf("Wrong end tag! %s:%s != %s:%s\n",
-      quark_to_string(current_name.prefix),
-      quark_to_string(current_name.local),
-      quark_to_string(expected.prefix),
-      quark_to_string(expected.local));
+      current_name.prefix.c_str(),
+      current_name.local.c_str(),
+      expected.prefix.c_str(),
+      expected.local.c_str());
     return false;
     }
   token_ = token_end_element;
@@ -228,6 +218,10 @@ bool XmlReader::parse_text()
   do
     {
     ++cursor;
+    if (cursor == buffer.end())
+      {
+      return false;
+      }
     }
   while (*cursor != '<');
   token_ = token_text;
@@ -236,6 +230,10 @@ bool XmlReader::parse_text()
 
 bool XmlReader::read()
   {
+  if (cursor == buffer.end())
+    {
+    return false;
+    }
   /*!re2c
   "<?"
     {

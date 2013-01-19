@@ -9,17 +9,32 @@
 #ifndef KARROT_SOLVE_HPP
 #define KARROT_SOLVE_HPP
 
-#include <karrot/implementation.hpp>
-#include <karrot/spec.hpp>
+#include "database.hpp"
+#include "spec.hpp"
+#include "quark.hpp"
 #include <vector>
 #include <set>
 
 namespace karrot
 {
 
-std::vector<int> solve(
-    const std::vector<Implementation>& database,
-    const std::set<Spec>& projects);
+inline bool satisfies(const DatabaseEntry& entry, const Spec& spec)
+  {
+  if (entry.id != spec.id)
+    {
+    return false;
+    }
+  const Implementation& impl = entry.impl;
+  if (impl.component != spec.component && impl.component != "*" && impl.component != "SOURCE")
+    {
+    return false;
+    }
+  return spec.query.evaluate(impl.version, impl.variant);
+  }
+
+typedef std::vector<Spec> Requests;
+
+std::vector<int> solve(const Database& database, const Requests& requests);
 
 } // namespace karrot
 

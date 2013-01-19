@@ -34,18 +34,20 @@ class XmlReader: boost::noncopyable
     XmlReader(const boost::filesystem::path& filepath);
     bool read();
     XmlToken token() const;
-    int name() const;
-    int namespace_uri() const;
-    int attribute(int name, int namespace_uri) const;
+    const std::string& name() const;
+    const std::string& namespace_uri() const;
+    const std::string& attribute(
+      const std::string& name,
+      const std::string& namespace_uri) const;
     void skip();
     bool start_element();
     std::string content();
   private:
     struct Name
       {
-      int prefix;
-      int local;
-      int namespace_uri;
+      std::string prefix;
+      std::string local;
+      const std::string* namespace_uri;
       };
     struct Tag
       {
@@ -55,12 +57,12 @@ class XmlReader: boost::noncopyable
     struct Attribute
       {
       Name name;
-      int value;
+      std::string value;
       };
     struct Mapping
       {
-      int prefix;
-      int namespace_uri;
+      std::string prefix;
+      std::string namespace_uri;
       };
   private:
     void push_tag();

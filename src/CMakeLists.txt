@@ -21,7 +21,7 @@ re2c_target(
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
 
-add_library(karrot
+add_library(karrot STATIC
   minisat/Global.h
   minisat/Heap.h
   minisat/Solver.cpp
@@ -39,7 +39,6 @@ add_library(karrot
   feed_queue.hpp
   hash.hpp
   package_handler.hpp
-  quark_internal.hpp
   quark.cpp
   query_re2c.hpp
   query_re2c.in.hpp

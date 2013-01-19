@@ -7,7 +7,7 @@
  */
 
 #include <stdexcept>
-#include <karrot/quark.hpp>
+#include "quark.hpp"
 
 namespace karrot
 {
