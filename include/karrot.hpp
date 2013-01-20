@@ -62,7 +62,7 @@ class DriverDecorator: public Driver
         : component(std::move(component))
       {
       }
-    virtual ~DriverDecorator() = default;
+    virtual ~DriverDecorator();
   protected:
     const char* namespace_uri() const //override
       {

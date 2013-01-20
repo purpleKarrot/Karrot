@@ -15,4 +15,8 @@ Driver::~Driver()
   {
   }
 
+DriverDecorator::~DriverDecorator()
+  {
+  }
+
 } // namespace Karrot
