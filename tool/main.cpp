@@ -28,6 +28,8 @@
 #  include "subversion.hpp"
 #endif
 
+#include "cmake.hpp"
+
 using namespace Karrot;
 
 template<typename Type, typename... Args>
@@ -89,22 +91,30 @@ int main(int argc, char* argv[])
   try
     {
     Engine engine;
+    CMake::Listsfile listsfile;
 
 #ifdef USE_ARCHIVE
-    engine.add_driver("archive", make_driver<Archive>());
+    engine.add_driver("archive",
+        make_driver<CMake::PrefixInjector>(listsfile,
+            make_driver<Archive>()));
 #endif
 
 #ifdef USE_PACKAGEKIT
     PackageKit package_kit;
-    engine.add_driver("packagekit", make_driver<PKDriver>(package_kit));
+    engine.add_driver("packagekit",
+        make_driver<PKDriver>(package_kit));
 #endif
 
 #ifdef USE_GIT
-    engine.add_driver("git", make_driver<Git>());
+    engine.add_driver("git",
+        make_driver<CMake::SubdirInjector>(listsfile,
+            make_driver<Git>()));
 #endif
 
 #ifdef USE_SUBVERSION
-    engine.add_driver("svn", make_driver<Subversion>());
+    engine.add_driver("svn",
+        make_driver<CMake::SubdirInjector>(listsfile,
+            make_driver<Subversion>()));
 #endif
 
     for (const std::string& url : request_urls)
@@ -116,6 +126,8 @@ int main(int argc, char* argv[])
 #ifdef USE_PACKAGEKIT
     package_kit.install_queued();
 #endif
+
+    listsfile.write();
     }
   catch (...)
     {

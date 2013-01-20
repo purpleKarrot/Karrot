@@ -22,7 +22,6 @@ class Archive: public Driver
     const char* namespace_uri() const override;
     Dictionary fields() const override;
     int filter(const Dictionary& fields, Implementation& impl) override;
-  protected:
     void download(const Implementation& impl, bool requested) override;
   private:
     std::string machine;

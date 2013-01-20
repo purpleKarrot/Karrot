@@ -22,7 +22,7 @@ class Subversion: public Driver
   public:
     Subversion();
     ~Subversion();
-  protected:
+  private:
     void download(const Implementation& impl, bool requested) override;
   private:
     apr_pool_t* pool;

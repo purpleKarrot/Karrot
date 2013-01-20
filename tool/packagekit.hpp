@@ -53,9 +53,9 @@ class PKDriver: public Driver
     Dictionary fields() const override;
     int filter(const Dictionary& fields, Implementation& impl) override;
     void download(const Implementation& impl, bool requested) override;
-    private:
+  private:
     PackageKit& package_kit;
-    };
+  };
 
 } // namespace Karrot
 

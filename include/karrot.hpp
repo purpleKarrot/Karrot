@@ -55,6 +55,34 @@ class Driver
     static const int SYS_AVAILABLE = 3;
   };
 
+class DriverDecorator: public Driver
+  {
+  public:
+    DriverDecorator(std::unique_ptr<Driver>&& component)
+        : component(std::move(component))
+      {
+      }
+  protected:
+    const char* namespace_uri() const override
+      {
+      return component->namespace_uri();
+      }
+    Dictionary fields() const override
+      {
+      return component->fields();
+      }
+    int filter(const Dictionary& fields, Implementation& impl) override
+      {
+      return component->filter(fields, impl);
+      }
+    void download(const Implementation& impl, bool requested) override
+      {
+      component->download(impl, requested);
+      }
+  private:
+    std::unique_ptr<Driver> component;
+  };
+
 class Engine
   {
   public:
