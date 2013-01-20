@@ -63,19 +63,19 @@ class DriverDecorator: public Driver
       {
       }
   protected:
-    const char* namespace_uri() const override
+    const char* namespace_uri() const //override
       {
       return component->namespace_uri();
       }
-    Dictionary fields() const override
+    Dictionary fields() const //override
       {
       return component->fields();
       }
-    int filter(const Dictionary& fields, Implementation& impl) override
+    int filter(const Dictionary& fields, Implementation& impl) //override
       {
       return component->filter(fields, impl);
       }
-    void download(const Implementation& impl, bool requested) override
+    void download(const Implementation& impl, bool requested) //override
       {
       component->download(impl, requested);
       }

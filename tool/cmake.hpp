@@ -62,7 +62,7 @@ class PrefixInjector: public Karrot::DriverDecorator
       {
       }
   private:
-    void download(const Karrot::Implementation& impl, bool requested) override
+    void download(const Karrot::Implementation& impl, bool requested) //override
       {
       DriverDecorator::download(impl, requested);
       listsfile.add_prefix(impl.name);
@@ -79,7 +79,7 @@ class SubdirInjector: public Karrot::DriverDecorator
       {
       }
   private:
-    void download(const Karrot::Implementation& impl, bool requested) override
+    void download(const Karrot::Implementation& impl, bool requested) //override
       {
       DriverDecorator::download(impl, requested);
       listsfile.add_subdir(impl.name);
