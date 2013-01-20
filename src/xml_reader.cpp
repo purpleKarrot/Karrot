@@ -167,7 +167,6 @@ bool XmlReader::start_element()
         }
       }
     }
-  is_empty_element = false;
   return false;
   }
 
