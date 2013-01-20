@@ -57,11 +57,12 @@ class Driver
 
 class DriverDecorator: public Driver
   {
-  public:
+  protected:
     DriverDecorator(std::unique_ptr<Driver>&& component)
         : component(std::move(component))
       {
       }
+    virtual ~DriverDecorator() = default;
   protected:
     const char* namespace_uri() const //override
       {
