@@ -86,7 +86,7 @@ endif()
 
 if(KARROT_USE_SUBVERSION)
   find_package(APR       REQUIRED)
-  find_package(SVN "1.7" REQUIRED COMPONENTS client delta diff fs subr wc)
+  find_package(SVN "1.6" REQUIRED COMPONENTS client delta diff fs subr wc)
   include_directories(
     ${APR_INCLUDE_DIRS}
     ${SVN_INCLUDE_DIRS}

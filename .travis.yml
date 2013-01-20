@@ -16,12 +16,12 @@ env:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq --no-install-recommends docbook-xml docbook-xsl doxygen libarchive-dev libboost-filesystem-dev libboost-program-options-dev re2c valac-0.16 xsltproc
+  - sudo apt-get install -qq --no-install-recommends docbook-xml docbook-xsl doxygen libarchive-dev libboost-filesystem-dev libboost-program-options-dev libsvn-dev re2c valac-0.16 xsltproc
 
 script:
   - mkdir _build
   - cd _build
-  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DKARROT_USE_ARCHIVE=ON -DKARROT_USE_PACKAGEKIT=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DKARROT_USE_ARCHIVE=ON -DKARROT_USE_PACKAGEKIT=ON -DKARROT_USE_SUBVERSION=ON ..
   - cmake --build .
   - ctest -V
   - cmake --build . --target documentation
