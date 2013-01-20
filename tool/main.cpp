@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
 #ifdef USE_ARCHIVE
     engine.add_driver("archive",
-        make_driver<CMake::PrefixInjector>(listsfile,
+        make_driver<CMake::Injector>(listsfile,
             make_driver<Archive>()));
 #endif
 
@@ -107,13 +107,13 @@ int main(int argc, char* argv[])
 
 #ifdef USE_GIT
     engine.add_driver("git",
-        make_driver<CMake::SubdirInjector>(listsfile,
+        make_driver<CMake::Injector>(listsfile,
             make_driver<Git>()));
 #endif
 
 #ifdef USE_SUBVERSION
     engine.add_driver("svn",
-        make_driver<CMake::SubdirInjector>(listsfile,
+        make_driver<CMake::Injector>(listsfile,
             make_driver<Subversion>()));
 #endif
 

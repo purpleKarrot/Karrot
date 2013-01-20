@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <sstream>
+#include <boost/algorithm/string/case_conv.hpp>
 
 namespace CMake
 {
@@ -25,9 +27,20 @@ class Listsfile
       {
       prefixes.push_back(prefix);
       }
-    void add_subdir(const std::string& subdir)
+    void add_subdir(const std::string& name, const Karrot::Dictionary& variant)
       {
-      subdirs.push_back(subdir);
+      subdirs << '\n';
+      for(const auto& var : variant)
+        {
+        subdirs
+          << "set("
+          << boost::to_upper_copy(name + '_' + var.first)
+          << " \""
+          << var.second
+          << "\")\n"
+          ;
+        }
+      subdirs << "add_subdirectory(" << name << ")\n";
       }
     void write() const
       {
@@ -44,20 +57,17 @@ class Listsfile
           }
         out << "  )\n";
         }
-      for (const std::string& subdir : subdirs)
-        {
-        out << "add_subdirectory(" << subdir << ")\n";
-        }
+      out << subdirs.rdbuf();
       }
   private:
     std::vector<std::string> prefixes;
-    std::vector<std::string> subdirs;
+    std::stringstream subdirs;
   };
 
-class PrefixInjector: public Karrot::DriverDecorator
+class Injector: public Karrot::DriverDecorator
   {
   public:
-    PrefixInjector(Listsfile& listsfile, std::unique_ptr<Driver>&& component)
+    Injector(Listsfile& listsfile, std::unique_ptr<Driver>&& component)
         : listsfile(listsfile), Karrot::DriverDecorator(std::move(component))
       {
       }
@@ -65,24 +75,14 @@ class PrefixInjector: public Karrot::DriverDecorator
     void download(const Karrot::Implementation& impl, bool requested) //override
       {
       DriverDecorator::download(impl, requested);
-      listsfile.add_prefix(impl.name);
-      }
-  private:
-    Listsfile& listsfile;
-  };
-
-class SubdirInjector: public Karrot::DriverDecorator
-  {
-  public:
-    SubdirInjector(Listsfile& listsfile, std::unique_ptr<Driver>&& component)
-        : listsfile(listsfile), Karrot::DriverDecorator(std::move(component))
-      {
-      }
-  private:
-    void download(const Karrot::Implementation& impl, bool requested) //override
-      {
-      DriverDecorator::download(impl, requested);
-      listsfile.add_subdir(impl.name);
+      if(impl.component == "SOURCE")
+        {
+        listsfile.add_subdir(impl.name, impl.variant);
+        }
+      else
+        {
+        listsfile.add_prefix(impl.name);
+        }
       }
   private:
     Listsfile& listsfile;
