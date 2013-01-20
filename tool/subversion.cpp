@@ -14,6 +14,7 @@
 #include <cstring>
 #include <iostream>
 
+#define SVN_DEPRECATED
 #include <svn_client.h>
 #include <svn_cmdline.h>
 #include <svn_path.h>
@@ -38,8 +39,8 @@ class SubversionError: public std::exception
   private:
     const char* what() const throw()
       {
-      static char buffer[1024];
-      return svn_err_best_message(svn_error_purge_tracing(error), buffer, 1024);
+      static char buffer[256];
+      return svn_err_best_message(error, buffer, sizeof(buffer));
       }
   private:
     svn_error_t* error;
@@ -47,20 +48,20 @@ class SubversionError: public std::exception
 
 struct InfoBaton
   {
-    InfoBaton(const char* url, svn_revnum_t rev) :
+    InfoBaton(const std::string& url, svn_revnum_t rev) :
         url(url), rev(rev), url_ok(false), rev_ok(false)
       {
       }
-    const char* url;
+    const std::string& url;
     svn_revnum_t rev;
     bool url_ok, rev_ok;
   };
 
 static svn_error_t* info_receiver(void* baton, const char* path,
-    const svn_client_info2_t* info, apr_pool_t *pool)
+    const svn_info_t* info, apr_pool_t *pool)
   {
   InfoBaton* info_baton = (InfoBaton*) baton;
-  info_baton->url_ok = std::strcmp(info_baton->url, info->URL) == 0;
+  info_baton->url_ok = info_baton->url == info->URL;
   info_baton->rev_ok = info_baton->rev == info->rev;
   return 0;
   }
@@ -152,24 +153,20 @@ void Subversion::download(const Implementation& impl, bool requested)
     url += "/tags/" + tag;
     }
 
-  const char* abs_path;
-  svn_dirent_get_absolute(&abs_path, impl.name.c_str(), pool);
-  const char* canonical_url = svn_uri_canonicalize(url.c_str(), pool);
-  const char* canonical_path = svn_dirent_canonicalize(abs_path, pool);
-
+  const std::string& path = impl.name;
   svn_error_t* error = NULL;
 
-  if (!boost::filesystem::exists(abs_path)) // / ".svn"))
+  if (!boost::filesystem::exists(path)) // / ".svn"))
     {
     error = svn_client_checkout3(
         &result_rev,
-        canonical_url,
-        canonical_path,
+        url.c_str(),
+        path.c_str(),
         &peg_revision,
         &revision,
         svn_depth_infinity,
-        TRUE, //ignore_externals
-        FALSE, //allow_unver_obstructions
+        TRUE,  // ignore_externals
+        FALSE, // allow_unver_obstructions
         ctx,
         pool);
     if (error)
@@ -178,17 +175,15 @@ void Subversion::download(const Implementation& impl, bool requested)
       }
     return;
     }
-  InfoBaton info_baton(canonical_url, revision.value.number);
-  error = svn_client_info3(
-      abs_path,
-      NULL,
-      NULL,
-      svn_depth_empty,
-      FALSE,
-      FALSE,
-      NULL,
+  InfoBaton info_baton(url, revision.value.number);
+  error = svn_client_info2(
+      path.c_str(),
+      NULL,  // peg_revision
+      NULL,  // revision
       info_receiver,
       &info_baton,
+      svn_depth_empty,
+      NULL,  // changelists
       ctx,
       pool);
   if (error)
@@ -197,17 +192,16 @@ void Subversion::download(const Implementation& impl, bool requested)
     }
   if (!info_baton.url_ok)
     {
-    error = svn_client_switch3(
+    error = svn_client_switch2(
         &result_rev,
-        canonical_path,
-        canonical_url,
+        path.c_str(),
+        url.c_str(),
         &peg_revision,
         &revision,
         svn_depth_infinity,
         TRUE,  // depth_is_sticky,
         TRUE,  // ignore_externals
         FALSE, // allow_unver_obstructions
-        FALSE, // ignore_ancestry
         ctx,
         pool);
     if (error)
@@ -219,8 +213,8 @@ void Subversion::download(const Implementation& impl, bool requested)
     {
     apr_array_header_t *paths = apr_array_make(pool, 1, sizeof(const char*));
     apr_array_header_t *result_revs;
-    APR_ARRAY_PUSH(paths, const char*) = canonical_path;
-    error = svn_client_update4(
+    APR_ARRAY_PUSH(paths, const char*) = path.c_str();
+    error = svn_client_update3(
         &result_revs,
         paths,
         &revision,
@@ -228,8 +222,6 @@ void Subversion::download(const Implementation& impl, bool requested)
         TRUE,  // depth_is_sticky,
         TRUE,  // ignore_externals
         FALSE, // allow_unver_obstructions
-        TRUE,  // adds_as_modification,
-        FALSE, // make_parents
         ctx,
         pool);
     if (error)
