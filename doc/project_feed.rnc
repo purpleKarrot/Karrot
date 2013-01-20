@@ -6,10 +6,9 @@
 #   http://www.boost.org/LICENSE_1_0.txt
 #=============================================================================
 
-default namespace = "http://ryppl.org/2012/feed"
-namespace ar = "http://ryppl.org/2012/archive"
-namespace pk = "http://ryppl.org/2012/packagekit"
-namespace vc = "http://ryppl.org/2012/versioncontrol"
+default namespace = "http://purplekarrot.net/2013/project"
+namespace ar = "http://purplekarrot.net/2013/archive"
+namespace pk = "http://purplekarrot.net/2013/packagekit"
 
 # TODO: maybe it should be allowed to put html inside the release element (log)?
 # any = element * { mixed { attribute * { text }*, any* } }
@@ -54,8 +53,8 @@ releases =
 
 build = 
   element build {
-    attribute vc:type { "git" | "svn" },
-    attribute vc:href { xsd:anyURI },
+    attribute vcs { "archive" | "git" | "subversion" },
+    attribute href { xsd:anyURI },
     dependency*
   }
 

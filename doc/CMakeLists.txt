@@ -61,14 +61,6 @@ configure_file(catalog.xml.in "${catalog}")
 set(doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
 set(xml_dir  "${CMAKE_CURRENT_BINARY_DIR}/xml")
 
-file(GLOB headers "../include/karrot/*.hpp")
-
-set(input)
-foreach(file IN LISTS headers)
-  get_filename_component(file "${file}" ABSOLUTE)
-  set(input "${input} \\\n \"${file}\"")
-endforeach()
-
 file(WRITE "${doxyfile}"
   "QUIET = YES\n"
   "WARN_IF_UNDOCUMENTED = NO\n"
@@ -76,12 +68,17 @@ file(WRITE "${doxyfile}"
   "GENERATE_HTML = NO\n"
   "GENERATE_XML = YES\n"
   "XML_OUTPUT = \"${xml_dir}\"\n"
-  "INPUT = ${input}\n"
+  "INPUT = \"${Karrot_SOURCE_DIR}/include/karrot.hpp\"\n"
   )
 
-add_custom_command(OUTPUT "${xml_dir}/index.xml"
-  COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-  DEPENDS ${headers}
+add_custom_command(
+  OUTPUT
+    "${xml_dir}/index.xml"
+    "${xml_dir}/combine.xslt"
+  COMMAND
+    ${DOXYGEN_EXECUTABLE} ${doxyfile}
+  DEPENDS
+    "${Karrot_SOURCE_DIR}/include/karrot.hpp"
   )
 
 # Collect Doxygen XML into a single XML file
@@ -108,14 +105,18 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/main.qbk"
     "${CMAKE_CURRENT_SOURCE_DIR}/main.qbk"
   )
 
-add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/karrot.xml"
-  COMMAND ${Quickbook_EXECUTABLE}
-          --input-file   "${CMAKE_CURRENT_BINARY_DIR}/main.qbk"
-          --include-path "${CMAKE_CURRENT_BINARY_DIR}"
-          --include-path "${CMAKE_CURRENT_SOURCE_DIR}"
-          --output-file  "${CMAKE_CURRENT_BINARY_DIR}/karrot.xml"
-  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.qbk"
-          "${CMAKE_CURRENT_BINARY_DIR}/reference.xml"
+add_custom_command(
+  OUTPUT
+    "${CMAKE_CURRENT_BINARY_DIR}/karrot.xml"
+  COMMAND
+    ${Quickbook_EXECUTABLE}
+    --input-file   "${CMAKE_CURRENT_BINARY_DIR}/main.qbk"
+    --include-path "${CMAKE_CURRENT_BINARY_DIR}"
+    --include-path "${CMAKE_CURRENT_SOURCE_DIR}"
+    --output-file  "${CMAKE_CURRENT_BINARY_DIR}/karrot.xml"
+  DEPENDS
+    "${CMAKE_CURRENT_BINARY_DIR}/main.qbk"
+    "${CMAKE_CURRENT_BINARY_DIR}/reference.xml"
   )
 
 xsltproc(
