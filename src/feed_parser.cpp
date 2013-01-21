@@ -45,8 +45,8 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     printf("not a karrot feed\n");
     return false;
     }
-  name = to_quark(xml.attribute("name", project_ns));
-  if (!name)
+  name = xml.attribute("name", project_ns);
+  if (name.empty())
     {
     printf("name missing!\n");
     return false;
@@ -285,7 +285,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
         }
       else
         {
-        std::cout << name << " is invalid!" << std::endl;
+        std::cout << this->name << " is invalid!" << std::endl;
         }
       xml.skip();
       }
@@ -298,22 +298,22 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
 
 void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
   {
-  int attr;
-  if ((attr = to_quark(xml.attribute("component", project_ns))))
+  std::string attr;
+  if (!(attr = xml.attribute("component", project_ns)).empty())
     {
-    group.impl.component = attr;
+    group.impl.component = std::move(attr);
     }
-  if ((attr = to_quark(xml.attribute("version", project_ns))))
+  if (!(attr = xml.attribute("version", project_ns)).empty())
     {
-    group.impl.version = attr;
+    group.impl.version = std::move(attr);
     }
-  if ((attr = to_quark(xml.attribute("variant", project_ns))))
+  if (!(attr = xml.attribute("variant", project_ns)).empty())
     {
-    group.impl.variant = parse_variant(quark_to_string(attr));
+    group.impl.variant = parse_variant(attr);
     }
-  if ((attr = to_quark(xml.attribute("type", project_ns))))
+  if (!(attr = xml.attribute("type", project_ns)).empty())
     {
-    group.driver = this->ph.get(quark_to_string(attr));
+    group.driver = this->ph.get(attr);
     if (group.driver)
       {
       group.fields = group.driver->fields();
@@ -324,9 +324,9 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     const char* namespace_uri = group.driver->namespace_uri();
     for (auto& entry : group.fields)
       {
-      if ((attr = to_quark(xml.attribute(entry.first, namespace_uri))))
+      if (!(attr = xml.attribute(entry.first, namespace_uri)).empty())
         {
-        entry.second = attr;
+        entry.second = std::move(attr);
         }
       }
     }
