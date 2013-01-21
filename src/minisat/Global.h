@@ -94,7 +94,7 @@ static inline int irand(double& seed, int size) {
 
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#ifdef _MSC_VER
+#ifdef _WIN32
 
 #include <ctime>
 
