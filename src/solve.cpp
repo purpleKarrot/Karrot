@@ -159,7 +159,7 @@ static void source_conflict_clauses(const Database& database, Solver& solver)
     }
   }
 
-std::vector<int> solve(const Database& database, const Requests& requests)
+bool solve(const Database& database, const Requests& requests, std::vector<int>& model)
   {
   Hash hash;
   if (hash.rehash_needed(database.size()))
@@ -216,18 +216,16 @@ std::vector<int> solve(const Database& database, const Requests& requests)
 
   if (!solver.solve(request))
     {
-    throw std::runtime_error("UNSAT!");
+    return false;
     }
-
-  std::vector<int> result;
   for (int i = 0; i < solver.nVars(); ++i)
     {
     if (solver.model[i] == l_True)
       {
-      result.push_back(i);
+      model.push_back(i);
       }
     }
-  return result;
+  return true;
   }
 
 } // namespace Karrot

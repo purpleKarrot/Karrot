@@ -92,13 +92,10 @@ class Engine
   public:
     void add_driver(std::string&& name, std::unique_ptr<Driver>&& driver);
     void add_request(const char* url, bool source);
-    void run();
-  private:
-    Engine(const Engine&);
-    void operator=(const Engine&);
+    bool run();
   private:
     class Private;
-    Private* self;
+    std::unique_ptr<Private> self;
   };
 
 } // namespace Karrot

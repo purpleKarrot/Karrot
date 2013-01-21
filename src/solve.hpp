@@ -34,7 +34,7 @@ inline bool satisfies(const DatabaseEntry& entry, const Spec& spec)
 
 typedef std::vector<Spec> Requests;
 
-std::vector<int> solve(const Database& database, const Requests& requests);
+bool solve(const Database& database, const Requests& requests, std::vector<int>& model);
 
 } // namespace Karrot
 

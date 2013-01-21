@@ -39,7 +39,6 @@ Engine::Engine() :
 
 Engine::~Engine()
   {
-  delete self;
   }
 
 void Engine::add_driver(std::string&& name, std::unique_ptr<Driver>&& driver)
@@ -59,7 +58,7 @@ void Engine::add_request(const char* url_string, bool source)
   self->requests.push_back(std::move(spec));
   }
 
-void Engine::run()
+bool Engine::run()
   {
   const Url* purl;
   while ((purl = self->feed_queue.get_next()))
@@ -76,7 +75,12 @@ void Engine::run()
       std::cerr << "not a valid project feed" << std::endl;
       }
     }
-  for (int i : solve(self->database, self->requests))
+  std::vector<int> model;
+  if (!solve(self->database, self->requests, model))
+    {
+    return false;
+    }
+  for (int i : model)
     {
     const DatabaseEntry& entry = self->database[i];
     if (entry.driver)
@@ -89,6 +93,7 @@ void Engine::run()
       entry.driver->download(entry.impl, requested);
       }
     }
+  return true;
   }
 
 } // namespace Karrot
