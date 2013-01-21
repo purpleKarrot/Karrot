@@ -73,7 +73,7 @@ void Engine::run()
     FeedParser parser(self->feed_queue, self->database, self->package_handler);
     if (!parser.parse(url, xml))
       {
-      std::cerr << "not a valid ryppl feed" << std::endl;
+      std::cerr << "not a valid project feed" << std::endl;
       }
     }
   for (int i : solve(self->database, self->requests))

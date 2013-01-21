@@ -47,7 +47,7 @@ Archive::Archive()
 
 const char* Archive::namespace_uri() const
   {
-  return "http://ryppl.org/2012/archive";
+  return "http://purplekarrot.net/2013/archive";
   }
 
 Dictionary Archive::fields() const

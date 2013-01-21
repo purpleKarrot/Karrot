@@ -65,7 +65,7 @@ void PackageKit::install_queued()
 
 const char* PKDriver::namespace_uri() const
   {
-  return "http://ryppl.org/2012/packagekit";
+  return "http://purplekarrot.net/2013/packagekit";
   }
 
 Dictionary PKDriver::fields() const
