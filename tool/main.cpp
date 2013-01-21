@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef USE_SUBVERSION
-    engine.add_driver("svn",
+    engine.add_driver("subversion",
         make_driver<CMake::Injector>(listsfile,
             make_driver<Subversion>()));
 #endif
@@ -121,7 +121,11 @@ int main(int argc, char* argv[])
       {
       engine.add_request(url.c_str(), true);
       }
-    engine.run();
+    if (!engine.run())
+      {
+      std::cout << "The request is not satisfiable!" << std::endl;
+      return -1;
+      }
 
 #ifdef USE_PACKAGEKIT
     package_kit.install_queued();
