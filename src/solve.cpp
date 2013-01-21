@@ -11,7 +11,6 @@
 #include "query.hpp"
 #include "minisat/Solver.h"
 #include "url.hpp"
-#include "quark.hpp"
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>

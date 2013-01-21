@@ -8,7 +8,6 @@
 
 #include <karrot.hpp>
 #include "database.hpp"
-#include "quark.hpp"
 #include <cstring>
 #include <algorithm>
 
@@ -53,7 +52,7 @@ void Engine::add_request(const char* url_string, bool source)
   Spec spec(url);
   if (source)
     {
-    spec.component = string_to_quark("SOURCE");
+    spec.component = "SOURCE";
     }
   self->requests.push_back(std::move(spec));
   }

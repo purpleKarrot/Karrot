@@ -56,7 +56,7 @@ class FeedParser
     void parse_package_fields(XmlReader& xml, Package& group);
   private:
     std::string name;
-    std::vector<std::string> variants;
+    Dictionary variants;
     std::vector<Release> releases;
     std::vector<Dependencies> components;
     Url url;

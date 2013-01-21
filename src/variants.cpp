@@ -7,12 +7,8 @@
  */
 
 #include "variants.hpp"
-#include "quark.hpp"
-#include <cstring>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 namespace Karrot
 {
@@ -48,45 +44,32 @@ next:
   return builder;
   }
 
-static void r_variants_recurse(const std::string *dict, std::size_t size,
-    Dictionary* builder, const std::function<void(Dictionary)>& func)
+static void r_variants_recurse(
+    const Dictionary::const_iterator& cur,
+    const Dictionary::const_iterator& end,
+    const Dictionary& dict,
+    const std::function<void(Dictionary)>& func)
   {
-  const char *c, *v;
-  for (c = v = dict[1].c_str();; ++c)
+  assert(cur != end);
+  std::vector < std::string > values;
+  split(values, cur->second, boost::is_any_of(";"), boost::token_compress_on);
+  for (const std::string& val : values)
     {
-    int ee = (*c == '\0');
-    int ff = (*c == ';');
-    if (ee || ff)
+    Dictionary copy(dict);
+    copy.insert(std::make_pair(cur->first, val));
+    if (std::next(cur) == end)
       {
-      int qq = string_to_quark(v, c - v);
-      if (!qq)
-        {
-        Dictionary bb(*builder);
-        bb[dict[0]] = qq;
-        if (size > 2)
-          {
-          const std::string* dict2 = dict + 2;
-          size_t size2 = size - 2;
-          r_variants_recurse(dict2, size2, &bb, func);
-          }
-        else
-          {
-          func(bb);
-          }
-        }
+      func(copy);
       }
-    if (ee)
+    else
       {
-      break;
-      }
-    if (ff)
-      {
-      v = c + 1;
+      r_variants_recurse(std::next(cur), end, copy, func);
       }
     }
   }
 
-void foreach_variant(const std::vector<std::string>& variants,
+void foreach_variant(
+    const Dictionary& variants,
     const std::function<void(Dictionary)>& func)
   {
   if (variants.empty())
@@ -95,8 +78,7 @@ void foreach_variant(const std::vector<std::string>& variants,
     }
   else
     {
-    Dictionary builder;
-    r_variants_recurse(&variants[0], variants.size(), &builder, func);
+    r_variants_recurse(variants.begin(), variants.end(), Dictionary(), func);
     }
   }
 

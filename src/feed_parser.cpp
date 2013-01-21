@@ -110,8 +110,9 @@ void FeedParser::parse_variants(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    variants.push_back(xml.attribute("name", project_ns));
-    variants.push_back(xml.attribute("values", project_ns));
+    std::string name = xml.attribute("name", project_ns);
+    std::string values = xml.attribute("values", project_ns);
+    variants.insert(std::make_pair(std::move(name), std::move(values)));
     xml.skip();
     }
   }
