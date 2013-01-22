@@ -105,17 +105,17 @@ XmlToken XmlReader::token() const
   return token_;
   }
 
-const std::string& XmlReader::name() const
+std::string XmlReader::name() const
   {
   return current_name.local;
   }
 
-const std::string& XmlReader::namespace_uri() const
+std::string XmlReader::namespace_uri() const
   {
   return *current_name.namespace_uri;
   }
 
-const std::string& XmlReader::attribute(
+std::string XmlReader::attribute(
     const std::string& name,
     const std::string& namespace_uri) const
   {

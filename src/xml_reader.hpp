@@ -34,9 +34,9 @@ class XmlReader: boost::noncopyable
     XmlReader(const boost::filesystem::path& filepath);
     bool read();
     XmlToken token() const;
-    const std::string& name() const;
-    const std::string& namespace_uri() const;
-    const std::string& attribute(
+    std::string name() const;
+    std::string namespace_uri() const;
+    std::string attribute(
       const std::string& name,
       const std::string& namespace_uri) const;
     void skip();
