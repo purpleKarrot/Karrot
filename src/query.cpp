@@ -258,7 +258,7 @@ static int vercmp(const char *s1, const char *s2)
 
 bool Query::evaluate(const std::string& version, const Dictionary& variants) const
   {
-  if (!queryspace.empty())
+  if (queryspace.empty())
     {
     return true;
     }
