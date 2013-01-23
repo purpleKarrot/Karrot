@@ -18,7 +18,7 @@ namespace Karrot
 class Query
   {
   public:
-    Query() = default;
+    Query() {} // = default;
     Query(const std::string& string);
     bool evaluate(const std::string& version, const Dictionary& variants) const;
   private:

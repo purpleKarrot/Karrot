@@ -19,7 +19,7 @@ class Url;
 class Spec
   {
   public:
-    Spec() = default;
+    Spec() {} // = default;
     Spec(
         const std::string& id,
         const std::string& component,

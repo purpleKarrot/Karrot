@@ -152,6 +152,10 @@ class vec {
     void     init(int size, const T& pad);
     void     grow(int min_cap);
 
+    // Don't allow copying (error prone):
+    vec<T>&  operator = (vec<T>& other); // = delete;
+             vec        (vec<T>& other); // = delete;
+
 public:
     // Types:
     typedef int Key;
@@ -187,10 +191,6 @@ public:
     // Vector interface:
     const T& operator [] (int index) const  { return data[index]; }
     T&       operator [] (int index)        { return data[index]; }
-
-    // Don't allow copying (error prone):
-    vec<T>&  operator = (vec<T>& other) = delete;
-             vec        (vec<T>& other) = delete;
 
     // Duplicatation (preferred instead):
     void copyTo(vec<T>& copy) const { copy.clear(); copy.growTo(sz); for (int i = 0; i < sz; i++) new (&copy[i]) T(data[i]); }
