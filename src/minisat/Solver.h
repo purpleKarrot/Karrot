@@ -20,6 +20,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef Solver_h
 #define Solver_h
 
+#include <vector>
 #include "SolverTypes.h"
 #include "VarOrder.h"
 
@@ -108,7 +109,7 @@ protected:
     void     varBumpActivity(Lit p) {
         if (var_decay < 0) return;     // (negative decay means static variable order -- don't bump)
         if ( (activity[var(p)] += var_inc) > 1e100 ) varRescaleActivity();
-        order.update(var(p)); }
+        /*order.update(var(p));*/ }
     void     varDecayActivity  () { if (var_decay >= 0) var_inc *= var_decay; }
     void     varRescaleActivity();
     void     claDecayActivity  () { cla_inc *= cla_decay; }
@@ -125,13 +126,14 @@ protected:
     int      decisionLevel() const { return trail_lim.size(); }
 
 public:
-    Solver() : ok               (true)
+    Solver(std::vector<Var>&& preferences)
+             : ok               (true)
              , n_bin_clauses    (0)
              , cla_inc          (1)
              , cla_decay        (1)
              , var_inc          (1)
              , var_decay        (1)
-             , order            (assigns, activity)
+             , order            (assigns, std::move(preferences))
              , qhead            (0)
              , simpDB_assigns   (0)
              , simpDB_props     (0)

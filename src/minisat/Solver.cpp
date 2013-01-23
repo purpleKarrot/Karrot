@@ -191,7 +191,6 @@ Var Solver::newVar() {
     assigns     .push(toInt(l_Undef));
     level       .push(-1);
     activity    .push(0);
-    order       .newVar();
     analyze_seen.push(0);
     return index; }
 
@@ -660,7 +659,7 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
 
             // New variable decision:
             stats.decisions++;
-            Var next = order.select(params.random_var_freq);
+            Var next = order.select();
 
             if (next == var_Undef){
                 // Model found:

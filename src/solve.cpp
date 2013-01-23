@@ -9,6 +9,7 @@
 #include "solve.hpp"
 #include "hash.hpp"
 #include "query.hpp"
+#include "vercmp.hpp"
 #include "minisat/Solver.h"
 #include "url.hpp"
 #include <algorithm>
@@ -51,6 +52,46 @@ static void print(const Database& database, const vec<Lit>& lits)
     // TODO:
     //std::cout << index << ": " << entries[index].id << std::endl;
     }
+  }
+
+// 1. prefer binary packages
+// 2. prefer fewer dependencies
+// 3. prefer older releases
+static std::vector<Var> make_preferences(const Database& database)
+  {
+  Var i = 0;
+  std::vector<Var> preferences(database.size());
+  std::generate(std::begin(preferences), std::end(preferences),
+    [&i]() -> Var
+    {
+    return i++;
+    });
+  std::sort(std::begin(preferences), std::end(preferences),
+    [database](Var var1, Var var2) -> bool
+    {
+    const DatabaseEntry& entry1 = database[var1];
+    const DatabaseEntry& entry2 = database[var2];
+    const Implementation& impl1 = entry1.impl;
+    const Implementation& impl2 = entry2.impl;
+    if (impl1.component != "SOURCE" && impl2.component == "SOURCE")
+      {
+      return true;
+      }
+    if (impl1.component == "SOURCE" && impl2.component != "SOURCE")
+      {
+      return false;
+      }
+    if (entry1.depends.size() < entry2.depends.size())
+      {
+      return true;
+      }
+    if (entry1.depends.size() > entry2.depends.size())
+      {
+      return false;
+      }
+    return vercmp(impl1.version.c_str(), impl2.version.c_str()) < 0;
+    });
+  return std::move(preferences);
   }
 
 static void dependency_clauses(
@@ -202,7 +243,7 @@ bool solve(const Database& database, const Requests& requests, std::vector<int>&
   std::cout << "Request:" << std::endl;
   print(database, request);
 
-  Solver solver;
+  Solver solver(make_preferences(database));
   for (std::size_t i = 0; i < database.size(); ++i)
     {
     solver.newVar();
