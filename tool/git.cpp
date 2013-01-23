@@ -21,6 +21,21 @@
 namespace
 {
 
+struct git_failure: std::runtime_error
+  {
+  git_failure() : std::runtime_error(giterr_last()->message)
+    {
+    }
+  };
+
+static inline void check_git_failure(int error)
+  {
+  if (error)
+    {
+    throw git_failure();
+    }
+  }
+
 template<typename T>
 struct at_scope_exit
   {
@@ -111,6 +126,7 @@ void Git::download(const Implementation& impl, bool requested)
 
   git_checkout_opts checkout_opts;
   memset(&checkout_opts, 0, sizeof(checkout_opts));
+  checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
   checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
   checkout_opts.progress_cb = checkout_progress;
   checkout_opts.progress_payload = &pd;
@@ -125,10 +141,7 @@ void Git::download(const Implementation& impl, bool requested)
 
   if (git_repository_open(&repo, path) == 0)
     {
-    if (git_remote_load(&origin, repo, "origin") != 0)
-      {
-      throw std::runtime_error(giterr_last()->message);
-      }
+    check_git_failure(git_remote_load(&origin, repo, "origin"));
     if (std::strcmp(git_remote_url(origin), href) != 0)
       {
       throw std::runtime_error("different origin");
@@ -136,41 +149,17 @@ void Git::download(const Implementation& impl, bool requested)
     }
   else
     {
-    if (git_repository_init(&repo, path, false) != 0)
-      {
-      throw std::runtime_error(giterr_last()->message);
-      }
-    if (git_remote_create(&origin, repo, "origin", href) != 0)
-      {
-      throw std::runtime_error(giterr_last()->message);
-      }
+    check_git_failure(git_repository_init(&repo, path, false));
+    check_git_failure(git_remote_create(&origin, repo, "origin", href));
     }
   git_remote_set_update_fetchhead(origin, 0);
   git_remote_set_cred_acquire_cb(origin, cred_acquire, 0);
-  if (git_remote_connect(origin, GIT_DIRECTION_FETCH) == 0)
-    {
-    at_scope_exit<git_remote> remote_disconnect(origin, git_remote_disconnect);
-    if (git_remote_download(origin, fetch_progress, &pd) != 0)
-      {
-      throw std::runtime_error(giterr_last()->message);
-      }
-    }
-  else
-    {
-    throw std::runtime_error(giterr_last()->message);
-    }
-  if (git_remote_update_tips(origin) != 0)
-    {
-    throw std::runtime_error(giterr_last()->message);
-    }
-  if (git_revparse_single(&object, repo, hash) != 0)
-    {
-    throw std::runtime_error(giterr_last()->message);
-    }
-  if (git_checkout_tree(repo, object, &checkout_opts) != 0)
-    {
-    throw std::runtime_error(giterr_last()->message);
-    }
+  check_git_failure(git_remote_connect(origin, GIT_DIRECTION_FETCH));
+  at_scope_exit<git_remote> remote_disconnect(origin, git_remote_disconnect);
+  check_git_failure(git_remote_download(origin, fetch_progress, &pd));
+  check_git_failure(git_remote_update_tips(origin));
+  check_git_failure(git_revparse_single(&object, repo, hash));
+  check_git_failure(git_checkout_tree(repo, object, &checkout_opts));
   }
 
 } // namepsace karrot
