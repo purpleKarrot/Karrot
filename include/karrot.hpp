@@ -13,6 +13,22 @@
 #include <string>
 #include <memory>
 
+#if defined(_WIN32)
+#  define KARROT_IMPORT __declspec(dllimport)
+#  define KARROT_EXPORT __declspec(dllexport)
+#else
+#  define KARROT_IMPORT __attribute__ ((visibility("default")))
+#  define KARROT_EXPORT __attribute__ ((visibility("default")))
+#endif
+
+#if defined(KARROT_STATIC)
+#  define KARROT_API
+#elif defined(KARROT_BUILD)
+#  define KARROT_API KARROT_EXPORT
+#else
+#  define KARROT_API KARROT_IMPORT
+#endif
+
 namespace Karrot
 {
 
@@ -28,7 +44,7 @@ class Implementation
     Dictionary values;
   };
 
-class Driver
+class KARROT_API Driver
   {
   public:
     virtual ~Driver();
@@ -55,7 +71,11 @@ class Driver
     static const int SYS_AVAILABLE = 3;
   };
 
-class DriverDecorator: public Driver
+#if defined _MSC_VER
+template class __declspec(dllexport) std::unique_ptr<Driver>;
+#endif
+
+class KARROT_API DriverDecorator: public Driver
   {
   protected:
     DriverDecorator(std::unique_ptr<Driver>&& component)
@@ -84,7 +104,7 @@ class DriverDecorator: public Driver
     std::unique_ptr<Driver> component;
   };
 
-class Engine
+class KARROT_API Engine
   {
   public:
     Engine();
@@ -95,7 +115,7 @@ class Engine
     bool run();
   private:
     class Private;
-    std::unique_ptr<Private> self;
+    Private* self;
   };
 
 } // namespace Karrot

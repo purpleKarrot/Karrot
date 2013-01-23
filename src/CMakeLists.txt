@@ -8,8 +8,7 @@
 
 find_package(RE2C REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-add_definitions(-DKARROT_SOURCE)
+set(CMAKE_DEBUG_POSTFIX "_d")
 
 re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
@@ -21,7 +20,7 @@ re2c_target(
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
 
-add_library(karrot STATIC
+add_library(karrot
   minisat/Global.h
   minisat/Heap.h
   minisat/Solver.cpp
@@ -55,6 +54,16 @@ add_library(karrot STATIC
   xml_reader.cpp
   xml_reader.hpp
   )
+
+set_property(TARGET karrot APPEND PROPERTY
+  COMPILE_DEFINITIONS "KARROT_BUILD=1"
+  )
+
+if(NOT BUILD_SHARED_LIBS)
+  set_property(TARGET karrot APPEND PROPERTY
+    COMPILE_DEFINITIONS "KARROT_STATIC=1"
+    )
+endif()
 
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 

@@ -38,6 +38,7 @@ Engine::Engine() :
 
 Engine::~Engine()
   {
+  delete self;
   }
 
 void Engine::add_driver(std::string&& name, std::unique_ptr<Driver>&& driver)
