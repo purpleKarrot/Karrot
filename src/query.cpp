@@ -21,14 +21,8 @@ static const int OR            = -10;
 
 #include "query_re2c.hpp"
 #include "quark.hpp"
+#include "vercmp.hpp"
 #include "variants.hpp"
-
-#include <string>
-#include <vector>
-#include <cctype>
-#include <cstring>
-#include <sstream>
-#include <stdexcept>
 #include <iostream>
 
 namespace Karrot
@@ -177,84 +171,6 @@ Query::Query(const std::string& string)
     }
   }
 
-static int vercmp(const char *s1, const char *s2)
-  {
-  int r = 0;
-  const char *e1, *e2;
-  while (*s1 && *s2)
-    {
-    while (*s1 && !std::isalnum(*s1))
-      {
-      s1++;
-      }
-    while (*s2 && !isalnum(*s2))
-      {
-      s2++;
-      }
-    if (isdigit(*s1) || isdigit(*s2))
-      {
-      while (*s1 == '0' && isdigit(s1[1]))
-        {
-        s1++;
-        }
-      while (*s2 == '0' && isdigit(s2[1]))
-        {
-        s2++;
-        }
-      e1 = s1;
-      e2 = s2;
-      while (isdigit(*e1))
-        {
-        e1++;
-        }
-      while (isdigit(*e2))
-        {
-        e2++;
-        }
-      r = (e1 - s1) - (e2 - s2);
-      if (r == 0)
-        {
-        r = strncmp(s1, s2, e1 - s1);
-        }
-      if (r != 0)
-        {
-        return r > 0 ? 1 : -1;
-        }
-      }
-    else
-      {
-      e1 = s1;
-      e2 = s2;
-      while (isalpha(*e1))
-        {
-        e1++;
-        }
-      while (isalpha(*e2))
-        {
-        e2++;
-        }
-      r = (e1 - s1) - (e2 - s2);
-      if (r > 0)
-        {
-        r = strncmp(s1, s2, e2 - s2);
-        return r >= 0 ? 1 : -1;
-        }
-      if (r < 0)
-        {
-        r = strncmp(s1, s2, e1 - s1);
-        return r <= 0 ? -1 : 1;
-        }
-      r = strncmp(s1, s2, e1 - s1);
-      if (r)
-        {
-        return r > 0 ? 1 : -1;
-        }
-      }
-    s1 = e1;
-    s2 = e2;
-    }
-  return s1 ? 1 : s2 ? -1 : 0;
-  }
 
 bool Query::evaluate(const std::string& version, const Dictionary& variants) const
   {
