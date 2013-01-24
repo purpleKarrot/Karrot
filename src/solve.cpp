@@ -44,16 +44,6 @@ static void query(
     }
   }
 
-static void print(const Database& database, const vec<Lit>& lits)
-  {
-  for (int i = 0; i < lits.size(); ++i)
-    {
-    int index = var(lits[i]);
-    // TODO:
-    //std::cout << index << ": " << entries[index].id << std::endl;
-    }
-  }
-
 // 1. prefer binary packages
 // 2. prefer fewer dependencies
 // 3. prefer older releases
@@ -108,9 +98,6 @@ static void dependency_clauses(
       query(hash, database, spec, clause);
       if (clause.size() == 1)
         {
-        // TODO:
-        //std::cout << "unsatisfied dependency: \n" << dependency << std::endl;
-        //std::cout << "required by: " << entries[i].name << std::endl;
         solver.addUnit(clause[0]);
         }
       else
@@ -216,6 +203,12 @@ bool solve(const Database& database, const Requests& requests, std::vector<int>&
       }
     }
 
+  Solver solver(make_preferences(database));
+  for (std::size_t i = 0; i < database.size(); ++i)
+    {
+    solver.newVar();
+    }
+
   vec<Lit> request;
   for (const Spec& spec : requests)
     {
@@ -223,8 +216,8 @@ bool solve(const Database& database, const Requests& requests, std::vector<int>&
     query(hash, database, spec, choices);
     if (choices.size() == 0)
       {
-      // TODO: add spec
-      throw std::runtime_error(std::string("impossible request"));
+      std::clog << "no implementation satisfies the request" << std::endl;
+      return false;
       }
     if (choices.size() == 1)
       {
@@ -232,21 +225,13 @@ bool solve(const Database& database, const Requests& requests, std::vector<int>&
       }
     else
       {
-      std::cout << "multiple choices:" << std::endl;
-      print(database, choices);
-      int selection = 0;
-      std::cout << "Select: " << std::flush;
-      std::cin >> selection;
-      request.push(Lit(selection));
+      solver.addClause(choices);
       }
     }
-  std::cout << "Request:" << std::endl;
-  print(database, request);
-
-  Solver solver(make_preferences(database));
-  for (std::size_t i = 0; i < database.size(); ++i)
+  if (request.size() == 0)
     {
-    solver.newVar();
+    std::clog << "request is not specific enough" << std::endl;
+    return false;
     }
 
   dependency_clauses(hash, database, solver);
@@ -256,6 +241,7 @@ bool solve(const Database& database, const Requests& requests, std::vector<int>&
 
   if (!solver.solve(request))
     {
+    std::clog << "no solution exists, because of conflicts" << std::endl;
     return false;
     }
   for (int i = 0; i < solver.nVars(); ++i)
