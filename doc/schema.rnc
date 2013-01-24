@@ -1,17 +1,14 @@
-#=============================================================================
-# Copyright (C) 2012 Daniel Pfeifer <daniel@pfeifer-mail.de>
+#============================================================================
+# Copyright (C) 2010-2013 Daniel Pfeifer <daniel@pfeifer-mail.de>
 #
 # Distributed under the Boost Software License, Version 1.0.
 # See accompanying file LICENSE_1_0.txt or copy at
 #   http://www.boost.org/LICENSE_1_0.txt
-#=============================================================================
+#============================================================================
 
 default namespace = "http://purplekarrot.net/2013/project"
 namespace ar = "http://purplekarrot.net/2013/archive"
 namespace pk = "http://purplekarrot.net/2013/packagekit"
-
-# TODO: maybe it should be allowed to put html inside the release element (log)?
-# any = element * { mixed { attribute * { text }*, any* } }
 
 start =
   element project {
@@ -27,7 +24,7 @@ start =
 
 meta =
   element meta {
-    element name { xsd:string },
+    element title { xsd:string },
     element summary { xsd:string },
     element description { xsd:token },
     element homepage { xsd:string }
@@ -46,12 +43,25 @@ releases =
     element release {
       attribute version { xsd:string },
       attribute tag { xsd:string }?,
-      attribute date { xsd:date }?,
-      xsd:string?
+      patch*,
+      changelog?
     }+
   }
 
-build = 
+patch =
+  element patch {
+    attribute href { xsd:anyURI }
+  }
+
+changelog =
+  element changelog {
+    attribute maintainer { xsd:string },
+    attribute email { xsd:string { pattern='[^@]+@[^\.]+\..+' } },
+    attribute date { xsd:dateTime },
+    element item { xsd:token }*
+  }
+
+build =
   element build {
     attribute vcs { "archive" | "git" | "subversion" },
     attribute href { xsd:anyURI },
