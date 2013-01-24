@@ -22,11 +22,9 @@ re2c_target(
 
 add_library(karrot
   minisat/Global.h
-  minisat/Heap.h
   minisat/Solver.cpp
   minisat/Solver.h
   minisat/SolverTypes.h
-  minisat/Sort.h
   minisat/VarOrder.h
   dependencies.hpp
   driver.cpp

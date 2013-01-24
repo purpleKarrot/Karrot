@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 **************************************************************************************************/
 
 #include "Solver.h"
-#include "Sort.h"
 #include <cmath>
 
 
@@ -264,7 +263,7 @@ void Solver::analyze(Clause* _confl, vec<Lit>& out_learnt, int& out_btlevel)
                     pathC++;
                 else{
                     out_learnt.push(q);
-                    out_btlevel = max(out_btlevel, level[var(q)]);
+                    out_btlevel = std::max(out_btlevel, level[var(q)]);
                 }
             }
         }
@@ -634,7 +633,7 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
                 analyzeFinal(confl);
                 return l_False; }
             analyze(confl, learnt_clause, backtrack_level);
-            cancelUntil(max(backtrack_level, root_level));
+            cancelUntil(std::max(backtrack_level, root_level));
             newClause(learnt_clause, true);
             if (learnt_clause.size() == 1) level[var(learnt_clause[0])] = 0;    // (this is ugly (but needed for 'analyzeFinal()') -- in future versions, we will backtrack past the 'root_level' and redo the assumptions)
             varDecayActivity();

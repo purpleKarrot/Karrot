@@ -20,6 +20,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef Global_h
 #define Global_h
 
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -51,10 +52,6 @@ typedef unsigned char uchar;
 typedef const char    cchar;
 
 
-template<class T> static inline T min(T x, T y) { return (x < y) ? x : y; }
-template<class T> static inline T max(T x, T y) { return (x > y) ? x : y; }
-
-
 //=================================================================================================
 // 'malloc()'-style memory allocation -- never returns NULL; aborts instead:
 
@@ -71,22 +68,6 @@ template<class T> static inline T* xrealloc(T* ptr, size_t size) {
 
 template<class T> static inline void xfree(T *ptr) {
     if (ptr != NULL) free((void*)ptr); }
-
-
-//=================================================================================================
-// Random numbers:
-
-
-// Returns a random float 0 <= x < 1. Seed must never be 0.
-static inline double drand(double& seed) {
-    seed *= 1389796;
-    int q = (int)(seed / 2147483647);
-    seed -= (double)q * 2147483647;
-    return seed / 2147483647; }
-
-// Returns a random integer 0 <= x < size. Seed must never be 0.
-static inline int irand(double& seed, int size) {
-    return (int)(drand(seed) * size); }
 
 
 //=================================================================================================
@@ -165,11 +146,9 @@ public:
     vec(void)                   : data(NULL) , sz(0)   , cap(0)    { }
     vec(int size)               : data(NULL) , sz(0)   , cap(0)    { growTo(size); }
     vec(int size, const T& pad) : data(NULL) , sz(0)   , cap(0)    { growTo(size, pad); }
-    vec(T* array, int size)     : data(array), sz(size), cap(size) { }      // (takes ownership of array -- will be deallocated with 'xfree()')
    ~vec(void)                                                      { clear(true); }
 
     // Ownership of underlying array:
-    T*       release  (void)           { T* ret = data; data = NULL; sz = 0; cap = 0; return ret; }
     operator T*       (void)           { return data; }     // (unsafe but convenient)
     operator const T* (void) const     { return data; }
 
@@ -194,7 +173,6 @@ public:
 
     // Duplicatation (preferred instead):
     void copyTo(vec<T>& copy) const { copy.clear(); copy.growTo(sz); for (int i = 0; i < sz; i++) new (&copy[i]) T(data[i]); }
-    void moveTo(vec<T>& dest) { dest.clear(true); dest.data = data; dest.sz = sz; dest.cap = cap; data = NULL; sz = 0; cap = 0; }
 };
 
 template<class T>
@@ -225,6 +203,18 @@ void vec<T>::clear(bool dealloc) {
         sz = 0;
         if (dealloc) xfree(data), data = NULL, cap = 0; } }
 
+template<class T, class LessThan>
+void sort(vec<T>& v, LessThan lt) {
+    T* begin = v;
+    T* end = begin + v.size();
+    std::sort(begin, end, lt); }
+
+template<class T>
+void sortUnique(vec<T>& v) {
+    T* begin = v;
+    T* end = begin + v.size();
+    std::sort(begin, end);
+    v.shrink(end - std::unique(begin, end)); }
 
 //=================================================================================================
 // Lifted booleans:
