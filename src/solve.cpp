@@ -57,7 +57,7 @@ static std::vector<Var> make_preferences(const Database& database)
     return i++;
     });
   std::sort(std::begin(preferences), std::end(preferences),
-    [database](Var var1, Var var2) -> bool
+    [&database](Var var1, Var var2) -> bool
     {
     const DatabaseEntry& entry1 = database[var1];
     const DatabaseEntry& entry2 = database[var2];
