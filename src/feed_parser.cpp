@@ -282,10 +282,6 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
           this->db.push_back(entry);
           }
         }
-      else
-        {
-        std::cout << this->name << " is invalid!" << std::endl;
-        }
       }
     xml.skip();
     }
