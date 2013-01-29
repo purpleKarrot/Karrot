@@ -13,14 +13,14 @@
 namespace Karrot
 {
 
-Dictionary parse_variant(const std::string& string)
+KDictionary parse_variant(const std::string& string)
   {
   if (string.empty())
     {
-    return Dictionary();
+    return KDictionary();
     }
   const char* str = string.c_str();
-  Dictionary builder;
+  KDictionary builder;
 next:
   std::size_t length = std::strcspn(str, "=;");
   std::string key(str, str + length);
@@ -45,17 +45,17 @@ next:
   }
 
 static void r_variants_recurse(
-    const Dictionary::const_iterator& cur,
-    const Dictionary::const_iterator& end,
-    const Dictionary& dict,
-    const std::function<void(Dictionary)>& func)
+    const KDictionary::const_iterator& cur,
+    const KDictionary::const_iterator& end,
+    const KDictionary& dict,
+    const std::function<void(KDictionary)>& func)
   {
   assert(cur != end);
   std::vector < std::string > values;
   split(values, cur->second, boost::is_any_of(";"), boost::token_compress_on);
   for (const std::string& val : values)
     {
-    Dictionary copy(dict);
+    KDictionary copy(dict);
     copy.insert(std::make_pair(cur->first, val));
     if (std::next(cur) == end)
       {
@@ -69,16 +69,16 @@ static void r_variants_recurse(
   }
 
 void foreach_variant(
-    const Dictionary& variants,
-    const std::function<void(Dictionary)>& func)
+    const KDictionary& variants,
+    const std::function<void(KDictionary)>& func)
   {
   if (variants.empty())
     {
-    func(Dictionary());
+    func(KDictionary());
     }
   else
     {
-    r_variants_recurse(variants.begin(), variants.end(), Dictionary(), func);
+    r_variants_recurse(variants.begin(), variants.end(), KDictionary(), func);
     }
   }
 

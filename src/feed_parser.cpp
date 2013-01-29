@@ -141,7 +141,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
   {
   Dependencies depends("*");
   parse_depends(xml, depends);
-  Driver* driver = this->ph.get(type);
+  Driver const *driver = this->ph.get(type);
   if (!driver)
     {
     return;
@@ -155,7 +155,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     {
     entry.impl.version = releases[i].version();
     entry.impl.values["tag"] = releases[i].tag();
-    foreach_variant(variants, [&](Dictionary variant)
+    foreach_variant(variants, [&](KDictionary variant)
       {
       entry.impl.variant = variant;
       entry.depends.clear();
@@ -271,7 +271,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if (group.driver)
     {
-    const char* namespace_uri = group.driver->namespace_uri();
+    std::string namespace_uri = group.driver->namespace_uri();
     for (auto& entry : group.fields)
       {
       if (!(attr = xml.attribute(entry.first, namespace_uri)).empty())
@@ -306,19 +306,34 @@ void FeedParser::add_package(const Package& package)
     {
     return;
     }
-  DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
-  entry.impl = package.impl;
-  entry.impl.name = this->name;
-  int flags = package.driver->filter(package.fields, entry.impl);
-  if (flags)
+  package.driver->filter(package.fields,
+    [&](DictView const& values, bool system)
     {
-    if ((flags | 0x1) != 0) // not INSTALLED
+    DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
+    entry.impl = package.impl;
+    entry.impl.name = this->name;
+    entry.driver = package.driver;
+    values.foreach([&entry](const std::string& key, const std::string& val)
       {
-      entry.driver = package.driver;
-      }
-    if ((flags | 0x2) == 0) // not SYSTEM
+      if (key == "name")
+        {
+        entry.impl.name = val;
+        }
+      else if (key == "component")
+        {
+        entry.impl.component = val;
+        }
+      else if (key == "version")
+        {
+        entry.impl.version = val;
+        }
+      else
+        {
+        entry.impl.values[key] = val;
+        }
+      });
+    if (!system)
       {
-      //Identification& id = impl.id;
       for (const Dependencies& component : components)
         {
         component.replay(entry.impl.component, entry.impl.version,
@@ -326,7 +341,7 @@ void FeedParser::add_package(const Package& package)
         }
       }
     this->db.push_back(entry);
-    }
+    });
   }
 
 } // namespace Karrot

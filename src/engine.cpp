@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot.hpp>
+#include <karrot.h>
 #include "database.hpp"
 #include <cstring>
 #include <algorithm>
@@ -18,48 +18,47 @@
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
 
-namespace Karrot
-{
-
-class Engine::Private
+struct _KEngine
   {
-  public:
-    FeedQueue feed_queue;
-    FeedCache feed_cache;
-    PackageHandler package_handler;
-    Requests requests;
-    Database database;
+  Karrot::FeedQueue feed_queue;
+  Karrot::FeedCache feed_cache;
+  Karrot::PackageHandler package_handler;
+  Karrot::Requests requests;
+  Karrot::Database database;
   };
 
-Engine::Engine() :
-    self(new Private)
+KEngine *
+k_engine_new(void)
   {
+  return new KEngine();
   }
 
-Engine::~Engine()
+void k_engine_free(KEngine *self)
   {
   delete self;
   }
 
-void Engine::add_driver(std::string&& name, std::unique_ptr<Driver>&& driver)
+void k_engine_add_driver(KEngine *self, char const *name, KDriver *driver)
   {
-  self->package_handler.add(std::move(name), std::move(driver));
+  self->package_handler.add(name, driver);
   }
 
-void Engine::add_request(const char* url_string, bool source)
+void k_engine_add_request(KEngine *self, char const *url_string, int source)
   {
+  using namespace Karrot;
   Url url(url_string);
   self->feed_queue.push(url);
   Spec spec(url);
-  if (source)
+  if (source != 0)
     {
     spec.component = "SOURCE";
     }
   self->requests.push_back(std::move(spec));
   }
 
-bool Engine::run()
+int k_engine_run(KEngine *self)
   {
+  using namespace Karrot;
   const Url* purl;
   while ((purl = self->feed_queue.get_next()))
     {
@@ -95,5 +94,3 @@ bool Engine::run()
     }
   return true;
   }
-
-} // namespace Karrot

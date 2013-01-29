@@ -57,7 +57,7 @@ class FeedParser
     void add_package(const Package& package);
   private:
     std::string name;
-    Dictionary variants;
+    KDictionary variants;
     std::vector<Release> releases;
     std::vector<Dependencies> components;
     Url url;
