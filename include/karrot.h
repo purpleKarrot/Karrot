@@ -9,6 +9,8 @@
 #ifndef KARROT_H_INCLUDED
 #define KARROT_H_INCLUDED
 
+#include <stddef.h>
+
 #if defined(_WIN32)
 #  define KARROT_IMPORT __declspec(dllimport)
 #  define KARROT_EXPORT __declspec(dllexport)
@@ -36,31 +38,31 @@ typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, v
 typedef void (*KMapping) (char const *key, char const *val, void *self);
 
 KARROT_API void
-k_dict_foreach (KDictionary *self, KMapping mapping, void *target);
+k_dict_foreach (KDictionary const *self, KMapping mapping, void *target);
 
 KARROT_API char const *
-k_dict_lookup (KDictionary *self, char const *str);
+k_dict_lookup (KDictionary const *self, char const *str);
 
 KARROT_API char const *
-k_impl_get_name (KImplementation *self);
+k_impl_get_name (KImplementation const *self);
 
 KARROT_API char const *
-k_impl_get_component (KImplementation *self);
+k_impl_get_component (KImplementation const *self);
 
 KARROT_API char const *
-k_impl_get_version (KImplementation *self);
+k_impl_get_version (KImplementation const *self);
 
-KARROT_API KDictionary *
-k_impl_get_variant (KImplementation *self);
+KARROT_API KDictionary const *
+k_impl_get_variant (KImplementation const *self);
 
-KARROT_API KDictionary *
-k_impl_get_values (KImplementation *self);
+KARROT_API KDictionary const *
+k_impl_get_values (KImplementation const *self);
 
 struct _KDriver
   {
   char const *namespace_uri;
   char const *const *fields;
-  int fields_size;
+  size_t fields_size;
   KDownload download;
   void *download_target;
   void (*download_target_destroy_notify) (void*);

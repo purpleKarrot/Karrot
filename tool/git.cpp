@@ -117,9 +117,9 @@ namespace Karrot
 
 void Git::download(const Implementation& impl, bool requested)
   {
-  const char* href = impl.values.at("href").c_str();
-  const char* hash = impl.values.at("tag").c_str();
-  const char* path = impl.name.c_str();
+  const char* href = impl.values()["href"];
+  const char* hash = impl.values()["tag"];
+  const char* path = impl.name();
 
   progress_data pd;
   memset(&pd, 0, sizeof(pd));

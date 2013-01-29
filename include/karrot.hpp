@@ -9,92 +9,123 @@
 #ifndef KARROT_HPP_INCLUDED
 #define KARROT_HPP_INCLUDED
 
-#include <map>
-#include <string>
+#include <karrot.h>
+#include <functional>
 #include <memory>
-
-#if defined(_WIN32)
-#  define KARROT_IMPORT __declspec(dllimport)
-#  define KARROT_EXPORT __declspec(dllexport)
-#else
-#  define KARROT_IMPORT __attribute__ ((visibility("default")))
-#  define KARROT_EXPORT __attribute__ ((visibility("default")))
-#endif
-
-#if defined(KARROT_STATIC)
-#  define KARROT_API
-#elif defined(KARROT_BUILD)
-#  define KARROT_API KARROT_EXPORT
-#else
-#  define KARROT_API KARROT_IMPORT
-#endif
+#include <vector>
 
 namespace Karrot
 {
 
-typedef std::map<std::string, std::string> Dictionary;
+class Dictionary;
+class Implementation;
+class Driver;
+class Engine;
+
+typedef std::function<void(const char*, const char*)> Mapping;
+typedef std::function<void(char const **val, int size, bool native)> AddFun;
+
+class Dictionary
+  {
+  public:
+    const char *operator[](const char *key) const
+      {
+      return k_dict_lookup (self, key);
+      }
+    void foreach(Mapping mapping) const
+      {
+      k_dict_foreach(self, &mapping_fun, &mapping);
+      }
+  private:
+    Dictionary(KDictionary const *self) : self(self)
+      {
+      }
+    static void mapping_fun(char const *key, char const *val, void *self)
+      {
+      reinterpret_cast<Mapping*>(self)->operator()(key, val);
+      }
+    KDictionary const *self;
+    friend class Implementation;
+    friend class Engine;
+  };
 
 class Implementation
   {
   public:
-    std::string name;
-    std::string component;
-    std::string version;
-    Dictionary variant;
-    Dictionary values;
+    const char *name() const
+      {
+      return k_impl_get_name(self);
+      }
+    const char *component() const
+      {
+      return k_impl_get_component(self);
+      }
+    const char *version() const
+      {
+      return k_impl_get_version(self);
+      }
+    Dictionary variant() const
+      {
+      return Dictionary(k_impl_get_variant(self));
+      }
+    Dictionary values() const
+      {
+      return Dictionary(k_impl_get_values(self));
+      }
+  private:
+    Implementation(KImplementation const *self) : self(self)
+      {
+      }
+    KImplementation const *self;
+    friend class Engine;
   };
 
-class KARROT_API Driver
+class Driver
   {
   public:
-    virtual ~Driver();
+    typedef std::vector<const char*> Fields;
   public:
+    virtual ~Driver()
+      {
+      }
     virtual const char* namespace_uri() const
-      {
-      return nullptr;
-      }
-    virtual Dictionary fields() const
-      {
-      return Dictionary();
-      }
-    virtual int filter(const Dictionary& fields, Implementation& implementation)
       {
       return 0;
       }
-    virtual void download(const Implementation& implementation, bool requested)
+    virtual Fields fields() const
+      {
+      return std::vector<const char*>();
+      }
+    virtual void filter(Dictionary const& fields, AddFun const& add)
       {
       }
-  public:
-    static const int INCOMPATIBLE  = 0;
-    static const int NORMAL        = 1;
-    static const int SYS_INSTALLED = 2;
-    static const int SYS_AVAILABLE = 3;
+    virtual void download(Implementation const& impl, bool requested)
+      {
+      }
   };
 
-#if defined _MSC_VER
-template class __declspec(dllexport) std::unique_ptr<Driver>;
-#endif
-
-class KARROT_API DriverDecorator: public Driver
+class DriverDecorator: public Driver
   {
   protected:
     DriverDecorator(std::unique_ptr<Driver>&& component)
         : component(std::move(component))
       {
       }
-    virtual ~DriverDecorator();
+    virtual ~DriverDecorator()
+      {
+      }
   protected:
     const char* namespace_uri() const //override
       {
       return component->namespace_uri();
       }
-    Dictionary fields() const //override
+    Fields fields() const //override
       {
       return component->fields();
       }
-    int filter(const Dictionary& fields, Implementation& impl) //override
+    void filter(Dictionary const& fields, AddFun const& add) //override
       {
-      return component->filter(fields, impl);
+      component->filter(fields, add);
       }
     void download(const Implementation& impl, bool requested) //override
       {
@@ -104,18 +135,63 @@ class KARROT_API DriverDecorator: public Driver
     std::unique_ptr<Driver> component;
   };
 
-class KARROT_API Engine
+class Engine
   {
-  public:
-    Engine();
-    ~Engine();
-  public:
-    void add_driver(std::string&& name, std::unique_ptr<Driver>&& driver);
-    void add_request(const char* url, bool source);
-    bool run();
   private:
-    class Private;
-    Private* self;
+    static void download_fun(KImplementation const *impl, int requested, void *self)
+      {
+      Driver* driver = reinterpret_cast<Driver*>(self);
+      driver->download(Implementation(impl), requested != 0);
+      }
+    static void filter_fun(KDictionary const *fields, KAddFun fun, void *target, void *self)
+      {
+      using namespace std::placeholders;
+      Driver* driver = reinterpret_cast<Driver*>(self);
+      driver->filter(Dictionary(fields), std::bind(fun, _1, _2, _3, target));
+      }
+    static void destroy_fun(void *self)
+      {
+      delete reinterpret_cast<Driver*>(self);
+      }
+  public:
+    Engine()
+      {
+      self = k_engine_new();
+      }
+    ~Engine()
+      {
+      k_engine_free(self);
+      }
+  public:
+    void add_driver(char const *name, std::unique_ptr<Driver>&& driver)
+      {
+      const char *namespace_uri = driver->namespace_uri();
+      const std::vector<const char*> fields = driver->fields();
+      Driver *pdriver = driver.release();
+      KDriver kdriver =
+        {
+        namespace_uri,
+        &fields[0],
+        fields.size(),
+        download_fun,
+        pdriver,
+        destroy_fun,
+        filter_fun,
+        pdriver,
+        nullptr
+        };
+      k_engine_add_driver(self, name, &kdriver);
+      }
+    void add_request(const char* url, bool source)
+      {
+      k_engine_add_request(self, url, source);
+      }
+    bool run()
+      {
+      return k_engine_run(self) != 0;
+      }
+  private:
+    KEngine *self;
   };
 
 } // namespace Karrot

@@ -50,14 +50,15 @@ const char* Archive::namespace_uri() const
   return "http://purplekarrot.net/2013/archive";
   }
 
-Dictionary Archive::fields() const
+Driver::Fields Archive::fields() const
   {
-  Dictionary fields;
-  fields.insert(std::make_pair("sysname", "*"));
-  fields.insert(std::make_pair("machine", "*"));
-  fields.insert(std::make_pair("href", std::string()));
-  fields.insert(std::make_pair("checksum", std::string()));
-  return fields;
+  return
+    {
+    "sysname", "*",
+    "machine", "*",
+    "href", nullptr,
+    "checksum", nullptr
+    };
   }
 
 static int progress(void *clientp, double total, double now, double t, double n)
@@ -309,21 +310,24 @@ static fs::path analyze_extracted(fs::path root)
   return nested;
   }
 
-int Archive::filter(const Dictionary& fields, Implementation& impl)
+void Archive::filter(Dictionary const& fields, AddFun const& add)
   {
-  const std::string& p_sysname = fields.at("sysname");
-  if (p_sysname != "*" && p_sysname != sysname)
+  const char *p_sysname = fields["sysname"];
+  if (p_sysname != std::string("*") && p_sysname != sysname)
     {
-    return INCOMPATIBLE;
+    return;
     }
-  const std::string& p_machine = fields.at("machine");
-  if (p_machine != "*" && p_machine != machine)
+  const char *p_machine = fields["machine"];
+  if (p_machine != std::string("*") && p_machine != machine)
     {
-    return INCOMPATIBLE;
+    return;
     }
-  impl.values["href"] = fields.at("href");
-  impl.values["checksum"] = fields.at("checksum");
-  return NORMAL;
+  std::vector<const char*> values
+    {
+    "href", fields["href"],
+    "checksum", fields["checksum"]
+    };
+  add(values.data(), values.size(), false);
   }
 
 static bool check_md5(FILE *file, const char *md5)
@@ -354,8 +358,8 @@ static bool check_md5(FILE *file, const char *md5)
 
 void Archive::download(const Implementation& impl, bool requested)
   {
-  const char* url = impl.values.at("href").c_str();
-  const char* md5 = impl.values.at("checksum").c_str();
+  const char* url = impl.values()["href"];
+  const char* md5 = impl.values()["checksum"];
   fs::path filepath = fs::path(".archives") / urlencode(url);
   FILE* file = std::fopen(filepath.string().c_str(), "rb");
   if (file)
@@ -372,8 +376,8 @@ void Archive::download(const Implementation& impl, bool requested)
   std::fclose(file);
 
   fs::path current_path = fs::current_path();
-  fs::path output_path = current_path / impl.name;
-  fs::path temp_path = current_path / (impl.name + "-tmp");
+  fs::path output_path = current_path / impl.name();
+  fs::path temp_path = current_path / (impl.name() + std::string("-tmp"));
   output_path.replace_extension();
 
   create_directory(temp_path);

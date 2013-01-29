@@ -30,16 +30,16 @@ class Listsfile
     void add_subdir(const std::string& name, const Karrot::Dictionary& variant)
       {
       subdirs << '\n';
-      for(const auto& var : variant)
+      variant.foreach([&](const char *key, const char *val)
         {
         subdirs
           << "set("
-          << boost::to_upper_copy(name + '_' + var.first)
+          << boost::to_upper_copy(name + '_' + key)
           << " \""
-          << var.second
+          << val
           << "\")\n"
           ;
-        }
+        });
       subdirs << "add_subdirectory(" << name << ")\n";
       }
     void write() const
@@ -75,13 +75,13 @@ class Injector: public Karrot::DriverDecorator
     void download(const Karrot::Implementation& impl, bool requested) //override
       {
       DriverDecorator::download(impl, requested);
-      if(impl.component == "SOURCE")
+      if(impl.component() == std::string("SOURCE"))
         {
-        listsfile.add_subdir(impl.name, impl.variant);
+        listsfile.add_subdir(impl.name(), impl.variant());
         }
       else
         {
-        listsfile.add_prefix(impl.name);
+        listsfile.add_prefix(impl.name());
         }
       }
   private:

@@ -9,7 +9,7 @@
 #include "dictionary.hpp"
 
 void
-k_dict_foreach(KDictionary *self, KMapping mapping, void *target)
+k_dict_foreach(KDictionary const *self, KMapping mapping, void *target)
   {
   for (const auto& entry : *self)
     {
@@ -18,7 +18,7 @@ k_dict_foreach(KDictionary *self, KMapping mapping, void *target)
   }
 
 char const *
-k_dict_lookup(KDictionary *self, char const *str)
+k_dict_lookup(KDictionary const *self, char const *str)
   {
   auto it = self->find(str);
   return it != self->end() ? it->second.c_str() : nullptr;
