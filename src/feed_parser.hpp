@@ -54,6 +54,7 @@ class FeedParser
     void parse_depends(XmlReader& xml, Dependencies& depends);
     void parse_packages(XmlReader& xml, Package group);
     void parse_package_fields(XmlReader& xml, Package& group);
+    void add_package(const Package& package);
   private:
     std::string name;
     Dictionary variants;

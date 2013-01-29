@@ -226,24 +226,6 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
     }
   }
 
-static bool package_is_valid(const Package& package)
-  {
-  if (!package.driver)
-    {
-    return false;
-    }
-  bool valid = true;
-  for (const auto& entry : package.fields)
-    {
-    if (entry.second.empty())
-      {
-      std::cerr << "required attribute not set: " << entry.first << std::endl;
-      valid = false;
-      }
-    }
-  return valid;
-  }
-
 void FeedParser::parse_packages(XmlReader& xml, Package group)
   {
   while (xml.start_element())
@@ -258,30 +240,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
     else if (name == "package" && namespace_uri == project_ns)
       {
       parse_package_fields(xml, group);
-      if (package_is_valid(group))
-        {
-        DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
-        entry.impl = group.impl;
-        entry.impl.name = this->name;
-        int flags = group.driver->filter(group.fields, entry.impl);
-        if (flags)
-          {
-          if ((flags | 0x1) != 0) // not INSTALLED
-            {
-            entry.driver = group.driver;
-            }
-          if ((flags | 0x2) == 0) // not SYSTEM
-            {
-            //Identification& id = impl.id;
-            for (const Dependencies& component : components)
-              {
-              component.replay(entry.impl.component, entry.impl.version,
-                  entry.impl.variant, entry.depends, entry.conflicts);
-              }
-            }
-          this->db.push_back(entry);
-          }
-        }
+      add_package(group);
       }
     xml.skip();
     }
@@ -320,6 +279,53 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
         entry.second = std::move(attr);
         }
       }
+    }
+  }
+
+static bool package_is_valid(const Package& package)
+  {
+  if (!package.driver)
+    {
+    return false;
+    }
+  bool valid = true;
+  for (const auto& entry : package.fields)
+    {
+    if (entry.second.empty())
+      {
+      std::cerr << "required attribute not set: " << entry.first << std::endl;
+      valid = false;
+      }
+    }
+  return valid;
+  }
+
+void FeedParser::add_package(const Package& package)
+  {
+  if (!package_is_valid(package))
+    {
+    return;
+    }
+  DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
+  entry.impl = package.impl;
+  entry.impl.name = this->name;
+  int flags = package.driver->filter(package.fields, entry.impl);
+  if (flags)
+    {
+    if ((flags | 0x1) != 0) // not INSTALLED
+      {
+      entry.driver = package.driver;
+      }
+    if ((flags | 0x2) == 0) // not SYSTEM
+      {
+      //Identification& id = impl.id;
+      for (const Dependencies& component : components)
+        {
+        component.replay(entry.impl.component, entry.impl.version,
+            entry.impl.variant, entry.depends, entry.conflicts);
+        }
+      }
+    this->db.push_back(entry);
     }
   }
 
