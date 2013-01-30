@@ -53,6 +53,7 @@ add_library(karrot
   xml_re2c.in.hpp
   xml_reader.cpp
   xml_reader.hpp
+  karrot.rc
   )
 
 set_property(TARGET karrot APPEND PROPERTY
