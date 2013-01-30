@@ -27,6 +27,10 @@
 #  define KARROT_API KARROT_IMPORT
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct _KDictionary KDictionary;
 typedef struct _KImplementation KImplementation;
 typedef struct _KDriver KDriver;
@@ -85,5 +89,9 @@ k_engine_run (KEngine *self);
 
 KARROT_API void
 k_engine_free (KEngine *self);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* KARROT_H_INCLUDED */
