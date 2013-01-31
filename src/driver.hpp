@@ -20,7 +20,7 @@ class Driver
   {
   public:
     Driver(KDriver *driver)
-      : ns_uri_(driver->namespace_uri)
+      : ns_uri_(driver->namespace_uri ? driver->namespace_uri : "")
 //    , fields_(driver->fields, driver->fields_size)
       , download_(driver->download, driver->download_target, driver->download_target_destroy_notify)
       , filter_(driver->filter, driver->filter_target, driver->filter_target_destroy_notify)
