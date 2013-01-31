@@ -13,6 +13,10 @@
 #include <boost/filesystem/operations.hpp>
 #include <curl/curl.h>
 
+#ifdef _WIN32
+#  include <shlobj.h>
+#endif
+
 namespace Karrot
 {
 
@@ -58,37 +62,39 @@ size_t write_fun(char* ptr, size_t size, size_t nmemb, void* userdata)
   return nmemb;
   }
 
-static int prog_fun(void *clientp, double total, double now, double t, double n)
+static boost::filesystem::path cache_dir()
   {
-  int x;
-  int w = 60;
-  double ratio = (now == 0) ? 0 : now / total;
-  int c = (int) (ratio * w);
-  printf("                                                                 \r");
-  printf("%3d%% [", (int) (ratio * 100));
-  for (x = 0; x < c; x++)
+#ifdef _WIN32
+  PWSTR pwstr;
+  HRESULT result = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &pwstr);
+  if (!FAILED(result))
     {
-    printf("=");
+    boost::filesystem::path cache(pwstr);
+    CoTaskMemFree(pwstr);
+    return cache;
     }
-  for (x = c; x < w; x++)
+#endif
+  const char* cache = getenv("XDG_CACHE_HOME");
+  if (cache)
     {
-    printf(" ");
+    return cache;
     }
-  printf("]\r");
-  fflush (stdout);
-  return 0;
+  const char* home = getenv("HOME");
+  if (home)
+    {
+    return boost::filesystem::path(home) / ".config";
+    }
+  return boost::filesystem::current_path();
   }
 
 FeedCache::FeedCache() :
-    path(boost::filesystem::current_path() / "cache"),
+    path(cache_dir() / "Karrot"),
     curl_handle(curl_easy_init())
   {
   create_directory(path);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_fun);
   curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "karrot/0.1");
   curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
-  curl_easy_setopt(curl_handle, CURLOPT_PROGRESSFUNCTION, prog_fun);
-  curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 0);
   }
 
 FeedCache::~FeedCache()
