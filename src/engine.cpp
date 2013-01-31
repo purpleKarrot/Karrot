@@ -10,6 +10,7 @@
 #include "database.hpp"
 #include <cstring>
 #include <algorithm>
+#include <boost/exception/diagnostic_information.hpp>
 
 #include "solve.hpp"
 #include "feed_queue.hpp"
@@ -56,7 +57,7 @@ void k_engine_add_request(KEngine *self, char const *url_string, int source)
   self->requests.push_back(std::move(spec));
   }
 
-int k_engine_run(KEngine *self)
+static int engine_run(KEngine *self)
   {
   using namespace Karrot;
   const Url* purl;
@@ -93,4 +94,17 @@ int k_engine_run(KEngine *self)
       }
     }
   return true;
+  }
+
+int k_engine_run(KEngine *self)
+  {
+  try
+    {
+    return engine_run(self);
+    }
+  catch (...)
+    {
+    std::cerr << boost::current_exception_diagnostic_information() << std::endl;
+    }
+  return false;
   }
