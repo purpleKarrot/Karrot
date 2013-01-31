@@ -21,7 +21,7 @@ class Driver
   public:
     Driver(KDriver *driver)
       : ns_uri_(driver->namespace_uri ? driver->namespace_uri : "")
-//    , fields_(driver->fields, driver->fields_size)
+      , fields_(make_dict(driver->fields, driver->fields_size))
       , download_(driver->download, driver->download_target, driver->download_target_destroy_notify)
       , filter_(driver->filter, driver->filter_target, driver->filter_target_destroy_notify)
       {
@@ -43,6 +43,19 @@ class Driver
       filter_(&fields, add_fun, &add);
       }
   private:
+    static KDictionary make_dict(char const * const *fields, std::size_t size)
+      {
+      KDictionary result;
+      assert(size % 2 == 0);
+      for (std::size_t i = 0; i < size;)
+        {
+        const char *key = fields[i++];
+        const char *val = fields[i++];
+        assert(key);
+        result[key] = val ? val : "";
+        }
+      return result;
+      }
     static void add_fun(char const **val, int size, int native, void *self)
       {
       AddFun const &function = *reinterpret_cast<AddFun*>(self);
