@@ -129,8 +129,8 @@ void Subversion::download(const Implementation& impl, bool requested)
   svn_opt_revision_t peg_revision;
   peg_revision.kind = svn_opt_revision_unspecified;
 
-  std::string url = impl.values.at("href");
-  std::string tag = impl.values.at("tag");
+  std::string url = impl.values()["href"];
+  std::string tag = impl.values()["tag"];
 
   std::string::size_type loc = tag.rfind('@');
   if (loc != std::string::npos)
@@ -153,7 +153,7 @@ void Subversion::download(const Implementation& impl, bool requested)
     url += "/tags/" + tag;
     }
 
-  const std::string& path = impl.name;
+  const std::string& path = impl.name();
   svn_error_t* error = NULL;
 
   if (!boost::filesystem::exists(path)) // / ".svn"))

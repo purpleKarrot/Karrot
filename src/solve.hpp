@@ -24,7 +24,7 @@ inline bool satisfies(const DatabaseEntry& entry, const Spec& spec)
     {
     return false;
     }
-  const Implementation& impl = entry.impl;
+  const KImplementation& impl = entry.impl;
   if (impl.component != spec.component && impl.component != "*" && impl.component != "SOURCE")
     {
     return false;

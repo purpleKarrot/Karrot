@@ -172,7 +172,7 @@ Query::Query(const std::string& string)
   }
 
 
-bool Query::evaluate(const std::string& version, const Dictionary& variants) const
+bool Query::evaluate(const std::string& version, const KDictionary& variants) const
   {
   if (queryspace.empty())
     {

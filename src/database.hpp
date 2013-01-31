@@ -9,7 +9,7 @@
 #ifndef KARROT_DATABASE_HPP
 #define KARROT_DATABASE_HPP
 
-#include <karrot.hpp>
+#include "implementation.hpp"
 #include <vector>
 
 namespace Karrot
@@ -26,10 +26,10 @@ class DatabaseEntry
       }
   public:
     std::string id;
-    Implementation impl;
+    KImplementation impl;
     std::vector<Spec> depends;
     std::vector<Spec> conflicts;
-    Driver* driver;
+    Driver const *driver;
   };
 
 typedef std::vector<DatabaseEntry> Database;

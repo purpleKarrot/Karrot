@@ -9,7 +9,7 @@
 #ifndef KARROT_DEPENDENCIES_HPP
 #define KARROT_DEPENDENCIES_HPP
 
-#include <karrot.hpp>
+#include <karrot.h>
 #include <vector>
 #include "spec.hpp"
 #include "quark.hpp"
@@ -64,7 +64,7 @@ class Dependencies
     void replay(
         const std::string& component,
         const std::string& version,
-        const Dictionary& values,
+        const KDictionary& values,
         std::vector<Spec>& depends,
         std::vector<Spec>& conflicts) const
       {

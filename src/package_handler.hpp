@@ -10,7 +10,7 @@
 #define KARROT_PACKAGE_HANDLER_HPP
 
 #include <map>
-#include <karrot.hpp>
+#include "driver.hpp"
 
 namespace Karrot
 {
@@ -18,21 +18,21 @@ namespace Karrot
 class PackageHandler
   {
   public:
-    void add(std::string&& name, std::unique_ptr<Driver>&& driver)
+    void add(std::string&& name, Driver&& driver)
       {
       handlers.insert(std::make_pair(std::move(name), std::move(driver)));
       }
-    Driver* get(const std::string& name) const
+    Driver const * get(const std::string& name) const
       {
       auto it = handlers.find(name);
       if (it != handlers.end())
         {
-        return it->second.get();
+        return &it->second;
         }
       return 0;
       }
   private:
-    std::map<std::string, std::unique_ptr<Driver>> handlers;
+    std::map<std::string, Driver> handlers;
   };
 
 } // namespace Karrot

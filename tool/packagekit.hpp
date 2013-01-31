@@ -10,6 +10,7 @@
 #define KARROT_PACKAGEKIT_HPP
 
 #include <karrot.hpp>
+#include <string>
 #include <vector>
 
 typedef struct _KarrotPackageKit KarrotPackageKit;
@@ -50,8 +51,8 @@ class PKDriver: public Driver
       }
   private:
     const char* namespace_uri() const; //override
-    Dictionary fields() const; //override
-    int filter(const Dictionary& fields, Implementation& impl); //override
+    void fields(Fields& out) const; //override
+    void filter(Dictionary const& fields, AddFun const& add); //override
     void download(const Implementation& impl, bool requested); //override
   private:
     PackageKit& package_kit;

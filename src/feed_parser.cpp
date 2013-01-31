@@ -141,7 +141,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
   {
   Dependencies depends("*");
   parse_depends(xml, depends);
-  Driver* driver = this->ph.get(type);
+  Driver const *driver = this->ph.get(type);
   if (!driver)
     {
     return;
@@ -155,7 +155,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     {
     entry.impl.version = releases[i].version();
     entry.impl.values["tag"] = releases[i].tag();
-    foreach_variant(variants, [&](Dictionary variant)
+    foreach_variant(variants, [&](KDictionary variant)
       {
       entry.impl.variant = variant;
       entry.depends.clear();
@@ -226,24 +226,6 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
     }
   }
 
-static bool package_is_valid(const Package& package)
-  {
-  if (!package.driver)
-    {
-    return false;
-    }
-  bool valid = true;
-  for (const auto& entry : package.fields)
-    {
-    if (entry.second.empty())
-      {
-      std::cerr << "required attribute not set: " << entry.first << std::endl;
-      valid = false;
-      }
-    }
-  return valid;
-  }
-
 void FeedParser::parse_packages(XmlReader& xml, Package group)
   {
   while (xml.start_element())
@@ -258,30 +240,7 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
     else if (name == "package" && namespace_uri == project_ns)
       {
       parse_package_fields(xml, group);
-      if (package_is_valid(group))
-        {
-        DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
-        entry.impl = group.impl;
-        entry.impl.name = this->name;
-        int flags = group.driver->filter(group.fields, entry.impl);
-        if (flags)
-          {
-          if ((flags | 0x1) != 0) // not INSTALLED
-            {
-            entry.driver = group.driver;
-            }
-          if ((flags | 0x2) == 0) // not SYSTEM
-            {
-            //Identification& id = impl.id;
-            for (const Dependencies& component : components)
-              {
-              component.replay(entry.impl.component, entry.impl.version,
-                  entry.impl.variant, entry.depends, entry.conflicts);
-              }
-            }
-          this->db.push_back(entry);
-          }
-        }
+      add_package(group);
       }
     xml.skip();
     }
@@ -312,7 +271,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if (group.driver)
     {
-    const char* namespace_uri = group.driver->namespace_uri();
+    std::string namespace_uri = group.driver->namespace_uri();
     for (auto& entry : group.fields)
       {
       if (!(attr = xml.attribute(entry.first, namespace_uri)).empty())
@@ -321,6 +280,68 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
         }
       }
     }
+  }
+
+static bool package_is_valid(const Package& package)
+  {
+  if (!package.driver)
+    {
+    return false;
+    }
+  bool valid = true;
+  for (const auto& entry : package.fields)
+    {
+    if (entry.second.empty())
+      {
+      std::cerr << "required attribute not set: " << entry.first << std::endl;
+      valid = false;
+      }
+    }
+  return valid;
+  }
+
+void FeedParser::add_package(const Package& package)
+  {
+  if (!package_is_valid(package))
+    {
+    return;
+    }
+  package.driver->filter(package.fields,
+    [&](DictView const& values, bool system)
+    {
+    DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
+    entry.impl = package.impl;
+    entry.impl.name = this->name;
+    entry.driver = package.driver;
+    values.foreach([&entry](const std::string& key, const std::string& val)
+      {
+      if (key == "name")
+        {
+        entry.impl.name = val;
+        }
+      else if (key == "component")
+        {
+        entry.impl.component = val;
+        }
+      else if (key == "version")
+        {
+        entry.impl.version = val;
+        }
+      else
+        {
+        entry.impl.values[key] = val;
+        }
+      });
+    if (!system)
+      {
+      for (const Dependencies& component : components)
+        {
+        component.replay(entry.impl.component, entry.impl.version,
+            entry.impl.variant, entry.depends, entry.conflicts);
+        }
+      }
+    this->db.push_back(entry);
+    });
   }
 
 } // namespace Karrot

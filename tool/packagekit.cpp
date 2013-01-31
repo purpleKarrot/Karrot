@@ -68,41 +68,45 @@ const char* PKDriver::namespace_uri() const
   return "http://purplekarrot.net/2013/packagekit";
   }
 
-Dictionary PKDriver::fields() const
+void PKDriver::fields(Fields &out) const
   {
-  Dictionary fields;
-  fields.insert(std::make_pair("distro", "*"));
-  fields.insert(std::make_pair("name", std::string()));
-  return fields;
+  static const char* const fields_instance[] =
+    {
+    "distro", "*",
+    "name", nullptr
+    };
+  out = fields_instance;
   }
 
-int PKDriver::filter(const Dictionary& fields, Implementation& impl)
+void PKDriver::filter(Dictionary const& fields, AddFun const& add)
   {
-  const std::string& p_distro = fields.at("distro");
-  if (p_distro != package_kit.distro() && p_distro != "*")
+  const char *p_distro = fields["distro"];
+  if (p_distro != package_kit.distro() && p_distro != std::string("*"))
     {
-    return Driver::INCOMPATIBLE;
+    return;
     }
   bool installed;
   std::string package_id;
-  if (!package_kit.resolve(fields.at("name"), installed, package_id))
+  if (!package_kit.resolve(fields["name"], installed, package_id))
     {
-    return Driver::INCOMPATIBLE;
+    return;
     }
   const char* begin = std::strchr(package_id.c_str(), ';') + 1;
   const char* end = std::strchr(begin, ';');
-  impl.version = std::string(begin, end);
-  impl.values["packageid"] = package_id;
-  if (installed)
+  std::string version(begin, end);
+
+  std::vector<const char*> values
     {
-    return Driver::SYS_INSTALLED;
-    }
-  return Driver::SYS_AVAILABLE;
+    "version", version.c_str(),
+    "packageid", package_id.c_str(),
+    "installed", installed ? "yes" : "no"
+    };
+  add(values.data(), values.size(), true);
   }
 
 void PKDriver::download(const Implementation& impl, bool requested)
   {
-  package_kit.queue_package(impl.values.at("packageid"));
+  package_kit.queue_package(impl.values()["packageid"]);
   }
 
 } // namespace Karrot

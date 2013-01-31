@@ -61,8 +61,8 @@ static std::vector<Var> make_preferences(const Database& database)
     {
     const DatabaseEntry& entry1 = database[var1];
     const DatabaseEntry& entry2 = database[var2];
-    const Implementation& impl1 = entry1.impl;
-    const Implementation& impl2 = entry2.impl;
+    const KImplementation& impl1 = entry1.impl;
+    const KImplementation& impl2 = entry2.impl;
     if (impl1.component != "SOURCE" && impl2.component == "SOURCE")
       {
       return true;
@@ -145,8 +145,8 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
         {
         break;
         }
-      const Implementation& impl1 = entry1.impl;
-      const Implementation& impl2 = entry2.impl;
+      const KImplementation& impl1 = entry1.impl;
+      const KImplementation& impl2 = entry2.impl;
       if (impl1.version != impl2.version ||
           impl1.variant != impl2.variant ||
           impl1.component == impl2.component ||

@@ -9,7 +9,8 @@
 #ifndef KARROT_PACKAGE_HPP
 #define KARROT_PACKAGE_HPP
 
-#include <karrot.hpp>
+#include "dictionary.hpp"
+#include "implementation.hpp"
 
 namespace Karrot
 {
@@ -23,9 +24,9 @@ class Package
       {
       }
   public:
-    Implementation impl;
-    Dictionary fields;
-    Driver* driver;
+    KImplementation impl;
+    KDictionary fields;
+    Driver const *driver;
   };
 
 } // namespace Karrot
