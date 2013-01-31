@@ -80,8 +80,8 @@ void PKDriver::fields(Fields &out) const
 
 void PKDriver::filter(Dictionary const& fields, AddFun const& add)
   {
-  const char *p_distro = fields["distro"];
-  if (p_distro != package_kit.distro() && p_distro != std::string("*"))
+  std::string p_distro = fields["distro"];
+  if (p_distro != package_kit.distro() && p_distro != "*")
     {
     return;
     }

@@ -12,6 +12,7 @@
 #include <karrot.h>
 #include <functional>
 #include <memory>
+#include <string>
 
 namespace Karrot
 {
@@ -27,9 +28,10 @@ typedef std::function<void(char const **val, int size, bool native)> AddFun;
 class Dictionary
   {
   public:
-    const char *operator[](const char *key) const
+    std::string operator[](const char *key) const
       {
-      return k_dict_lookup (self, key);
+      char const *value = k_dict_lookup(self, key);
+      return value ? value : std::string();
       }
     void foreach(Mapping mapping) const
       {
@@ -51,17 +53,20 @@ class Dictionary
 class Implementation
   {
   public:
-    const char *name() const
+    std::string name() const
       {
-      return k_impl_get_name(self);
+      char const *value = k_impl_get_name(self);
+      return value ? value : std::string();
       }
-    const char *component() const
+    std::string component() const
       {
-      return k_impl_get_component(self);
+      char const *value = k_impl_get_component(self);
+      return value ? value : std::string();
       }
-    const char *version() const
+    std::string version() const
       {
-      return k_impl_get_version(self);
+      char const *value = k_impl_get_version(self);
+      return value ? value : std::string();
       }
     Dictionary variant() const
       {

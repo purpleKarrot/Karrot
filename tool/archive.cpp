@@ -313,22 +313,24 @@ static fs::path analyze_extracted(fs::path root)
 
 void Archive::filter(Dictionary const& fields, AddFun const& add)
   {
-  const char *p_sysname = fields["sysname"];
-  if (p_sysname != std::string("*") && p_sysname != sysname)
+  std::string p_sysname = fields["sysname"];
+  if (p_sysname != "*" && p_sysname != sysname)
     {
     return;
     }
-  const char *p_machine = fields["machine"];
-  if (p_machine != std::string("*") && p_machine != machine)
+  std::string p_machine = fields["machine"];
+  if (p_machine != "*" && p_machine != machine)
     {
     return;
     }
-  std::vector<const char*> values
+  std::string href = fields["href"];
+  std::string checksum = fields["checksum"];
+  const char *values[] =
     {
-    "href", fields["href"],
-    "checksum", fields["checksum"]
+    "href", href.c_str(),
+    "checksum", checksum.c_str()
     };
-  add(values.data(), values.size(), false);
+  add(values, 4, false);
   }
 
 static bool check_md5(FILE *file, const char *md5)
@@ -359,13 +361,13 @@ static bool check_md5(FILE *file, const char *md5)
 
 void Archive::download(const Implementation& impl, bool requested)
   {
-  const char* url = impl.values()["href"];
-  const char* md5 = impl.values()["checksum"];
+  std::string url = impl.values()["href"];
+  std::string md5 = impl.values()["checksum"];
   fs::path filepath = fs::path(".archives") / urlencode(url);
   FILE* file = std::fopen(filepath.string().c_str(), "rb");
   if (file)
     {
-    if (check_md5(file, md5))
+    if (check_md5(file, md5.c_str()))
       {
       std::fclose(file);
       return;
@@ -373,7 +375,7 @@ void Archive::download(const Implementation& impl, bool requested)
     std::fclose(file);
     }
   file = std::fopen(filepath.string().c_str(), "wb");
-  r_download_(file, url);
+  r_download_(file, url.c_str());
   std::fclose(file);
 
   fs::path current_path = fs::current_path();

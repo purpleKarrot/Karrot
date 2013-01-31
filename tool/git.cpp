@@ -117,9 +117,9 @@ namespace Karrot
 
 void Git::download(const Implementation& impl, bool requested)
   {
-  const char* href = impl.values()["href"];
-  const char* hash = impl.values()["tag"];
-  const char* path = impl.name();
+  std::string href = impl.values()["href"];
+  std::string hash = impl.values()["tag"];
+  std::string path = impl.name();
 
   progress_data pd;
   memset(&pd, 0, sizeof(pd));
@@ -139,18 +139,18 @@ void Git::download(const Implementation& impl, bool requested)
   at_scope_exit<git_remote> remote_free(origin, git_remote_free);
   at_scope_exit<git_object> object_free(object, git_object_free);
 
-  if (git_repository_open(&repo, path) == 0)
+  if (git_repository_open(&repo, path.c_str()) == 0)
     {
     check_git_failure(git_remote_load(&origin, repo, "origin"));
-    if (std::strcmp(git_remote_url(origin), href) != 0)
+    if (std::strcmp(git_remote_url(origin), href.c_str()) != 0)
       {
       throw std::runtime_error("different origin");
       }
     }
   else
     {
-    check_git_failure(git_repository_init(&repo, path, false));
-    check_git_failure(git_remote_create(&origin, repo, "origin", href));
+    check_git_failure(git_repository_init(&repo, path.c_str(), false));
+    check_git_failure(git_remote_create(&origin, repo, "origin", href.c_str()));
     }
   git_remote_set_update_fetchhead(origin, 0);
   git_remote_set_cred_acquire_cb(origin, cred_acquire, 0);
@@ -158,7 +158,7 @@ void Git::download(const Implementation& impl, bool requested)
   at_scope_exit<git_remote> remote_disconnect(origin, git_remote_disconnect);
   check_git_failure(git_remote_download(origin, fetch_progress, &pd));
   check_git_failure(git_remote_update_tips(origin));
-  check_git_failure(git_revparse_single(&object, repo, hash));
+  check_git_failure(git_revparse_single(&object, repo, hash.c_str()));
   check_git_failure(git_checkout_tree(repo, object, &checkout_opts));
   }
 
