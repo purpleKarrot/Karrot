@@ -78,7 +78,53 @@ endif()
 
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 
-target_link_libraries(karrot
+target_link_libraries(karrot LINK_PRIVATE
   ${CURL_LIBRARIES}
   ${Boost_LIBRARIES}
+  )
+
+install(TARGETS karrot EXPORT karrot_export
+  ARCHIVE
+    DESTINATION lib
+    COMPONENT   dev
+    #CONFIGURATIONS "Release"
+  LIBRARY
+    DESTINATION lib
+    COMPONENT   bin
+    #CONFIGURATIONS "Release"
+  RUNTIME
+    DESTINATION bin
+    COMPONENT   bin
+    #CONFIGURATIONS "Release"
+  )
+
+install(EXPORT karrot_export
+  DESTINATION cmake
+  FILE KarrotTargets.cmake
+  )
+
+set(cfg_file "${CMAKE_CURRENT_BINARY_DIR}/KarrotConfig.cmake")
+set(ver_file "${CMAKE_CURRENT_BINARY_DIR}/KarrotConfigVersion.cmake")
+
+file(WRITE "${cfg_file}" "
+GET_FILENAME_COMPONENT(_DIR \"\${CMAKE_CURRENT_LIST_FILE}\" PATH)
+INCLUDE(\"\${_DIR}/KarrotTargets.cmake\")
+SET(Karrot_INCLUDE_DIRS \"\${_DIR}/include\")
+SET(Karrot_LIBRARIES karrot)
+")
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${ver_file}"
+  VERSION "0.1.0"
+  COMPATIBILITY SameMajorVersion
+  )
+
+install(FILES "${cfg_file}" "${ver_file}"
+  COMPONENT dev
+  DESTINATION cmake
+  )
+
+install(FILES "${Karrot_SOURCE_DIR}/include/karrot.h"
+  COMPONENT dev
+  DESTINATION include
   )
