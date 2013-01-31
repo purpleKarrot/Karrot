@@ -15,19 +15,17 @@
 namespace Karrot
 {
 
-static const std::string empty_string;
-
 void XmlReader::lookup_namespace(Name& name)
   {
   for (const Mapping& mapping : boost::adaptors::reverse(ns_mappings))
     {
     if (name.prefix == mapping.prefix)
       {
-      name.namespace_uri = &mapping.namespace_uri;
+      name.namespace_uri = mapping.namespace_uri;
       return;
       }
     }
-  name.namespace_uri = &empty_string;
+  name.namespace_uri.clear();
   }
 
 std::size_t XmlReader::push_namespaces()
@@ -112,7 +110,7 @@ std::string XmlReader::name() const
 
 std::string XmlReader::namespace_uri() const
   {
-  return *current_name.namespace_uri;
+  return current_name.namespace_uri;
   }
 
 std::string XmlReader::attribute(
@@ -121,12 +119,12 @@ std::string XmlReader::attribute(
   {
   for (const Attribute& attr : attributes)
     {
-    if (attr.name.local == name && *attr.name.namespace_uri == namespace_uri)
+    if (attr.name.local == name && attr.name.namespace_uri == namespace_uri)
       {
       return attr.value;
       }
     }
-  return empty_string;
+  return std::string();
   }
 
 void XmlReader::skip()
