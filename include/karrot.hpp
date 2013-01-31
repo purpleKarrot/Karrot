@@ -12,7 +12,6 @@
 #include <karrot.h>
 #include <functional>
 #include <memory>
-#include <vector>
 
 namespace Karrot
 {
@@ -83,7 +82,26 @@ class Implementation
 class Driver
   {
   public:
-    typedef std::vector<const char*> Fields;
+    class Fields
+      {
+      private:
+        Fields(char const * const *&fields, std::size_t &size)
+            : fields(fields), size(size)
+          {
+          }
+      public:
+        template<std::size_t Size>
+        Fields& operator=(const char* const (&fields)[Size])
+          {
+          this->fields = fields;
+          this->size = Size;
+          return *this;
+          }
+      private:
+        char const *const *&fields;
+        std::size_t &size;
+        friend class Engine;
+      };
   public:
     virtual ~Driver()
       {
@@ -92,9 +110,8 @@ class Driver
       {
       return 0;
       }
-    virtual Fields fields() const
+    virtual void fields(Fields& out) const
       {
-      return std::vector<const char*>();
       }
     virtual void filter(Dictionary const& fields, AddFun const& add)
       {
@@ -119,9 +136,9 @@ class DriverDecorator: public Driver
       {
       return component->namespace_uri();
       }
-    Fields fields() const //override
+    void fields(Fields& out) const //override
       {
-      return component->fields();
+      component->fields(out);
       }
     void filter(Dictionary const& fields, AddFun const& add) //override
       {
@@ -166,21 +183,22 @@ class Engine
     void add_driver(char const *name, std::unique_ptr<Driver>&& driver)
       {
       const char *namespace_uri = driver->namespace_uri();
-      const std::vector<const char*> fields = driver->fields();
-      Driver *pdriver = driver.release();
       KDriver kdriver =
         {
         namespace_uri,
-        &fields[0],
-        fields.size(),
+        nullptr,
+        0,
         download_fun,
-        pdriver,
+        driver.get(),
         destroy_fun,
         filter_fun,
-        pdriver,
+        driver.get(),
         nullptr
         };
+      Driver::Fields fields(kdriver.fields, kdriver.fields_size);
+      driver->fields(fields);
       k_engine_add_driver(self, name, &kdriver);
+      driver.release();
       }
     void add_request(const char* url, bool source)
       {

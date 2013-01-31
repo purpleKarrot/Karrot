@@ -51,7 +51,7 @@ class PKDriver: public Driver
       }
   private:
     const char* namespace_uri() const; //override
-    Fields fields() const; //override
+    void fields(Fields& out) const; //override
     void filter(Dictionary const& fields, AddFun const& add); //override
     void download(const Implementation& impl, bool requested); //override
   private:

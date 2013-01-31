@@ -50,15 +50,16 @@ const char* Archive::namespace_uri() const
   return "http://purplekarrot.net/2013/archive";
   }
 
-Driver::Fields Archive::fields() const
+void Archive::fields(Fields& out) const
   {
-  return
+  static const char* const fields_instance[] =
     {
     "sysname", "*",
     "machine", "*",
     "href", nullptr,
     "checksum", nullptr
     };
+  out = fields_instance;
   }
 
 static int progress(void *clientp, double total, double now, double t, double n)

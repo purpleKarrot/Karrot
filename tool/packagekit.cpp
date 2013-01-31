@@ -68,13 +68,14 @@ const char* PKDriver::namespace_uri() const
   return "http://purplekarrot.net/2013/packagekit";
   }
 
-Driver::Fields PKDriver::fields() const
+void PKDriver::fields(Fields &out) const
   {
-  return
+  static const char* const fields_instance[] =
     {
     "distro", "*",
     "name", nullptr
     };
+  out = fields_instance;
   }
 
 void PKDriver::filter(Dictionary const& fields, AddFun const& add)
