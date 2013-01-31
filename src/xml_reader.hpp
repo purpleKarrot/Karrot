@@ -47,7 +47,7 @@ class XmlReader: boost::noncopyable
       {
       std::string prefix;
       std::string local;
-      const std::string* namespace_uri;
+      std::string namespace_uri;
       };
     struct Tag
       {
