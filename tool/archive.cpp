@@ -45,6 +45,11 @@ Archive::Archive()
 #endif
   }
 
+const char* Archive::name() const
+  {
+  return "archive";
+  }
+
 const char* Archive::namespace_uri() const
   {
   return "http://purplekarrot.net/2013/archive";

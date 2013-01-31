@@ -94,25 +94,24 @@ int main(int argc, char* argv[])
     CMake::Listsfile listsfile;
 
 #ifdef USE_ARCHIVE
-    engine.add_driver("archive",
+    engine.add_driver(
         make_driver<CMake::Injector>(listsfile,
             make_driver<Archive>()));
 #endif
 
 #ifdef USE_PACKAGEKIT
     PackageKit package_kit;
-    engine.add_driver("packagekit",
-        make_driver<PKDriver>(package_kit));
+    engine.add_driver(make_driver<PKDriver>(package_kit));
 #endif
 
 #ifdef USE_GIT
-    engine.add_driver("git",
+    engine.add_driver(
         make_driver<CMake::Injector>(listsfile,
             make_driver<Git>()));
 #endif
 
 #ifdef USE_SUBVERSION
-    engine.add_driver("subversion",
+    engine.add_driver(
         make_driver<CMake::Injector>(listsfile,
             make_driver<Subversion>()));
 #endif

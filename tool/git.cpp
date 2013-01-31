@@ -115,6 +115,11 @@ static int cred_acquire(git_cred **cred, const char* url, unsigned int allowed_t
 namespace Karrot
 {
 
+char const * Git::name() const
+  {
+  return "git";
+  }
+
 void Git::download(const Implementation& impl, bool requested)
   {
   std::string href = impl.values()["href"];

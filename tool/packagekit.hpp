@@ -50,6 +50,7 @@ class PKDriver: public Driver
       {
       }
   private:
+    const char* name() const; //override
     const char* namespace_uri() const; //override
     void fields(Fields& out) const; //override
     void filter(Dictionary const& fields, AddFun const& add); //override

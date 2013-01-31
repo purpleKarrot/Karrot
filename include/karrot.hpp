@@ -111,6 +111,7 @@ class Driver
     virtual ~Driver()
       {
       }
+    virtual const char* name() const = 0;
     virtual const char* namespace_uri() const
       {
       return 0;
@@ -121,9 +122,7 @@ class Driver
     virtual void filter(Dictionary const& fields, AddFun const& add)
       {
       }
-    virtual void download(Implementation const& impl, bool requested)
-      {
-      }
+    virtual void download(Implementation const& impl, bool requested) = 0;
   };
 
 class DriverDecorator: public Driver
@@ -137,6 +136,10 @@ class DriverDecorator: public Driver
       {
       }
   protected:
+    const char* name() const //override
+      {
+      return component->name();
+      }
     const char* namespace_uri() const //override
       {
       return component->namespace_uri();
@@ -185,11 +188,13 @@ class Engine
       k_engine_free(self);
       }
   public:
-    void add_driver(char const *name, std::unique_ptr<Driver>&& driver)
+    void add_driver(std::unique_ptr<Driver>&& driver)
       {
+      const char *name = driver->name();
       const char *namespace_uri = driver->namespace_uri();
       KDriver kdriver =
         {
+        name,
         namespace_uri,
         nullptr,
         0,
@@ -202,7 +207,7 @@ class Engine
         };
       Driver::Fields fields(kdriver.fields, kdriver.fields_size);
       driver->fields(fields);
-      k_engine_add_driver(self, name, &kdriver);
+      k_engine_add_driver(self, &kdriver);
       driver.release();
       }
     void add_request(const char* url, bool source)

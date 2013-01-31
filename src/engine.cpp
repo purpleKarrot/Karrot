@@ -39,9 +39,11 @@ void k_engine_free(KEngine *self)
   delete self;
   }
 
-void k_engine_add_driver(KEngine *self, char const *name, KDriver *driver)
+void k_engine_add_driver(KEngine *self, KDriver *driver)
   {
-  self->package_handler.add(name, driver);
+  assert(driver);
+  assert(driver->name);
+  self->package_handler.add(driver->name, driver);
   }
 
 void k_engine_add_request(KEngine *self, char const *url_string, int source)

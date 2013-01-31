@@ -63,6 +63,11 @@ void PackageKit::install_queued()
   karrot_package_kit_install(self, list.data(), list.size());
   }
 
+const char* PKDriver::name() const
+  {
+  return "packagekit";
+  }
+
 const char* PKDriver::namespace_uri() const
   {
   return "http://purplekarrot.net/2013/packagekit";

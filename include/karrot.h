@@ -64,6 +64,7 @@ k_impl_get_values (KImplementation const *self);
 
 struct _KDriver
   {
+  char const *name;
   char const *namespace_uri;
   char const *const *fields;
   size_t fields_size;
@@ -79,7 +80,7 @@ KARROT_API KEngine *
 k_engine_new (void);
 
 KARROT_API void
-k_engine_add_driver (KEngine *self, char const *name, KDriver *driver);
+k_engine_add_driver (KEngine *self, KDriver *driver);
 
 KARROT_API void
 k_engine_add_request (KEngine *self, char const *url, int source);
