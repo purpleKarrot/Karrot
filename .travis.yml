@@ -15,20 +15,22 @@ compiler:
 env:
   global:
     - OPTIONS="-DKARROT_USE_ARCHIVE=ON -DKARROT_USE_PACKAGEKIT=ON -DKARROT_USE_SUBVERSION=ON"
+    - DEPENDS="libarchive-dev valac-0.16 libsvn-dev"
   matrix:
     - BUILD_TYPE=Debug
     - BUILD_TYPE=Release
 
 matrix:
   include:
-    - compiler: i586-mingw32msvc-gcc
+    - compiler: i686-w64-mingw32-gcc
       env:
         - BUILD_TYPE=Release
         - OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../CMake/i686-w64-mingw32.cmake"
+        - DEPENDS="g++-mingw-w64-i686"
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq --no-install-recommends docbook-xml docbook-xsl doxygen libarchive-dev libboost-filesystem-dev libboost-program-options-dev libsvn-dev re2c valac-0.16 xsltproc
+  - sudo apt-get install -qq --no-install-recommends $DEPENDS docbook-xml docbook-xsl doxygen libboost-filesystem-dev libboost-program-options-dev re2c xsltproc
 
 script:
   - mkdir _build
