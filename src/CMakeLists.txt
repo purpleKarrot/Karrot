@@ -22,8 +22,10 @@ if(NOT WIN32)
   endif()
 endif()
 
-find_package(CURL REQUIRED)
-include_directories(${CURL_INCLUDE_DIRS})
+if(NOT WIN32)
+  find_package(CURL REQUIRED)
+  include_directories(${CURL_INCLUDE_DIRS})
+endif()
 
 #set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost "1.46" REQUIRED COMPONENTS filesystem system)

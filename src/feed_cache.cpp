@@ -11,10 +11,11 @@
 #include "quark.hpp"
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <curl/curl.h>
 
 #ifdef _WIN32
 #  include <shlobj.h>
+#else
+#  include <curl/curl.h>
 #endif
 
 namespace Karrot
