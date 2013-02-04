@@ -214,6 +214,10 @@ class Engine
       {
       k_engine_add_request(self, url, source);
       }
+    void dot_filename(char const *filename)
+      {
+      k_engine_dot_filename (self, filename);
+      }
     bool run()
       {
       return k_engine_run(self) != 0;

@@ -85,6 +85,9 @@ k_engine_add_driver (KEngine *self, KDriver *driver);
 KARROT_API void
 k_engine_add_request (KEngine *self, char const *url, int source);
 
+KARROT_API void
+k_engine_dot_filename (KEngine *self, char const *filename);
+
 KARROT_API int
 k_engine_run (KEngine *self);
 

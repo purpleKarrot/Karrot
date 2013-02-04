@@ -9,6 +9,7 @@
 #include <karrot.h>
 #include "database.hpp"
 #include <cstring>
+#include <fstream>
 #include <algorithm>
 #include <boost/exception/diagnostic_information.hpp>
 
@@ -26,6 +27,7 @@ struct _KEngine
   Karrot::PackageHandler package_handler;
   Karrot::Requests requests;
   Karrot::Database database;
+  std::string dot_filename;
   };
 
 KEngine *
@@ -59,6 +61,39 @@ void k_engine_add_request(KEngine *self, char const *url_string, int source)
   self->requests.push_back(std::move(spec));
   }
 
+void k_engine_dot_filename(KEngine *self, char const *filename)
+  {
+  assert(filename);
+  self->dot_filename = filename;
+  }
+
+static void write_graphviz(std::string const& filename,
+    std::vector<int> const& model, Karrot::Database const& database)
+  {
+  std::ofstream dot_file(filename);
+  dot_file << "digraph G {\n";
+  for (std::size_t i = 0; i < model.size(); ++i)
+    {
+    auto& entry = database[model[i]];
+    dot_file << "  " << i << " ["
+      << "label=\"" << entry.impl.name << ' ' << entry.impl.version << "\", "
+      << "URL=\"http://" << entry.id << "\""
+      << "];" << std::endl;
+      ;
+    for (std::size_t k = 0; k < model.size(); ++k)
+      {
+      for (auto& spec : database[model[k]].depends)
+        {
+        if (satisfies(entry, spec))
+          {
+          dot_file << "  " << k << " -> " << i << ";\n";
+          }
+        }
+      }
+    }
+  dot_file << "}\n";
+  }
+
 static int engine_run(KEngine *self)
   {
   using namespace Karrot;
@@ -81,6 +116,10 @@ static int engine_run(KEngine *self)
   if (!solve(self->database, self->requests, model))
     {
     return false;
+    }
+  if (!self->dot_filename.empty())
+    {
+    write_graphviz(self->dot_filename, model, self->database);
     }
   for (int i : model)
     {

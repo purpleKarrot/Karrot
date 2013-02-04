@@ -40,6 +40,7 @@ std::unique_ptr<Driver> make_driver(Args&&... args)
 
 int main(int argc, char* argv[])
   {
+  std::string dotfile;
   std::string machine;
   std::string sysname;
   std::vector<std::string> request_urls;
@@ -50,6 +51,7 @@ int main(int argc, char* argv[])
     allowed_options.add_options()
       ("help,h", "produce help message")
       ("version,v", "print version string")
+      ("dotfile,d", po::value(&dotfile), "output graphviz dot file")
       ("sysname,s", po::value(&sysname), "the system name")
       ("machine,m", po::value(&machine), "the hardware name")
       ;
@@ -119,6 +121,10 @@ int main(int argc, char* argv[])
     for (const std::string& url : request_urls)
       {
       engine.add_request(url.c_str(), true);
+      }
+    if (!dotfile.empty())
+      {
+      engine.dot_filename(dotfile.c_str());
       }
     if (!engine.run())
       {
