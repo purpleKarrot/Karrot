@@ -6,6 +6,11 @@
 #   http://www.boost.org/LICENSE_1_0.txt
 #=============================================================================
 
+option(KARROT_BUILD_TOOL "Build the Karrot command line tool" ON)
+if(NOT KARROT_BUILD_TOOL)
+  return()
+endif()
+
 option(KARROT_USE_ARCHIVE    "Build with Archive support"    OFF)
 option(KARROT_USE_GIT        "Build with Git support"        OFF)
 option(KARROT_USE_PACKAGEKIT "Build with PackageKit support" OFF)

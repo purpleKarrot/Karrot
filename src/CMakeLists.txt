@@ -28,7 +28,7 @@ if(NOT WIN32)
 endif()
 
 #set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost "1.46" REQUIRED COMPONENTS filesystem system)
+find_package(Boost "1.46" REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 re2c_target(
@@ -99,10 +99,9 @@ endif()
 
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 
-target_link_libraries(karrot LINK_PRIVATE
-  ${CURL_LIBRARIES}
-  ${Boost_LIBRARIES}
-  )
+if(NOT WIN32)
+  target_link_libraries(karrot LINK_PRIVATE ${CURL_LIBRARIES})
+endif()
 
 install(TARGETS karrot EXPORT karrot_export
   ARCHIVE
