@@ -11,6 +11,14 @@ option(KARROT_USE_GIT        "Build with Git support"        OFF)
 option(KARROT_USE_PACKAGEKIT "Build with PackageKit support" OFF)
 option(KARROT_USE_SUBVERSION "Build with Subversion support" OFF)
 
+#set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost "1.46" REQUIRED COMPONENTS
+  filesystem
+  program_options
+  system
+  )
+include_directories(${Boost_INCLUDE_DIRS})
+
 set(sources)
 set(libraries)
 

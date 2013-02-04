@@ -6,8 +6,6 @@
 #   http://www.boost.org/LICENSE_1_0.txt
 #=============================================================================
 
-include_directories(../src)
-
 set(test_list
   quark
   url
@@ -19,7 +17,6 @@ create_test_sourcelist(test_sources
   )
 
 add_executable(karrot_test_driver ${test_sources})
-target_link_libraries(karrot_test_driver karrot)
 
 foreach(test IN LISTS test_list)
   add_test(NAME karrot.${test} COMMAND $<TARGET_FILE:karrot_test_driver> ${test})

@@ -10,6 +10,25 @@ find_package(RE2C REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_DEBUG_POSTFIX "_d")
 
+if(NOT WIN32)
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-fvisibility=hidden VISIBILITY_HIDDEN)
+  check_cxx_compiler_flag(-fvisibility-inlines-hidden VISIBILITY_INLINES_HIDDEN)
+  if(VISIBILITY_HIDDEN)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+  endif()
+  if(VISIBILITY_INLINES_HIDDEN)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
+  endif()
+endif()
+
+find_package(CURL REQUIRED)
+include_directories(${CURL_INCLUDE_DIRS})
+
+#set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost "1.46" REQUIRED COMPONENTS filesystem system)
+include_directories(${Boost_INCLUDE_DIRS})
+
 re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/query_re2c.hpp -s

@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "quark.hpp"
+#include "../src/quark.cpp"
 #include <boost/detail/lightweight_test.hpp>
 
 int quark(int argc, char* argv[])

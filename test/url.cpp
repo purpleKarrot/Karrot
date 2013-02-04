@@ -6,8 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "url.hpp"
-#include "quark.hpp"
+#include "../src/url.cpp"
+#include "../src/quark.hpp"
 #include <boost/detail/lightweight_test.hpp>
 
 int url(int argc, char* argv[])

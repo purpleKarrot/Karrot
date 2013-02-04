@@ -12,13 +12,16 @@ project(Karrot CXX)
 list(APPEND CMAKE_MODULE_PATH "${Karrot_SOURCE_DIR}/CMake")
 
 enable_testing()
+include_directories(include)
 
+option(BUILD_SHARED_LIBS "build shared libraries" ON)
 if(BUILD_SHARED_LIBS)
   add_definitions(-DKARROT_DYN_LINK)
 endif()
 
 if(MSVC)
   add_definitions(
+    -DBOOST_ALL_NO_LIB # no autolinking please
     -D_CRT_SECURE_NO_WARNINGS
     -D_SCL_SECURE_NO_WARNINGS
     )
@@ -40,23 +43,6 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     add_definitions(-Doverride)
   endif()
 endif()
-
-find_package(CURL REQUIRED)
-
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost "1.46" REQUIRED COMPONENTS
-  filesystem
-  program_options
-  system
-  )
-
-add_definitions(-DBOOST_ALL_NO_LIB)
-
-include_directories(
-  ${CURL_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  include
-  )
 
 add_subdirectory(doc)
 add_subdirectory(src)
