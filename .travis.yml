@@ -22,14 +22,16 @@ env:
     - BUILD_TYPE=Release
 
 matrix:
-  include:
+  allow_failures:
     - compiler: clang
+  include:
+    - compiler: gcc
       env:
         - BUILD_TYPE=Release
         - OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../CMake/i686-w64-mingw32.cmake"
-        - DEPENDS="g++-mingw-w64-i686"
+        - DEPENDS="gcc-mingw-w64-i686 g++-mingw-w64-i686"
         - TARGETS="ALL test"
-    - compiler: clang
+    - compiler: gcc
       env:
         - BUILD_TYPE=Release
         - OPTIONS="-DKARROT_BUILD_DOCS=ON"
