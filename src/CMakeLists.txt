@@ -113,16 +113,22 @@ SET(Karrot_INCLUDE_DIRS \"\${_DIR}/include\")
 SET(Karrot_LIBRARIES karrot)
 ")
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file("${ver_file}"
-  VERSION "0.1.0"
-  COMPATIBILITY SameMajorVersion
-  )
-
-install(FILES "${cfg_file}" "${ver_file}"
+install(FILES "${cfg_file}"
   COMPONENT dev
   DESTINATION cmake
   )
+
+if(NOT CMAKE_VERSION VERSION_LESS "2.8.8")
+  include(CMakePackageConfigHelpers)
+  write_basic_package_version_file("${ver_file}"
+    VERSION "0.1.0"
+    COMPATIBILITY SameMajorVersion
+    )
+  install(FILES "${ver_file}"
+    COMPONENT dev
+    DESTINATION cmake
+    )
+endif()
 
 install(FILES "${Karrot_SOURCE_DIR}/include/karrot.h"
   COMPONENT dev
