@@ -22,8 +22,8 @@ class Delegate
     typedef void (*Destroy)(void*);
     typedef void *Target;
   public:
-    Delegate(Function function, Target target, Destroy destroy)
-        : function(function), target(target), destroy(destroy)
+    Delegate(Function function, Target target, Destroy destroy) :
+        function(function), target(target), destroy(destroy)
       {
       }
     ~Delegate()
@@ -33,15 +33,31 @@ class Delegate
         destroy(target);
         }
       }
+  public:
+    Delegate(Delegate&& other) :
+        function(other.function), target(other.target), destroy(other.destroy)
+      {
+      other.function = nullptr;
+      other.destroy = nullptr;
+      }
+    Delegate& operator=(Delegate&& other)
+      {
+      function = other.function;
+      target = other.target;
+      destroy = other.destroy;
+      other.function = nullptr;
+      other.destroy = nullptr;
+      return *this;
+      }
+  public:
+    Delegate(Delegate const&) = delete;
+    Delegate& operator=(Delegate const&) = delete;
+  public:
     Ret operator()(Args... args) const
       {
       assert(function);
       /*return*/ function(args..., target);
       }
-    Delegate(Delegate&&) = default;
-    Delegate(Delegate const&) = delete;
-    Delegate& operator=(Delegate&&) = default;
-    Delegate& operator=(Delegate const&) = delete;
   private:
     Function function;
     Target target;
