@@ -9,7 +9,8 @@
 #ifndef KARROT_PACKAGE_HANDLER_HPP
 #define KARROT_PACKAGE_HANDLER_HPP
 
-#include <map>
+#include <vector>
+#include <algorithm>
 #include "driver.hpp"
 
 namespace Karrot
@@ -18,21 +19,25 @@ namespace Karrot
 class PackageHandler
   {
   public:
-    void add(std::string&& name, Driver&& driver)
+    void add(Driver&& driver)
       {
-      handlers.insert(std::make_pair(std::move(name), std::move(driver)));
+      handlers.push_back(std::move(driver));
       }
     Driver const * get(const std::string& name) const
       {
-      auto it = handlers.find(name);
+      auto it = std::find_if(begin(handlers), end(handlers),
+        [&name](Driver const& driver) -> bool
+        {
+        return name == driver.name();
+        });
       if (it != handlers.end())
         {
-        return &it->second;
+        return &*it;
         }
-      return 0;
+      return nullptr;
       }
   private:
-    std::map<std::string, Driver> handlers;
+    std::vector<Driver> handlers;
   };
 
 } // namespace Karrot

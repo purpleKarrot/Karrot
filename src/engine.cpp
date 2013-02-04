@@ -43,7 +43,7 @@ void k_engine_add_driver(KEngine *self, KDriver *driver)
   {
   assert(driver);
   assert(driver->name);
-  self->package_handler.add(driver->name, driver);
+  self->package_handler.add(driver);
   }
 
 void k_engine_add_request(KEngine *self, char const *url_string, int source)

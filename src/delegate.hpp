@@ -38,6 +38,10 @@ class Delegate
       assert(function);
       /*return*/ function(args..., target);
       }
+    Delegate(Delegate&&) = default;
+    Delegate(Delegate const&) = delete;
+    Delegate& operator=(Delegate&&) = default;
+    Delegate& operator=(Delegate const&) = delete;
   private:
     Function function;
     Target target;
