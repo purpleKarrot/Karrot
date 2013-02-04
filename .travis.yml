@@ -8,7 +8,9 @@
 
 language: cpp
 
-compiler: gcc
+compiler:
+  - clang
+  - gcc
 
 env:
   - BUILD_TYPE=Debug
