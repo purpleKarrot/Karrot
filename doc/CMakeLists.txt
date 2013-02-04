@@ -6,6 +6,11 @@
 #   http://www.boost.org/LICENSE_1_0.txt
 #=============================================================================
 
+option(KARROT_BUILD_DOCS "Build documentation" OFF)
+if(NOT KARROT_BUILD_DOCS)
+  return()
+endif()
+
 find_package(Doxygen  REQUIRED)
 find_package(XSLTPROC REQUIRED)
 
