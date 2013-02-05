@@ -44,7 +44,7 @@ before_install:
 script:
   - mkdir _build
   - cd _build
-  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE $OPTIONS .. && make $TARGETS
+  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE $OPTIONS .. && make -k $TARGETS
 
 branches:
   only:
