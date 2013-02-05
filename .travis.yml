@@ -39,7 +39,7 @@ matrix:
         - TARGETS="documentation"
 
 before_install:
-  - sudo apt-get install --qq --no-install-recommends $DEPENDS libboost-filesystem-dev libboost-program-options-dev re2c
+  - sudo apt-get install -qq --no-install-recommends $DEPENDS libboost-filesystem-dev libboost-program-options-dev re2c
 
 script:
   - mkdir _build
