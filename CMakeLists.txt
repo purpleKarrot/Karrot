@@ -27,6 +27,17 @@ if(MSVC)
     )
 endif()
 
+if(CMAKE_CROSSCOMPILING AND CMAKE_HOST_UNIX)
+  set(Boost_INCLUDE_DIR "${CMAKE_BINARY_DIR}/boost_root")
+  if(NOT EXISTS "${Boost_INCLUDE_DIR}/boost")
+    file(MAKE_DIRECTORY "${Boost_INCLUDE_DIR}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+      "/usr/include/boost"
+      "${Boost_INCLUDE_DIR}/boost"
+      )
+  endif()
+endif()
+
 if(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
   set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libstdc++")
   set(CMAKE_CXX_LINK_FLAGS "-std=c++11 -stdlib=libstdc++")
