@@ -6,6 +6,9 @@
 #   http://www.boost.org/LICENSE_1_0.txt
 #=============================================================================
 
+find_package(Boost "1.46" REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
 set(test_list
   quark
   url
