@@ -29,6 +29,6 @@ endif()
 
 foreach(test IN LISTS test_list)
   add_test(NAME karrot.${test}
-    COMMAND ${test_launcher} $<TARGET_FILE:karrot_test_driver ${test}
+    COMMAND ${test_launcher} $<TARGET_FILE:karrot_test_driver> ${test}
     )
 endforeach()
