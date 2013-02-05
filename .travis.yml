@@ -34,7 +34,7 @@ matrix:
     - compiler: gcc
       env:
         - BUILD_TYPE=Release
-        - OPTIONS="-DKARROT_BUILD_DOCS=ON"
+        - OPTIONS="-DKARROT_BUILD_DOCS=ON -DKARROT_BUILD_TOOL=OFF"
         - DEPENDS="docbook-xml docbook-xsl doxygen xsltproc"
         - TARGETS="documentation"
 

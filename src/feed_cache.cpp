@@ -13,7 +13,11 @@
 #include <boost/filesystem/operations.hpp>
 
 #ifdef _WIN32
-#  include <shlobj.h>
+#  include "windows/library.hpp"
+
+typedef HRESULT (*GetKnownFolderPath)(GUID const&, DWORD, HANDLE, PWSTR*);
+typedef HRESULT (*GetFolderPath)(HWND, int, HANDLE, DWORD, LPWSTR);
+
 #else
 #  include <curl/curl.h>
 #endif
@@ -66,15 +70,40 @@ size_t write_fun(char* ptr, size_t size, size_t nmemb, void* userdata)
 static boost::filesystem::path cache_dir()
   {
 #ifdef _WIN32
-  PWSTR pwstr;
-  HRESULT result = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &pwstr);
-  if (!FAILED(result))
+  Library shell32("Shell32.dll");
+  GetKnownFolderPath get_known_folder = nullptr;
+  shell32.load("SHGetKnownFolderPath", get_known_folder);
+  static const GUID local_app_data =
     {
+    0xF1B32785,
+    0x6FBA,
+    0x4FCF,
+    {0x9D, 0x55, 0x7B, 0x8E, 0x7F, 0x15, 0x70, 0x91}
+    };
+  if(get_known_folder)
+    {
+    PWSTR pwstr;
+    HRESULT result = get_known_folder(local_app_data, 0, NULL, &pwstr);
+    if (FAILED(result))
+      {
+      std::error_code error(GetLastError(), std::system_category());
+      throw std::system_error(error);
+      }
     boost::filesystem::path cache(pwstr);
     CoTaskMemFree(pwstr);
     return cache;
     }
-#endif
+  GetFolderPath get_folder = nullptr;
+  shell32.require("SHGetFolderPathW", get_folder);
+  wchar_t path[MAX_PATH];
+  HRESULT result = get_folder(0, 0x001c, 0, 0, path);
+  if (FAILED(result))
+    {
+    std::error_code error(GetLastError(), std::system_category());
+    throw std::system_error(error);
+    }
+  return path;
+#else
   const char* cache = getenv("XDG_CACHE_HOME");
   if (cache)
     {
@@ -86,6 +115,7 @@ static boost::filesystem::path cache_dir()
     return boost::filesystem::path(home) / ".config";
     }
   return boost::filesystem::current_path();
+#endif
   }
 
 FeedCache::FeedCache() :
