@@ -22,11 +22,13 @@ create_test_sourcelist(test_sources
 add_executable(karrot_test_driver ${test_sources})
 
 if(WIN32 AND CMAKE_HOST_UNIX)
-  set(test_driver "wine $<TARGET_FILE:karrot_test_driver>")
+  find_program(test_launcher wine)
 else()
-  set(test_driver "$<TARGET_FILE:karrot_test_driver>")
+  set(test_launcher)
 endif()
 
 foreach(test IN LISTS test_list)
-  add_test(NAME karrot.${test} COMMAND ${test_driver} ${test})
+  add_test(NAME karrot.${test}
+    COMMAND ${test_launcher} $<TARGET_FILE:karrot_test_driver ${test}
+    )
 endforeach()
