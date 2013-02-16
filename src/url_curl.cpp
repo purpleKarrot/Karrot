@@ -10,9 +10,9 @@
 
 #include "url.hpp"
 #include "quark.hpp"
+#include <fstream>
 #include <memory>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
 #include <curl/curl.h>
 
 namespace
@@ -54,8 +54,7 @@ std::string url_to_filename(const Karrot::Url& url)
 size_t write_fun(char* ptr, size_t size, size_t nmemb, void* userdata)
   {
   assert(size == 1);
-  using boost::filesystem::ofstream;
-  ofstream& file = *reinterpret_cast<ofstream*>(userdata);
+  std::ofstream& file = *reinterpret_cast<std::ofstream*>(userdata);
   file.write(ptr, static_cast<std::streamsize>(nmemb));
   return nmemb;
   }
@@ -122,7 +121,7 @@ std::string download(Url const& url)
     static Downloader downloader;
     try
       {
-      boost::filesystem::ofstream file(filepath, std::ios::binary);
+      std::ofstream file(filepath.string(), std::ios::binary);
       downloader.download(url, file);
       }
     catch (...)
