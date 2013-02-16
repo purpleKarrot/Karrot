@@ -74,6 +74,7 @@ add_library(karrot
   spec.hpp
   url.cpp
   url.hpp
+  url_curl.cpp
   url_win32.cpp
   variants.cpp
   variants.hpp
@@ -112,7 +113,7 @@ if(WIN32)
 endif()
 
 if(WIN32)
-  target_link_libraries(karrot LINK_PRIVATE Shlwapi)
+  target_link_libraries(karrot LINK_PRIVATE shlwapi)
 else()
   target_link_libraries(karrot LINK_PRIVATE ${CURL_LIBRARIES})
 endif()

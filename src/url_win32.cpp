@@ -6,6 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
+#ifdef _WIN32
+
 #include "url.hpp"
 #include "quark.hpp"
 #include <windows.h>
@@ -320,3 +322,5 @@ std::string download(Url const& url)
   }
 
 } // namespace Karrot
+
+#endif /* _WIN32 */
