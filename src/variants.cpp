@@ -9,39 +9,42 @@
 #include "variants.hpp"
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/fusion/adapted/std_pair.hpp>
+#include <boost/spirit/include/qi_nonterminal.hpp>
+#include <boost/spirit/include/qi_operator.hpp>
+#include <boost/spirit/include/qi_parse.hpp>
+#include <boost/spirit/include/qi_char.hpp>
 
 namespace Karrot
 {
 
+namespace qi = boost::spirit::qi;
+
+template<typename Iterator>
+struct DictionaryGrammar: qi::grammar<Iterator, KDictionary()>
+  {
+  DictionaryGrammar() : DictionaryGrammar::base_type(dict)
+    {
+    dict = entry % ';';
+    entry = key >> '=' >> value;
+    key = qi::char_("a-zA-Z") >> *qi::char_("a-zA-Z_0-9");
+    value = +qi::char_("a-zA-Z_0-9");
+    }
+  qi::rule<Iterator, KDictionary()> dict;
+  qi::rule<Iterator, std::pair<std::string, std::string>()> entry;
+  qi::rule<Iterator, std::string()> key, value;
+  };
+
 KDictionary parse_variant(const std::string& string)
   {
-  if (string.empty())
+  KDictionary result;
+  auto begin = string.begin();
+  DictionaryGrammar<decltype(begin)> grammar;
+  if (!qi::parse(begin, string.end(), grammar, result))
     {
-    return KDictionary();
+    throw std::runtime_error("invalid variant: " + string);
     }
-  const char* str = string.c_str();
-  KDictionary builder;
-next:
-  std::size_t length = std::strcspn(str, "=;");
-  std::string key(str, str + length);
-  if (str[length] != '=')
-    {
-    throw std::runtime_error(std::string("invalid dict: ") + str);
-    }
-  str += length + 1;
-  length = std::strcspn(str, "=;");
-  std::string val(str, str + length);
-  if (str[length] == '=')
-    {
-    throw std::runtime_error(std::string("invalid dict: ") + str);
-    }
-  builder[key] = val;
-  if (str[length] == ';')
-    {
-    str += length + 1;
-    goto next;
-    }
-  return builder;
+  return result;
   }
 
 static void r_variants_recurse(
