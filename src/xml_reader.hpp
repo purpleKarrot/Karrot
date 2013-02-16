@@ -10,7 +10,6 @@
 #define KARROT_XML_READER_HPP
 
 #include <boost/noncopyable.hpp>
-#include <boost/filesystem/path.hpp>
 #include <string>
 #include <vector>
 
@@ -31,7 +30,7 @@ enum XmlToken
 class XmlReader: boost::noncopyable
   {
   public:
-    XmlReader(const boost::filesystem::path& filepath);
+    XmlReader(std::string const& filepath);
     bool read();
     XmlToken token() const;
     std::string name() const;

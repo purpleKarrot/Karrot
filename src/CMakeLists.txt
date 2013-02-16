@@ -54,8 +54,6 @@ add_library(karrot
   dictionary.hpp
   driver.hpp
   engine.cpp
-  feed_cache.cpp
-  feed_cache.hpp
   feed_parser.cpp
   feed_parser.hpp
   feed_queue.hpp
@@ -76,6 +74,7 @@ add_library(karrot
   spec.hpp
   url.cpp
   url.hpp
+  url_win32.cpp
   variants.cpp
   variants.hpp
   vercmp.cpp
@@ -87,6 +86,8 @@ add_library(karrot
   karrot.rc
   )
 
+source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
+
 set_property(TARGET karrot APPEND PROPERTY
   COMPILE_DEFINITIONS "KARROT_BUILD=1"
   )
@@ -97,9 +98,22 @@ if(NOT BUILD_SHARED_LIBS)
     )
 endif()
 
-source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
+if(WIN32)
+  if(BUILD_SHARED_LIBS)
+    set_target_properties(karrot PROPERTIES
+      IMPORT_PREFIX ""
+      PREFIX ""
+      )
+  else()
+    set_target_properties(karrot PROPERTIES
+      PREFIX "lib"
+      )
+  endif()
+endif()
 
-if(NOT WIN32)
+if(WIN32)
+  target_link_libraries(karrot LINK_PRIVATE Shlwapi)
+else()
   target_link_libraries(karrot LINK_PRIVATE ${CURL_LIBRARIES})
 endif()
 

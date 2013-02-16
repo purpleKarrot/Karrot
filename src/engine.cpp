@@ -11,11 +11,11 @@
 #include <cstring>
 #include <fstream>
 #include <algorithm>
+#include <stdexcept>
 #include <boost/exception/diagnostic_information.hpp>
 
 #include "solve.hpp"
 #include "feed_queue.hpp"
-#include "feed_cache.hpp"
 #include "feed_parser.hpp"
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
@@ -23,7 +23,6 @@
 struct _KEngine
   {
   Karrot::FeedQueue feed_queue;
-  Karrot::FeedCache feed_cache;
   Karrot::PackageHandler package_handler;
   Karrot::Requests requests;
   Karrot::Database database;
@@ -101,7 +100,7 @@ static int engine_run(KEngine *self)
   while ((purl = self->feed_queue.get_next()))
     {
     const Url url(*purl); //explicit copy!
-    XmlReader xml(self->feed_cache.local_path(url));
+    XmlReader xml(download(url));
     if (!xml.start_element())
       {
       throw std::runtime_error("failed to read start of feed");

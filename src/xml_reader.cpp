@@ -9,7 +9,8 @@
 #include "xml_reader.hpp"
 #include "xml_re2c.hpp"
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
+#include <stdexcept>
 #include <boost/range/adaptor/reversed.hpp>
 
 namespace Karrot
@@ -80,13 +81,13 @@ void XmlReader::pop_tag()
 
 //#include "xml_re2c.h"
 
-XmlReader::XmlReader(const boost::filesystem::path& filepath) :
+XmlReader::XmlReader(std::string const& filepath) :
     token_(token_none), is_empty_element(false)
   {
-  boost::filesystem::ifstream stream(filepath, std::ios::binary);
+  std::ifstream stream(filepath, std::ios::binary);
   if (!stream)
     {
-    throw std::runtime_error("cannot open file " + filepath.string());
+    throw std::runtime_error("cannot open file " + filepath);
     }
   stream.unsetf(std::ios::skipws);
   stream.seekg(0, std::ios::end);

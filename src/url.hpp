@@ -9,6 +9,8 @@
 #ifndef KARROT_URL_HPP
 #define KARROT_URL_HPP
 
+#include <string>
+
 namespace Karrot
 {
 
@@ -25,6 +27,8 @@ class Url
     int query;
     int fragment;
   };
+
+std::string download(Url const& url);
 
 } // namespace Karrot
 

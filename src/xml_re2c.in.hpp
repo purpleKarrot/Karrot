@@ -6,6 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
+#include <cstdio>
+
 namespace Karrot
 {
 
@@ -200,7 +202,7 @@ bool XmlReader::parse_end_element()
     }
   if (current_name.prefix != expected.prefix || current_name.local != expected.local)
     {
-    printf("Wrong end tag! %s:%s != %s:%s\n",
+    std::printf("Wrong end tag! %s:%s != %s:%s\n",
       current_name.prefix.c_str(),
       current_name.local.c_str(),
       expected.prefix.c_str(),

@@ -11,6 +11,11 @@
 
 #include <stddef.h>
 
+#define KARROT_VER_MAJOR 0
+#define KARROT_VER_MINOR 1
+#define KARROT_VER_PATCH 0
+#define KARROT_VERSION "0.1.0"
+
 #if defined(_WIN32)
 #  define KARROT_IMPORT __declspec(dllimport)
 #  define KARROT_EXPORT __declspec(dllexport)
