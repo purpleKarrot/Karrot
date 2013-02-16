@@ -22,6 +22,10 @@ create_test_sourcelist(test_sources
 add_executable(karrot_test_driver ${test_sources})
 
 if(WIN32 AND CMAKE_HOST_UNIX)
+  target_link_libraries(karrot_test_driver
+    -static-libgcc
+    -static-libstdc++
+    )
   find_program(test_launcher wine)
 else()
   set(test_launcher)
