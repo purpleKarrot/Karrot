@@ -8,9 +8,11 @@
 
 #include <git2.h>
 #include <git2/remote.h>
+#include <boost/throw_exception.hpp>
 
 #include "git.hpp"
 
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -28,13 +30,12 @@ struct git_failure: std::runtime_error
     }
   };
 
-static inline void check_git_failure(int error)
-  {
-  if (error)
-    {
-    throw git_failure();
-    }
-  }
+#define CALL_GIT(FUNCTION, ...)                                                \
+  if (FUNCTION(__VA_ARGS__))                                                   \
+    {                                                                          \
+    BOOST_THROW_EXCEPTION(git_failure());                                      \
+    }                                                                          \
+  void(0)                                                                      \
 
 template<typename T>
 struct at_scope_exit
@@ -53,53 +54,75 @@ struct at_scope_exit
     void (*func)(T*);
   };
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#  define PRIuZ "Iu"
-#else
-#  define PRIuZ "zu"
-#endif
-
-struct progress_data
+class Progress
   {
-  git_transfer_progress fetch_progress;
-  size_t completed_steps;
-  size_t total_steps;
-  const char *path;
+  public:
+    Progress(const char *name)
+        : name{name}, steps{0, 0, 0}
+      {
+      }
+    ~Progress()
+      {
+      printf("\n");
+      }
+    void update(int step, std::size_t completed, std::size_t total)
+      {
+      assert(step < 3);
+      steps[step] = total > 0 ? (60 * completed) / total : 0;
+      }
+    void print()
+      {
+      int i = 1;
+      printf("%-16s[", name);
+      for (; i <= steps[0]; ++i)
+        {
+        printf("#");
+        }
+      for (; i <= steps[1]; ++i)
+        {
+        printf("=");
+        }
+      for (; i <= steps[2]; ++i)
+        {
+        printf("-");
+        }
+      for (; i <= 60; ++i)
+        {
+        printf(" ");
+        }
+      printf("]\r");
+      }
+  private:
+    const char *name;
+    int steps[3];
   };
 
-static void print_progress(const progress_data *pd)
+static int fetch_progress(const git_transfer_progress *stats, void *payload)
   {
-  int network_percent = (100*pd->fetch_progress.received_objects) / pd->fetch_progress.total_objects;
-  int index_percent = (100*pd->fetch_progress.indexed_objects) / pd->fetch_progress.total_objects;
-  int checkout_percent = (int)(pd->total_steps > 0 ? (100 * pd->completed_steps) / pd->total_steps : 0.f);
-  int kbytes = pd->fetch_progress.received_bytes / 1024;
-
-  printf("net %3d%% (%4d kb, %5d/%5d)  /  idx %3d%% (%5d/%5d)  /  chk %3d%% (%4" PRIuZ "/%4" PRIuZ ") %s\r",
-      network_percent, kbytes,
-      pd->fetch_progress.received_objects, pd->fetch_progress.total_objects,
-      index_percent, pd->fetch_progress.indexed_objects, pd->fetch_progress.total_objects,
-      checkout_percent,
-      pd->completed_steps, pd->total_steps,
-      pd->path);
+  Progress &progress = *reinterpret_cast<Progress*>(payload);
+  progress.update(2, stats->received_objects, stats->total_objects);
+  progress.update(1, stats->indexed_objects, stats->total_objects);
+  progress.print();
+  return 0;
   }
 
-static void fetch_progress(const git_transfer_progress *stats, void *payload)
+static void checkout_progress(
+    const char *path,
+    size_t cur,
+    size_t tot,
+    void *payload)
   {
-  progress_data *pd = (progress_data*) payload;
-  pd->fetch_progress = *stats;
-  print_progress(pd);
+  Progress &progress = *reinterpret_cast<Progress*>(payload);
+  progress.update(0, cur, tot);
+  progress.print();
   }
 
-static void checkout_progress(const char *path, size_t cur, size_t tot, void *payload)
-  {
-  progress_data *pd = (progress_data*) payload;
-  pd->completed_steps = cur;
-  pd->total_steps = tot;
-  pd->path = path;
-  print_progress(pd);
-  }
-
-static int cred_acquire(git_cred **cred, const char* url, unsigned int allowed_types, void*)
+static int cred_acquire(
+    git_cred **cred,
+    const char *url,
+    const char *username_from_url,
+    unsigned int allowed_types,
+    void *payload)
   {
   std::string username, password;
   std::cout << "cred required for " << url << std::endl;
@@ -126,15 +149,14 @@ void Git::download(const Implementation& impl, bool requested)
   std::string hash = impl.values()["tag"];
   std::string path = impl.name();
 
-  progress_data pd;
-  memset(&pd, 0, sizeof(pd));
+  Progress progress(path.c_str());
 
   git_checkout_opts checkout_opts;
   memset(&checkout_opts, 0, sizeof(checkout_opts));
   checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
   checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
   checkout_opts.progress_cb = checkout_progress;
-  checkout_opts.progress_payload = &pd;
+  checkout_opts.progress_payload = &progress;
 
   git_repository* repo = 0;
   git_remote* origin = 0;
@@ -146,7 +168,7 @@ void Git::download(const Implementation& impl, bool requested)
 
   if (git_repository_open(&repo, path.c_str()) == 0)
     {
-    check_git_failure(git_remote_load(&origin, repo, "origin"));
+    CALL_GIT(git_remote_load, &origin, repo, "origin");
     if (std::strcmp(git_remote_url(origin), href.c_str()) != 0)
       {
       throw std::runtime_error("different origin");
@@ -154,17 +176,20 @@ void Git::download(const Implementation& impl, bool requested)
     }
   else
     {
-    check_git_failure(git_repository_init(&repo, path.c_str(), false));
-    check_git_failure(git_remote_create(&origin, repo, "origin", href.c_str()));
+    CALL_GIT(git_repository_init, &repo, path.c_str(), false);
+    CALL_GIT(git_remote_create, &origin, repo, "origin", href.c_str());
     }
   git_remote_set_update_fetchhead(origin, 0);
   git_remote_set_cred_acquire_cb(origin, cred_acquire, 0);
-  check_git_failure(git_remote_connect(origin, GIT_DIRECTION_FETCH));
+  CALL_GIT(git_remote_connect, origin, GIT_DIRECTION_FETCH);
+
   at_scope_exit<git_remote> remote_disconnect(origin, git_remote_disconnect);
-  check_git_failure(git_remote_download(origin, fetch_progress, &pd));
-  check_git_failure(git_remote_update_tips(origin));
-  check_git_failure(git_revparse_single(&object, repo, hash.c_str()));
-  check_git_failure(git_checkout_tree(repo, object, &checkout_opts));
+
+  CALL_GIT(git_remote_download, origin, fetch_progress, &progress);
+  CALL_GIT(git_remote_update_tips, origin);
+  CALL_GIT(git_revparse_single, &object, repo, hash.c_str());
+  CALL_GIT(git_repository_set_head_detached, repo, git_object_id(object));
+  CALL_GIT(git_checkout_tree, repo, object, &checkout_opts);
   }
 
 } // namepsace karrot

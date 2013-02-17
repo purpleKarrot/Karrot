@@ -111,7 +111,10 @@ void PKDriver::filter(Dictionary const& fields, AddFun const& add)
 
 void PKDriver::download(const Implementation& impl, bool requested)
   {
-  package_kit.queue_package(impl.values()["packageid"]);
+  if (impl.values()["installed"] != "yes")
+    {
+    package_kit.queue_package(impl.values()["packageid"]);
+    }
   }
 
 } // namespace Karrot
