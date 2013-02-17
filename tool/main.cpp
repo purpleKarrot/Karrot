@@ -21,7 +21,8 @@
 #endif
 
 #ifdef USE_PACKAGEKIT
-#  include "packagekit.hpp"
+#  include <glib-object.h>
+#  include "packagekit.h"
 #endif
 
 #ifdef USE_SUBVERSION
@@ -102,8 +103,8 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef USE_PACKAGEKIT
-    PackageKit package_kit;
-    engine.add_driver(make_driver<PKDriver>(package_kit));
+    g_type_init();
+    engine.add_driver_fun(register_packagekit);
 #endif
 
 #ifdef USE_GIT
@@ -131,11 +132,6 @@ int main(int argc, char* argv[])
       std::cout << "The request is not satisfiable!" << std::endl;
       return -1;
       }
-
-#ifdef USE_PACKAGEKIT
-    package_kit.install_queued();
-#endif
-
     listsfile.write();
     }
   catch (...)

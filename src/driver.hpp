@@ -22,7 +22,7 @@ class Driver
     Driver(KDriver *driver)
       : name_(driver->name ? driver->name : "")
       , ns_uri_(driver->namespace_uri ? driver->namespace_uri : "")
-      , fields_(make_dict(driver->fields, driver->fields_size))
+      , fields_(make_dict(driver->fields, driver->fields_length1))
       , download_(driver->download, driver->download_target, driver->download_target_destroy_notify)
       , filter_(driver->filter, driver->filter_target, driver->filter_target_destroy_notify)
       {

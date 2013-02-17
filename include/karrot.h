@@ -47,32 +47,32 @@ typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, v
 typedef void (*KMapping) (char const *key, char const *val, void *self);
 
 KARROT_API void
-k_dict_foreach (KDictionary const *self, KMapping mapping, void *target);
+k_dictionary_foreach (KDictionary const *self, KMapping mapping, void *target);
 
 KARROT_API char const *
-k_dict_lookup (KDictionary const *self, char const *str);
+k_dictionary_lookup (KDictionary const *self, char const *str);
 
 KARROT_API char const *
-k_impl_get_name (KImplementation const *self);
+k_implementation_get_name (KImplementation const *self);
 
 KARROT_API char const *
-k_impl_get_component (KImplementation const *self);
+k_implementation_get_component (KImplementation const *self);
 
 KARROT_API char const *
-k_impl_get_version (KImplementation const *self);
+k_implementation_get_version (KImplementation const *self);
 
 KARROT_API KDictionary const *
-k_impl_get_variant (KImplementation const *self);
+k_implementation_get_variant (KImplementation const *self);
 
 KARROT_API KDictionary const *
-k_impl_get_values (KImplementation const *self);
+k_implementation_get_values (KImplementation const *self);
 
 struct _KDriver
   {
   char const *name;
   char const *namespace_uri;
   char const *const *fields;
-  size_t fields_size;
+  size_t fields_length1;
   KDownload download;
   void *download_target;
   void (*download_target_destroy_notify) (void*);

@@ -30,12 +30,12 @@ class Dictionary
   public:
     std::string operator[](const char *key) const
       {
-      char const *value = k_dict_lookup(self, key);
+      char const *value = k_dictionary_lookup(self, key);
       return value ? value : std::string();
       }
     void foreach(Mapping mapping) const
       {
-      k_dict_foreach(self, &mapping_fun, &mapping);
+      k_dictionary_foreach(self, &mapping_fun, &mapping);
       }
   private:
     Dictionary(KDictionary const *self) : self(self)
@@ -55,26 +55,26 @@ class Implementation
   public:
     std::string name() const
       {
-      char const *value = k_impl_get_name(self);
+      char const *value = k_implementation_get_name(self);
       return value ? value : std::string();
       }
     std::string component() const
       {
-      char const *value = k_impl_get_component(self);
+      char const *value = k_implementation_get_component(self);
       return value ? value : std::string();
       }
     std::string version() const
       {
-      char const *value = k_impl_get_version(self);
+      char const *value = k_implementation_get_version(self);
       return value ? value : std::string();
       }
     Dictionary variant() const
       {
-      return Dictionary(k_impl_get_variant(self));
+      return Dictionary(k_implementation_get_variant(self));
       }
     Dictionary values() const
       {
-      return Dictionary(k_impl_get_values(self));
+      return Dictionary(k_implementation_get_values(self));
       }
   private:
     Implementation(KImplementation const *self) : self(self)
@@ -188,6 +188,10 @@ class Engine
       k_engine_free(self);
       }
   public:
+    void add_driver_fun(void (*function)(KEngine*))
+      {
+      function(self);
+      }
     void add_driver(std::unique_ptr<Driver>&& driver)
       {
       const char *name = driver->name();
@@ -205,7 +209,7 @@ class Engine
         driver.get(),
         nullptr
         };
-      Driver::Fields fields(kdriver.fields, kdriver.fields_size);
+      Driver::Fields fields(kdriver.fields, kdriver.fields_length1);
       driver->fields(fields);
       k_engine_add_driver(self, &kdriver);
       driver.release();

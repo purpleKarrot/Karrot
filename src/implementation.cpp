@@ -9,31 +9,31 @@
 #include "implementation.hpp"
 
 char const *
-k_impl_get_name(KImplementation const *self)
+k_implementation_get_name(KImplementation const *self)
   {
   return self->name.c_str();
   }
 
 char const *
-k_impl_get_component(KImplementation const *self)
+k_implementation_get_component(KImplementation const *self)
   {
   return self->component.c_str();
   }
 
 char const *
-k_impl_get_version(KImplementation const *self)
+k_implementation_get_version(KImplementation const *self)
   {
   return self->version.c_str();
   }
 
 KDictionary const *
-k_impl_get_variant(KImplementation const *self)
+k_implementation_get_variant(KImplementation const *self)
   {
   return &self->variant;
   }
 
 KDictionary const *
-k_impl_get_values(KImplementation const *self)
+k_implementation_get_values(KImplementation const *self)
   {
   return &self->values;
   }

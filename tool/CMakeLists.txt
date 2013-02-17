@@ -66,20 +66,22 @@ if(KARROT_USE_PACKAGEKIT)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GLIB REQUIRED gio-2.0)
   set(vala_output
-    packagekit_g.c
-    packagekit_g.h 
+    packagekit.c
+    packagekit.h
     )
   add_custom_command(OUTPUT ${vala_output}
     COMMAND
       ${VALA_EXECUTABLE}
     ARGS
       --pkg=gio-2.0
-      -H packagekit_g.h
-      -C "${CMAKE_CURRENT_SOURCE_DIR}/packagekit_g.vala"
+      -H packagekit.h
+      -C "${CMAKE_CURRENT_SOURCE_DIR}/packagekit.vala"
       -b ${CMAKE_CURRENT_SOURCE_DIR}
       -d ${CMAKE_CURRENT_BINARY_DIR}
+      "${Karrot_SOURCE_DIR}/bindings/vala/karrot.vapi"
     DEPENDS
-      "${CMAKE_CURRENT_SOURCE_DIR}/packagekit_g.vala"
+      "${CMAKE_CURRENT_SOURCE_DIR}/packagekit.vala"
+      "${Karrot_SOURCE_DIR}/bindings/vala/karrot.vapi"
     )
   include_directories(
     ${GLIB_INCLUDE_DIRS}
@@ -90,8 +92,6 @@ if(KARROT_USE_PACKAGEKIT)
     )
   list(APPEND sources
     ${vala_output}
-    packagekit.cpp
-    packagekit.hpp
     )
   enable_language(C)
   add_definitions(-DUSE_PACKAGEKIT)
