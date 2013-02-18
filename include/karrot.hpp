@@ -224,7 +224,12 @@ class Engine
       }
     bool run()
       {
-      return k_engine_run(self) != 0;
+      int result = k_engine_run(self);
+      if (result < 0)
+        {
+        throw std::runtime_error(k_engine_error_message(self));
+        }
+      return result == 0;
       }
   private:
     KEngine *self;

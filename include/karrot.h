@@ -96,6 +96,9 @@ k_engine_dot_filename (KEngine *self, char const *filename);
 KARROT_API int
 k_engine_run (KEngine *self);
 
+KARROT_API char const *
+k_engine_error_message (KEngine *self);
+
 KARROT_API void
 k_engine_free (KEngine *self);
 

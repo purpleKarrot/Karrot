@@ -12,6 +12,7 @@
 #include <fstream>
 #include <algorithm>
 #include <stdexcept>
+#include <boost/throw_exception.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 
 #include "solve.hpp"
@@ -27,6 +28,7 @@ struct _KEngine
   Karrot::Requests requests;
   Karrot::Database database;
   std::string dot_filename;
+  std::string error;
   };
 
 KEngine *
@@ -93,17 +95,18 @@ static void write_graphviz(std::string const& filename,
   dot_file << "}\n";
   }
 
-static int engine_run(KEngine *self)
+static bool engine_run(KEngine *self)
   {
   using namespace Karrot;
   const Url* purl;
   while ((purl = self->feed_queue.get_next()))
     {
     const Url url(*purl); //explicit copy!
-    XmlReader xml(download(url));
+    std::string local_path = download(url);
+    XmlReader xml(local_path);
     if (!xml.start_element())
       {
-      throw std::runtime_error("failed to read start of feed");
+      BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + local_path));
       }
     FeedParser parser(self->feed_queue, self->database, self->package_handler);
     if (!parser.parse(url, xml))
@@ -140,11 +143,16 @@ int k_engine_run(KEngine *self)
   {
   try
     {
-    return engine_run(self);
+    return engine_run(self) ? 0 : 1;
     }
   catch (...)
     {
-    std::cerr << boost::current_exception_diagnostic_information() << std::endl;
+    self->error = boost::current_exception_diagnostic_information();
     }
-  return false;
+  return -1;
+  }
+
+char const *k_engine_error_message(KEngine *self)
+  {
+  return self->error.c_str();
   }
