@@ -20,6 +20,7 @@
 #include <memory>
 #include <system_error>
 #include <vector>
+#include <boost/throw_exception.hpp>
 
 namespace
 {
@@ -33,7 +34,7 @@ class Library
       if (!handle)
         {
         std::error_code error(GetLastError(), std::system_category());
-        throw std::system_error(error, name);
+        BOOST_THROW_EXCEPTION(std::system_error(error, name));
         }
       }
     ~Library()
@@ -68,7 +69,7 @@ class Library
       if (!function)
         {
         std::error_code error(GetLastError(), std::system_category());
-        throw std::system_error(error, name);
+        BOOST_THROW_EXCEPTION(std::system_error(error, name));
         }
       }
   private:
@@ -91,13 +92,35 @@ class WinHTTP: private Library
       }
   public:
     BOOL (WINAPI *close_handle) (HINTERNET);
-    HINTERNET (WINAPI *connect) (HINTERNET, LPCSTR, INTERNET_PORT, DWORD);
-    HINTERNET (WINAPI *open) (LPCSTR, DWORD, LPCSTR, LPCSTR, DWORD);
-    HINTERNET (WINAPI *open_request) (HINTERNET, LPCSTR, LPCSTR, LPCSTR, LPCSTR, LPCSTR*, DWORD);
+    HINTERNET (WINAPI *connect) (HINTERNET, LPCWSTR, INTERNET_PORT, DWORD);
+    HINTERNET (WINAPI *open) (LPCWSTR, DWORD, LPCWSTR, LPCWSTR, DWORD);
+    HINTERNET (WINAPI *open_request) (HINTERNET, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR*, DWORD);
     BOOL (WINAPI *query_data_available) (HINTERNET, LPDWORD);
     BOOL (WINAPI *read_data) (HINTERNET, LPVOID, DWORD, LPDWORD);
     BOOL (WINAPI *receive_response) (HINTERNET, LPVOID);
-    BOOL (WINAPI *send_request) (HINTERNET, LPCSTR, DWORD, LPVOID, DWORD, DWORD, DWORD_PTR);
+    BOOL (WINAPI *send_request) (HINTERNET, LPCWSTR, DWORD, LPVOID, DWORD, DWORD, DWORD_PTR);
+  };
+
+class Wide
+  {
+  public:
+    Wide(char const *str)
+      {
+      int len = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, 0);
+      if (len <= 0)
+        {
+        std::error_code error(GetLastError(), std::system_category());
+        BOOST_THROW_EXCEPTION(std::system_error(error));
+        }
+      impl.resize(len);
+      MultiByteToWideChar(CP_ACP, 0, str, -1, &impl[0], impl.length());
+      }
+    operator LPCWSTR() const
+      {
+      return impl.c_str();
+      }
+  private:
+    std::wstring impl;
   };
 
 char const* get_host(Karrot::Url const& url)
@@ -122,49 +145,60 @@ class Downloader
   {
   public:
     Downloader() :
-        session(win_http.open("Karrot/1.0", 0, 0, 0, 0), win_http.close_handle)
+        session(win_http.open(L"Karrot/1.0", 0, 0, 0, 0), win_http.close_handle)
       {
+      if (!session)
+        {
+        std::error_code error(GetLastError(), std::system_category());
+        BOOST_THROW_EXCEPTION(std::system_error(error));
+        }
       }
   public:
-    void download(Karrot::Url const& url, std::ostream& file)
+    void download(Karrot::Url const& url, std::string const& filepath)
       {
       HINTERNET conn = get_connection(get_host(url), get_port(url));
       Handle request(
           win_http.open_request(
               conn,
-              "GET",
-              Karrot::quark_to_string(url.path),
+              L"GET",
+              Wide(Karrot::quark_to_string(url.path)),
               0,
               0,
               0,
-              0x00800000),
+              0 /*0x00800000*/),
           win_http.close_handle);
+      if (!request)
+        {
+        std::error_code error(GetLastError(), std::system_category());
+        BOOST_THROW_EXCEPTION(std::system_error(error));
+        }
       if (!win_http.send_request(request.get(), 0, 0, 0, 0, 0, 0))
         {
         std::error_code error(GetLastError(), std::system_category());
-        throw std::system_error(error);
+        BOOST_THROW_EXCEPTION(std::system_error(error));
         }
       if (!win_http.receive_response(request.get(), 0))
         {
         std::error_code error(GetLastError(), std::system_category());
-        throw std::system_error(error);
+        BOOST_THROW_EXCEPTION(std::system_error(error));
         }
       DWORD size = 0;
       DWORD down = 0;
       std::vector<char> buffer;
+      std::ofstream file(filepath);
       do
         {
         size = 0;
         if (!win_http.query_data_available(request.get(), &size))
           {
           std::error_code error(GetLastError(), std::system_category());
-          throw std::system_error(error);
+          BOOST_THROW_EXCEPTION(std::system_error(error));
           }
         buffer.resize(size);
         if (!win_http.read_data(request.get(), &buffer[0], size, &down))
           {
           std::error_code error(GetLastError(), std::system_category());
-          throw std::system_error(error);
+          BOOST_THROW_EXCEPTION(std::system_error(error));
           }
         file.write(buffer.data(), down);
         }
@@ -181,10 +215,15 @@ class Downloader
           }
         }
       Handle handle(
-          win_http.connect(session.get(), host.c_str(), port, 0),
+          win_http.connect(session.get(), Wide(host.c_str()), port, 0),
           win_http.close_handle);
+      if (!handle)
+        {
+        std::error_code error(GetLastError(), std::system_category());
+        BOOST_THROW_EXCEPTION(std::system_error(error));
+        }
       connections.emplace_back(host, port, std::move(handle));
-      return handle.get();
+      return connections.back().handle.get();
       }
   private:
     typedef std::unique_ptr<void, BOOL (WINAPI*) (HINTERNET)> Handle;
@@ -196,7 +235,7 @@ class Downloader
       if (!handle)
         {
         std::error_code error(GetLastError(), std::system_category());
-        throw std::system_error(error);
+        BOOST_THROW_EXCEPTION(std::system_error(error));
         }
       return Handle(handle, win_http.close_handle);
       }
@@ -248,7 +287,7 @@ bool is_cached(char const *file_name)
       {
       return false;
       }
-    throw std::system_error(std::error_code(error, std::system_category()));
+    BOOST_THROW_EXCEPTION(std::system_error(std::error_code(error, std::system_category())));
     }
   Handle handle = CreateFileA(
       file_name,
@@ -261,13 +300,13 @@ bool is_cached(char const *file_name)
   if (handle == INVALID_HANDLE_VALUE)
     {
     std::error_code error(GetLastError(), std::system_category());
-    throw std::system_error(error);
+    BOOST_THROW_EXCEPTION(std::system_error(error));
     }
   FILETIME write_time;
   if (GetFileTime(handle, 0, 0, &write_time) == 0)
     {
     std::error_code error(GetLastError(), std::system_category());
-    throw std::system_error(error);
+    BOOST_THROW_EXCEPTION(std::system_error(error));
     }
   FILETIME current_time;
   GetSystemTimeAsFileTime(&current_time);
@@ -276,7 +315,7 @@ bool is_cached(char const *file_name)
   write_large.HighPart = write_time.dwHighDateTime;
   current_large.LowPart = current_time.dwLowDateTime;
   current_large.HighPart = current_time.dwHighDateTime;
-  return current_large.QuadPart - write_large.QuadPart < 864000000000LL;
+  return current_large.QuadPart - write_large.QuadPart < 9000000000LL;
   }
 
 } // namespace
@@ -291,11 +330,10 @@ std::string download(Url const& url)
     return quark_to_string(url.path);
     }
   char filepath[MAX_PATH];
-  HRESULT result = SHGetFolderPathA(0, CSIDL_INTERNET_CACHE, 0, 0, filepath);
-  if (FAILED(result))
+  if (FAILED(SHGetFolderPathA(0, CSIDL_INTERNET_CACHE, 0, 0, filepath)))
     {
     std::error_code error(GetLastError(), std::system_category());
-    throw std::system_error(error);
+    BOOST_THROW_EXCEPTION(std::system_error(error));
     }
   std::string str = quark_to_string(url.host);
   str += quark_to_string(url.path);
@@ -306,17 +344,15 @@ std::string download(Url const& url)
       c = '-';
       }
     }
-  result = PathAppendA(filepath, str.c_str());
-  if (FAILED(result))
+  if (FAILED(PathAppendA(filepath, str.c_str())))
     {
     std::error_code error(GetLastError(), std::system_category());
-    throw std::system_error(error);
+    BOOST_THROW_EXCEPTION(std::system_error(error));
     }
   if (!is_cached(filepath))
     {
     static Downloader downloader;
-    std::ofstream file(filepath);
-    downloader.download(url, file);
+    downloader.download(url, filepath);
     }
   return filepath;
   }
