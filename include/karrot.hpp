@@ -12,6 +12,7 @@
 #include <karrot.h>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <string>
 
 namespace Karrot
