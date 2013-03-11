@@ -334,6 +334,15 @@ void FeedParser::add_package(const Package& package)
       });
     if (!system)
       {
+      bool supported = std::any_of(begin(releases), end(releases),
+        [&entry](const Release& release)
+        {
+        return entry.impl.version == release.version();
+        });
+      if (!supported)
+        {
+        return;
+        }
       for (const Dependencies& component : components)
         {
         component.replay(entry.impl.component, entry.impl.version,
