@@ -221,7 +221,7 @@ static int extract_local(const fs::path& archive_path)
   a = archive_read_new();
   ArchiveClose close_read(a, archive_read_free);
   archive_read_support_format_all(a);
-  archive_read_support_compression_all(a);
+  archive_read_support_filter_all(a);
 
   ext = archive_write_disk_new();
   ArchiveClose close_write(ext, archive_write_free);
