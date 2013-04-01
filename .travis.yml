@@ -22,8 +22,6 @@ env:
     - BUILD_TYPE=Release
 
 matrix:
-  allow_failures:
-    - compiler: clang
   include:
     - compiler: gcc
       env:
@@ -35,7 +33,7 @@ matrix:
       env:
         - BUILD_TYPE=Release
         - OPTIONS="-DKARROT_BUILD_DOCS=ON -DKARROT_BUILD_TOOL=OFF"
-        - DEPENDS="docbook-xml docbook-xsl doxygen xsltproc"
+        - DEPENDS="docbook-xml docbook-xsl doxygen libboost-dev xsltproc"
         - TARGETS="documentation"
 
 before_install:
