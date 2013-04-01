@@ -39,6 +39,7 @@ matrix:
         - TARGETS="documentation"
 
 before_install:
+  - sudo add-apt-repository ppa:mapnik/boost
   - sudo apt-get install -qq --no-install-recommends $DEPENDS libboost-filesystem-dev re2c
 
 script:
