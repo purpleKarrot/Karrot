@@ -36,15 +36,19 @@
 extern "C" {
 #endif
 
+typedef struct _KError KError;
 typedef struct _KDictionary KDictionary;
 typedef struct _KImplementation KImplementation;
 typedef struct _KDriver KDriver;
 typedef struct _KEngine KEngine;
 
 typedef void (*KAddFun) (char const **val, int size, int native, void *self);
-typedef void (*KDownload) (KImplementation const *impl, int requested, void *self);
+typedef void (*KDownload) (KImplementation const *impl, int requested, KError *error, void *self);
 typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, void *self);
 typedef void (*KMapping) (char const *key, char const *val, void *self);
+
+KARROT_API void
+k_error_set (KError *self, char const *what);
 
 KARROT_API void
 k_dictionary_foreach (KDictionary const *self, KMapping mapping, void *target);

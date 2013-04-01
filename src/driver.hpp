@@ -9,6 +9,7 @@
 #include <karrot.h>
 #include "delegate.hpp"
 #include "dictionary.hpp"
+#include "error.hpp"
 #include <functional>
 
 namespace Karrot
@@ -41,7 +42,12 @@ class Driver
       }
     void download(const KImplementation& impl, bool requested) const
       {
-      download_(&impl, requested);
+      KError error;
+      download_(&impl, requested, &error);
+      if (error)
+        {
+        std::rethrow_exception(error);
+        }
       }
     void filter(const KDictionary& fields, AddFun add) const
       {
@@ -69,7 +75,7 @@ class Driver
     std::string name_;
     std::string ns_uri_;
     KDictionary fields_;
-    Delegate<void, KImplementation const*, int> download_;
+    Delegate<void, KImplementation const*, int, KError*> download_;
     Delegate<void, KDictionary const*, KAddFun, void*> filter_;
   };
 

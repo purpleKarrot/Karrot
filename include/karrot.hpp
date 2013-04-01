@@ -164,10 +164,17 @@ class DriverDecorator: public Driver
 class Engine
   {
   private:
-    static void download_fun(KImplementation const *impl, int requested, void *self)
+    static void download_fun(KImplementation const *impl, int requested, KError *error, void *self)
       {
-      Driver* driver = reinterpret_cast<Driver*>(self);
-      driver->download(Implementation(impl), requested != 0);
+      try
+        {
+        Driver* driver = reinterpret_cast<Driver*>(self);
+        driver->download(Implementation(impl), requested != 0);
+        }
+      catch (std::exception& exception)
+        {
+        k_error_set(error, exception.what());
+        }
       }
     static void filter_fun(KDictionary const *fields, KAddFun fun, void *target, void *self)
       {
