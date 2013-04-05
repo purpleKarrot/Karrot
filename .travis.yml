@@ -14,8 +14,7 @@ compiler:
 
 env:
   global:
-    - OPTIONS="-DKARROT_USE_ARCHIVE=ON -DKARROT_USE_PACKAGEKIT=ON -DKARROT_USE_SUBVERSION=ON"
-    - DEPENDS="libarchive-dev libboost-program-options-dev valac-0.16 libsvn-dev"
+    - DEPENDS="libboost-program-options-dev"
     - TARGETS="all test"
   matrix:
     - BUILD_TYPE=Debug
@@ -26,7 +25,7 @@ matrix:
     - compiler: gcc
       env:
         - BUILD_TYPE=Release
-        - OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../CMake/i686-w64-mingw32.cmake -DKARROT_BUILD_TOOL=OFF"
+        - OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../CMake/i686-w64-mingw32.cmake -DKARROT_BUILD_EXAMPLE=OFF"
         - DEPENDS="binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 wine"
         - TARGETS="all test"
 
