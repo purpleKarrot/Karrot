@@ -15,9 +15,6 @@
 #include <stdexcept>
 #include <string>
 
-namespace Karrot
-{
-
 class Dictionary;
 class Implementation;
 class Driver;
@@ -196,10 +193,6 @@ class Engine
       k_engine_free(self);
       }
   public:
-    void add_driver_fun(void (*function)(KEngine*))
-      {
-      function(self);
-      }
     void add_driver(std::unique_ptr<Driver>&& driver)
       {
       const char *name = driver->name();
@@ -242,7 +235,5 @@ class Engine
   private:
     KEngine *self;
   };
-
-} // namespace Karrot
 
 #endif /* KARROT_HPP_INCLUDED */

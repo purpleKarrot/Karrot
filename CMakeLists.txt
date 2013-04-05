@@ -56,6 +56,6 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
 endif()
 
 add_subdirectory(doc)
+add_subdirectory(example)
 add_subdirectory(src)
 add_subdirectory(test)
-add_subdirectory(tool)

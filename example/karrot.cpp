@@ -6,38 +6,88 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot.hpp>
+#include "karrot.hpp"
 #include <boost/program_options.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <iostream>
-#include <fstream>
-
-#ifdef USE_ARCHIVE
-#  include "archive.hpp"
-#endif
-
-#ifdef USE_GIT
-#  include "git.hpp"
-#endif
-
-#ifdef USE_PACKAGEKIT
-#  include <glib-object.h>
-#  include "packagekit.h"
-#endif
-
-#ifdef USE_SUBVERSION
-#  include "subversion.hpp"
-#endif
-
-#include "cmake.hpp"
-
-using namespace Karrot;
 
 template<typename Type, typename... Args>
 std::unique_ptr<Driver> make_driver(Args&&... args)
   {
   return std::unique_ptr<Driver>(new Type(std::forward<Args>(args)...));
   }
+
+class Archive: public Driver
+  {
+  public:
+    Archive(std::string machine, std::string sysname)
+        : machine(machine), sysname(sysname)
+      {
+      }
+  private:
+    const char* name() const //override
+      {
+      return "archive";
+      }
+    const char* namespace_uri() const //override
+      {
+      return "http://purplekarrot.net/2013/archive";
+      }
+    void fields(Fields& out) const //override
+      {
+      static const char* const fields_instance[] =
+        {
+        "sysname", "*",
+        "machine", "*",
+        "href", nullptr
+        };
+      out = fields_instance;
+      }
+    void filter(Dictionary const& fields, AddFun const& add) //override
+      {
+      std::string p_sysname = fields["sysname"];
+      if (p_sysname != "*" && p_sysname != sysname)
+        {
+        return;
+        }
+      std::string p_machine = fields["machine"];
+      if (p_machine != "*" && p_machine != machine)
+        {
+        return;
+        }
+      std::string href = fields["href"];
+      std::string checksum = fields["checksum"];
+      const char *values[] =
+        {
+        "href", href.c_str()
+        };
+      add(values, 4, false);
+      }
+    void download(const Implementation& impl, bool requested) //override
+      {
+      }
+  private:
+    std::string machine;
+    std::string sysname;
+  };
+
+class Source: public Driver
+  {
+  public:
+    Source(const char* name) : name_(name)
+      {
+      }
+  private:
+    char const* name() const
+      {
+      return name_;
+      }
+    void download(const Implementation& impl, bool requested) //override
+      {
+      }
+  private:
+    const char* name_;
+  };
 
 int main(int argc, char* argv[])
   {
@@ -94,31 +144,9 @@ int main(int argc, char* argv[])
   try
     {
     Engine engine;
-    CMake::Listsfile listsfile;
-
-#ifdef USE_ARCHIVE
-    engine.add_driver(
-        make_driver<CMake::Injector>(listsfile,
-            make_driver<Archive>()));
-#endif
-
-#ifdef USE_PACKAGEKIT
-    g_type_init();
-    engine.add_driver_fun(register_packagekit);
-#endif
-
-#ifdef USE_GIT
-    engine.add_driver(
-        make_driver<CMake::Injector>(listsfile,
-            make_driver<Git>()));
-#endif
-
-#ifdef USE_SUBVERSION
-    engine.add_driver(
-        make_driver<CMake::Injector>(listsfile,
-            make_driver<Subversion>()));
-#endif
-
+    engine.add_driver(make_driver<Archive>(machine, sysname));
+    engine.add_driver(make_driver<Source>("git"));
+    engine.add_driver(make_driver<Source>("subversion"));
     for (const std::string& url : request_urls)
       {
       engine.add_request(url.c_str(), true);
@@ -132,7 +160,6 @@ int main(int argc, char* argv[])
       std::cout << "The request is not satisfiable!" << std::endl;
       return -1;
       }
-    listsfile.write();
     }
   catch (...)
     {
