@@ -14,16 +14,15 @@
 namespace Karrot
 {
 
-static const std::string project_ns = "http://purplekarrot.net/2013/project";
-
-FeedParser::FeedParser(FeedQueue& queue, Database& db, PackageHandler& ph) :
+FeedParser::FeedParser(FeedQueue& queue, Database& db, PackageHandler& ph, std::string project_ns) :
     queue(queue),
     db(db),
-    ph(ph)
+    ph(ph),
+    project_ns(std::move(project_ns))
   {
   }
 
-static std::string next_element(XmlReader& xml)
+std::string FeedParser::next_element(XmlReader& xml) const
   {
   while (xml.start_element())
     {

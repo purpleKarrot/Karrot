@@ -27,6 +27,7 @@ class Package
     KImplementation impl;
     KDictionary fields;
     Driver const *driver;
+    std::string namespace_uri;
   };
 
 } // namespace Karrot

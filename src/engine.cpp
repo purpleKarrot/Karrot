@@ -23,6 +23,15 @@
 
 struct _KEngine
   {
+  _KEngine(char const *namespace_uri)
+      : namespace_uri(namespace_uri)
+    {
+    if (this->namespace_uri.back() != '/')
+      {
+      this->namespace_uri += '/';
+      }
+    }
+  std::string namespace_uri;
   Karrot::FeedQueue feed_queue;
   Karrot::PackageHandler package_handler;
   Karrot::Requests requests;
@@ -32,9 +41,10 @@ struct _KEngine
   };
 
 KEngine *
-k_engine_new(void)
+k_engine_new(char const *namespace_base)
   {
-  return new KEngine();
+  assert(namespace_base);
+  return new KEngine(namespace_base);
   }
 
 void k_engine_free(KEngine *self)
@@ -46,7 +56,7 @@ void k_engine_add_driver(KEngine *self, KDriver *driver)
   {
   assert(driver);
   assert(driver->name);
-  self->package_handler.add(driver);
+  self->package_handler.add(driver, self->namespace_uri);
   }
 
 void k_engine_add_request(KEngine *self, char const *url_string, int source)
@@ -108,7 +118,11 @@ static bool engine_run(KEngine *self)
       {
       BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + local_path));
       }
-    FeedParser parser(self->feed_queue, self->database, self->package_handler);
+    FeedParser parser(
+        self->feed_queue,
+        self->database,
+        self->package_handler,
+        self->namespace_uri + "project");
     if (!parser.parse(url, xml))
       {
       std::cerr << "not a valid project feed" << std::endl;

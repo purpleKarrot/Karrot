@@ -29,10 +29,6 @@ class Archive: public Driver
       {
       return "archive";
       }
-    const char* namespace_uri() const //override
-      {
-      return "http://purplekarrot.net/2013/archive";
-      }
     void fields(Fields& out) const //override
       {
       static const char* const fields_instance[] =
@@ -143,7 +139,7 @@ int main(int argc, char* argv[])
     }
   try
     {
-    Engine engine;
+    Engine engine("http://purplekarrot.net/2013/");
     engine.add_driver(make_driver<Archive>(machine, sysname));
     engine.add_driver(make_driver<Source>("git"));
     engine.add_driver(make_driver<Source>("subversion"));

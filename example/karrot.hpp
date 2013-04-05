@@ -110,10 +110,6 @@ class Driver
       {
       }
     virtual const char* name() const = 0;
-    virtual const char* namespace_uri() const
-      {
-      return 0;
-      }
     virtual void fields(Fields& out) const
       {
       }
@@ -137,10 +133,6 @@ class DriverDecorator: public Driver
     const char* name() const //override
       {
       return component->name();
-      }
-    const char* namespace_uri() const //override
-      {
-      return component->namespace_uri();
       }
     void fields(Fields& out) const //override
       {
@@ -184,9 +176,9 @@ class Engine
       delete reinterpret_cast<Driver*>(self);
       }
   public:
-    Engine()
+    Engine(char const *namespace_uri)
       {
-      self = k_engine_new();
+      self = k_engine_new(namespace_uri);
       }
     ~Engine()
       {
@@ -195,12 +187,9 @@ class Engine
   public:
     void add_driver(std::unique_ptr<Driver>&& driver)
       {
-      const char *name = driver->name();
-      const char *namespace_uri = driver->namespace_uri();
       KDriver kdriver =
         {
-        name,
-        namespace_uri,
+        driver->name(),
         nullptr,
         0,
         download_fun,

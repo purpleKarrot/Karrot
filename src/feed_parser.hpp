@@ -43,9 +43,10 @@ class FeedParser
         std::string version_, tag_;
       };
   public:
-    FeedParser(FeedQueue& qq, Database& db, PackageHandler& ph);
+    FeedParser(FeedQueue& qq, Database& db, PackageHandler& ph, std::string project_ns);
     bool parse(const Url& url, XmlReader& xml);
   private:
+    std::string next_element(XmlReader& xml) const;
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
     void parse_build(XmlReader& xml, const std::string& type, const std::string& href);
@@ -64,6 +65,7 @@ class FeedParser
     FeedQueue& queue;
     Database& db;
     PackageHandler& ph;
+    std::string project_ns;
   };
 
 } // namespace Karrot

@@ -19,9 +19,9 @@ namespace Karrot
 class PackageHandler
   {
   public:
-    void add(Driver&& driver)
+    void add(KDriver *driver, std::string const& namespace_uri)
       {
-      handlers.push_back(std::move(driver));
+      handlers.emplace_back(driver, namespace_uri);
       }
     Driver const * get(const std::string& name) const
       {

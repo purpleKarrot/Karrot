@@ -20,21 +20,21 @@ typedef std::function<void(DictView const&, bool)> AddFun;
 class Driver
   {
   public:
-    Driver(KDriver *driver)
-      : name_(driver->name ? driver->name : "")
-      , ns_uri_(driver->namespace_uri ? driver->namespace_uri : "")
+    Driver(KDriver *driver, std::string const& namespace_uri)
+      : name_(driver->name)
+      , namespace_uri_(namespace_uri + name_)
       , fields_(make_dict(driver->fields, driver->fields_length1))
       , download_(driver->download, driver->download_target, driver->download_target_destroy_notify)
       , filter_(driver->filter, driver->filter_target, driver->filter_target_destroy_notify)
       {
       }
-    std::string name() const
+    std::string const& name() const
       {
       return name_;
       }
-    std::string namespace_uri() const
+    std::string const& namespace_uri() const
       {
-      return ns_uri_;
+      return namespace_uri_;
       }
     KDictionary fields() const
       {
@@ -73,7 +73,7 @@ class Driver
       function(DictView(val, size), native != 0);
       }
     std::string name_;
-    std::string ns_uri_;
+    std::string namespace_uri_;
     KDictionary fields_;
     Delegate<void, KImplementation const*, int, KError*> download_;
     Delegate<void, KDictionary const*, KAddFun, void*> filter_;
