@@ -22,14 +22,17 @@ if(NOT WIN32)
   endif()
 endif()
 
+if(WIN32)
+  find_package(Boost "1.46" REQUIRED)
+else()
+  find_package(Boost "1.46" REQUIRED filesystem system)
+endif()
+include_directories(${Boost_INCLUDE_DIRS})
+
 if(NOT WIN32)
   find_package(CURL REQUIRED)
   include_directories(${CURL_INCLUDE_DIRS})
 endif()
-
-#set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost "1.46" REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
 
 re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
@@ -115,9 +118,14 @@ if(WIN32)
 endif()
 
 if(WIN32)
-  target_link_libraries(karrot LINK_PRIVATE shlwapi)
+  target_link_libraries(karrot LINK_PRIVATE
+    shlwapi
+    )
 else()
-  target_link_libraries(karrot LINK_PRIVATE ${CURL_LIBRARIES})
+  target_link_libraries(karrot LINK_PRIVATE
+    ${Boost_LIBRARIES}
+    ${CURL_LIBRARIES}
+    )
 endif()
 
 install(TARGETS karrot EXPORT karrot_export
