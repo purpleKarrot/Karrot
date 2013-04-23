@@ -57,6 +57,9 @@ KARROT_API char const *
 k_dictionary_lookup (KDictionary const *self, char const *str);
 
 KARROT_API char const *
+k_implementation_get_id (KImplementation const *self);
+
+KARROT_API char const *
 k_implementation_get_name (KImplementation const *self);
 
 KARROT_API char const *

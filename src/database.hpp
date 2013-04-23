@@ -15,24 +15,7 @@
 namespace Karrot
 {
 
-class Spec;
-class Driver;
-
-class DatabaseEntry
-  {
-  public:
-    DatabaseEntry(const std::string& id) : id(id)
-      {
-      }
-  public:
-    std::string id;
-    KImplementation impl;
-    std::vector<Spec> depends;
-    std::vector<Spec> conflicts;
-    Driver const *driver;
-  };
-
-typedef std::vector<DatabaseEntry> Database;
+typedef std::vector<KImplementation> Database;
 
 } // namespace Karrot
 

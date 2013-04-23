@@ -59,10 +59,8 @@ static std::vector<Var> make_preferences(const Database& database)
   std::sort(std::begin(preferences), std::end(preferences),
     [&database](Var var1, Var var2) -> bool
     {
-    const DatabaseEntry& entry1 = database[var1];
-    const DatabaseEntry& entry2 = database[var2];
-    const KImplementation& impl1 = entry1.impl;
-    const KImplementation& impl2 = entry2.impl;
+    const KImplementation& impl1 = database[var1];
+    const KImplementation& impl2 = database[var2];
     if (impl1.component != "SOURCE" && impl2.component == "SOURCE")
       {
       return true;
@@ -71,11 +69,11 @@ static std::vector<Var> make_preferences(const Database& database)
       {
       return false;
       }
-    if (entry1.depends.size() < entry2.depends.size())
+    if (impl1.depends.size() < impl2.depends.size())
       {
       return true;
       }
-    if (entry1.depends.size() > entry2.depends.size())
+    if (impl1.depends.size() > impl2.depends.size())
       {
       return false;
       }
@@ -139,14 +137,12 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
     {
     for (std::size_t k = i + 1; k < database.size(); ++k)
       {
-      const DatabaseEntry& entry1 = database[i];
-      const DatabaseEntry& entry2 = database[k];
-      if (entry1.id != entry2.id)
+      const KImplementation& impl1 = database[i];
+      const KImplementation& impl2 = database[k];
+      if (impl1.id != impl2.id)
         {
         break;
         }
-      const KImplementation& impl1 = entry1.impl;
-      const KImplementation& impl2 = entry2.impl;
       if (impl1.version != impl2.version ||
           impl1.variant != impl2.variant ||
           impl1.component == impl2.component ||
@@ -165,13 +161,13 @@ static void source_conflict_clauses(const Database& database, Solver& solver)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
-    if (database[i].impl.component != "SOURCE")
+    if (database[i].component != "SOURCE")
       {
       continue;
       }
     for (std::size_t k = 0; k < database.size(); ++k)
       {
-      if (database[k].impl.component == "SOURCE")
+      if (database[k].component == "SOURCE")
         {
         continue;
         }

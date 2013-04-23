@@ -18,13 +18,12 @@
 namespace Karrot
 {
 
-inline bool satisfies(const DatabaseEntry& entry, const Spec& spec)
+inline bool satisfies(const KImplementation& impl, const Spec& spec)
   {
-  if (entry.id != spec.id)
+  if (impl.id != spec.id)
     {
     return false;
     }
-  const KImplementation& impl = entry.impl;
   if (impl.component != spec.component && impl.component != "*" && impl.component != "SOURCE")
     {
     return false;

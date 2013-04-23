@@ -11,14 +11,32 @@
 
 #include <karrot.h>
 #include "dictionary.hpp"
+#include <vector>
+
+namespace Karrot
+{
+class Spec;
+class Driver;
+}
 
 struct _KImplementation
   {
+  _KImplementation(
+    std::string const& id,
+    std::string const& name,
+    std::string const& component,
+    std::string const& version = std::string(),
+    KDictionary const& variant = KDictionary(),
+    KDictionary const& values = KDictionary());
+  std::string id;
   std::string name;
   std::string component;
   std::string version;
   KDictionary variant;
   KDictionary values;
+  std::vector<Karrot::Spec> depends;
+  std::vector<Karrot::Spec> conflicts;
+  Karrot::Driver const *driver;
   };
 
 #endif /* KARROT_IMPLEMENTATION_HPP */

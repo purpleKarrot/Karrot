@@ -44,6 +44,12 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     printf("not a karrot feed\n");
     return false;
     }
+  id = xml.attribute("href", project_ns);
+  if (id.empty())
+    {
+    printf("href missing!\n");
+    return false;
+    }
   name = xml.attribute("name", project_ns);
   if (name.empty())
     {
@@ -145,23 +151,20 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     {
     return;
     }
-  DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
-  entry.impl.component = "SOURCE";
-  entry.impl.name = name;
-  entry.impl.values["href"] = href;
-  entry.driver = driver;
+  KImplementation impl(this->id, this->name, "SOURCE");
+  impl.values["href"] = href;
+  impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
-    entry.impl.version = releases[i].version();
-    entry.impl.values["tag"] = releases[i].tag();
+    impl.version = releases[i].version();
+    impl.values["tag"] = releases[i].tag();
     foreach_variant(variants, [&](KDictionary variant)
       {
-      entry.impl.variant = variant;
-      entry.depends.clear();
-      entry.conflicts.clear();
-      depends.replay("*", entry.impl.version, variant,
-          entry.depends, entry.conflicts);
-      db.push_back(entry);
+      impl.variant = variant;
+      impl.depends.clear();
+      impl.conflicts.clear();
+      depends.replay("*", impl.version, variant, impl.depends, impl.conflicts);
+      db.push_back(impl);
       });
     }
   }
@@ -250,15 +253,15 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
   std::string attr;
   if (!(attr = xml.attribute("component", project_ns)).empty())
     {
-    group.impl.component = std::move(attr);
+    group.component = std::move(attr);
     }
   if (!(attr = xml.attribute("version", project_ns)).empty())
     {
-    group.impl.version = std::move(attr);
+    group.version = std::move(attr);
     }
   if (!(attr = xml.attribute("variant", project_ns)).empty())
     {
-    group.impl.variant = parse_variant(attr);
+    group.variant = parse_variant(attr);
     }
   if (!(attr = xml.attribute("type", project_ns)).empty())
     {
@@ -308,35 +311,39 @@ void FeedParser::add_package(const Package& package)
   package.driver->filter(package.fields,
     [&](DictView const& values, bool system)
     {
-    DatabaseEntry entry(std::string(quark_to_string(url.host)) + quark_to_string(url.path));
-    entry.impl = package.impl;
-    entry.impl.name = this->name;
-    entry.driver = package.driver;
-    values.foreach([&entry](const std::string& key, const std::string& val)
+    KImplementation impl(
+        this->id,
+        this->name,
+        package.component,
+        package.version,
+        package.variant,
+        package.values);
+    impl.driver = package.driver;
+    values.foreach([&impl](const std::string& key, const std::string& val)
       {
       if (key == "name")
         {
-        entry.impl.name = val;
+        impl.name = val;
         }
       else if (key == "component")
         {
-        entry.impl.component = val;
+        impl.component = val;
         }
       else if (key == "version")
         {
-        entry.impl.version = val;
+        impl.version = val;
         }
       else
         {
-        entry.impl.values[key] = val;
+        impl.values[key] = val;
         }
       });
     if (!system)
       {
       bool supported = std::any_of(begin(releases), end(releases),
-        [&entry](const Release& release)
+        [&impl](const Release& release)
         {
-        return entry.impl.version == release.version();
+        return impl.version == release.version();
         });
       if (!supported)
         {
@@ -344,11 +351,15 @@ void FeedParser::add_package(const Package& package)
         }
       for (const Dependencies& component : components)
         {
-        component.replay(entry.impl.component, entry.impl.version,
-            entry.impl.variant, entry.depends, entry.conflicts);
+        component.replay(
+            impl.component,
+            impl.version,
+            impl.variant,
+            impl.depends,
+            impl.conflicts);
         }
       }
-    this->db.push_back(entry);
+    this->db.push_back(impl);
     });
   }
 

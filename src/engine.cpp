@@ -87,8 +87,8 @@ static void write_graphviz(std::string const& filename,
     {
     auto& entry = database[model[i]];
     dot_file << "  " << i << " ["
-      << "label=\"" << entry.impl.name << ' ' << entry.impl.version << "\", "
-      << "URL=\"http://" << entry.id << "\""
+      << "label=\"" << entry.name << ' ' << entry.version << "\", "
+      << "URL=\"" << entry.id << "\""
       << "];" << std::endl;
       ;
     for (std::size_t k = 0; k < model.size(); ++k)
@@ -139,15 +139,15 @@ static bool engine_run(KEngine *self)
     }
   for (int i : model)
     {
-    const DatabaseEntry& entry = self->database[i];
-    if (entry.driver)
+    const KImplementation& impl = self->database[i];
+    if (impl.driver)
       {
       bool requested = std::any_of(self->requests.begin(), self->requests.end(),
-        [&entry](const Spec& spec)
+        [&impl](const Spec& spec)
         {
-        return satisfies(entry, spec);
+        return satisfies(impl, spec);
         });
-      entry.driver->download(entry.impl, requested);
+      impl.driver->download(impl, requested);
       }
     }
   return true;

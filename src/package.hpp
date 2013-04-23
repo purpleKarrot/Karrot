@@ -10,7 +10,6 @@
 #define KARROT_PACKAGE_HPP
 
 #include "dictionary.hpp"
-#include "implementation.hpp"
 
 namespace Karrot
 {
@@ -24,7 +23,10 @@ class Package
       {
       }
   public:
-    KImplementation impl;
+    std::string component;
+    std::string version;
+    KDictionary variant;
+    KDictionary values;
     KDictionary fields;
     Driver const *driver;
     std::string namespace_uri;

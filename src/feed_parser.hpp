@@ -57,6 +57,7 @@ class FeedParser
     void parse_package_fields(XmlReader& xml, Package& group);
     void add_package(const Package& package);
   private:
+    std::string id;
     std::string name;
     KDictionary variants;
     std::vector<Release> releases;

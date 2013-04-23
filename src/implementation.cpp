@@ -7,6 +7,29 @@
  */
 
 #include "implementation.hpp"
+#include "spec.hpp"
+
+_KImplementation::_KImplementation(
+  std::string const& id,
+  std::string const& name,
+  std::string const& component,
+  std::string const& version,
+  KDictionary const& variant,
+  KDictionary const& values)
+  : id(id)
+  , name(name)
+  , component(component)
+  , version(version)
+  , variant(variant)
+  , values(values)
+  {
+  }
+
+char const *
+k_implementation_get_id(KImplementation const *self)
+  {
+  return self->id.c_str();
+  }
 
 char const *
 k_implementation_get_name(KImplementation const *self)
