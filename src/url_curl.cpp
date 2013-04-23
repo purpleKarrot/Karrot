@@ -18,25 +18,6 @@
 namespace
 {
 
-std::string url_to_string(const Karrot::Url& url)
-  {
-  std::string str = Karrot::quark_to_string(url.scheme);
-  str += "://";
-  if (url.user_info)
-    {
-    str += Karrot::quark_to_string(url.user_info);
-    str += "@";
-    }
-  str += Karrot::quark_to_string(url.host);
-  if (url.port)
-    {
-    str += ":";
-    str += Karrot::quark_to_string(url.port);
-    }
-  str += Karrot::quark_to_string(url.path);
-  return str;
-  }
-
 std::string url_to_filename(const Karrot::Url& url)
   {
   std::string str = Karrot::quark_to_string(url.host);

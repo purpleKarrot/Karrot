@@ -174,7 +174,7 @@ std::string url_to_string(Url const& url)
     result += quark_to_string(url.user_info);
     result += "@";
     }
-  result + quark_to_string(url.host);
+  result += quark_to_string(url.host);
   if (url.port)
     {
     result += ":";
