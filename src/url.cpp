@@ -165,4 +165,23 @@ error:
   throw std::runtime_error(std::string("invalid url: ") + str);
   }
 
+std::string url_to_string(Url const& url)
+  {
+  std::string result = quark_to_string(url.scheme);
+  result += "://";
+  if (url.user_info)
+    {
+    result += quark_to_string(url.user_info);
+    result += "@";
+    }
+  result + quark_to_string(url.host);
+  if (url.port)
+    {
+    result += ":";
+    result += quark_to_string(url.port);
+    }
+  result += quark_to_string(url.path);
+  return result;
+  }
+
 } // namespace Karrot

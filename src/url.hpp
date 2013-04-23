@@ -28,6 +28,7 @@ class Url
     int fragment;
   };
 
+std::string url_to_string(Url const& url);
 std::string download(Url const& url);
 
 } // namespace Karrot

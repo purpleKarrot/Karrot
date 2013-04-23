@@ -79,6 +79,22 @@ class Library
 class WinHTTP: private Library
   {
   public:
+    struct AutoProxyOptions
+      {
+      DWORD flags;
+      DWORD auto_detect_flags;
+      LPCWSTR auto_config_url;
+      LPVOID reserved1;
+      DWORD reserved2;
+      BOOL auto_logon_if_challenged;
+      };
+    struct ProxyInfo
+      {
+      DWORD access_type;
+      LPWSTR proxy;
+      LPWSTR proxy_bypass;
+      };
+  public:
     WinHTTP() : Library("winhttp.dll")
       {
       require("WinHttpCloseHandle", close_handle);
@@ -89,6 +105,8 @@ class WinHTTP: private Library
       require("WinHttpReadData", read_data);
       require("WinHttpReceiveResponse", receive_response);
       require("WinHttpSendRequest", send_request);
+      require("WinHttpGetProxyForUrl", get_proxy_for_url);
+      require("WinHttpSetOption", set_option);
       }
   public:
     BOOL (WINAPI *close_handle) (HINTERNET);
@@ -99,6 +117,8 @@ class WinHTTP: private Library
     BOOL (WINAPI *read_data) (HINTERNET, LPVOID, DWORD, LPDWORD);
     BOOL (WINAPI *receive_response) (HINTERNET, LPVOID);
     BOOL (WINAPI *send_request) (HINTERNET, LPCWSTR, DWORD, LPVOID, DWORD, DWORD, DWORD_PTR);
+    BOOL (WINAPI *get_proxy_for_url) (HINTERNET, LPCWSTR, AutoProxyOptions*, ProxyInfo*);
+    BOOL (WINAPI *set_option) (HINTERNET, DWORD, LPVOID, DWORD);
   };
 
 class Wide
@@ -162,7 +182,7 @@ class Downloader
               conn,
               L"GET",
               Wide(Karrot::quark_to_string(url.path)),
-              0,
+              L"HTTP/1.1",
               0,
               0,
               0 /*0x00800000*/),
@@ -172,6 +192,27 @@ class Downloader
         std::error_code error(GetLastError(), std::system_category());
         BOOST_THROW_EXCEPTION(std::system_error(error));
         }
+
+      WinHTTP::AutoProxyOptions auto_proxy_options;
+      WinHTTP::ProxyInfo proxy_info;
+      ZeroMemory(&auto_proxy_options, sizeof(auto_proxy_options));
+      ZeroMemory(&proxy_info, sizeof(proxy_info));
+      auto_proxy_options.flags = 0x00000001;
+      auto_proxy_options.auto_detect_flags = 0x00000001 | 0x00000002;
+      auto_proxy_options.auto_logon_if_challenged = TRUE;
+      if (win_http.get_proxy_for_url(
+          session.get(),
+          Wide(Karrot::url_to_string(url).c_str()),
+          &auto_proxy_options,
+          &proxy_info))
+        {
+        if (!win_http.set_option(request.get(), 38, &proxy_info, sizeof(proxy_info)))
+          {
+          std::error_code error(GetLastError(), std::system_category());
+          BOOST_THROW_EXCEPTION(std::system_error(error));
+          }
+        }
+
       if (!win_http.send_request(request.get(), 0, 0, 0, 0, 0, 0))
         {
         std::error_code error(GetLastError(), std::system_category());
@@ -287,7 +328,8 @@ bool is_cached(char const *file_name)
       {
       return false;
       }
-    BOOST_THROW_EXCEPTION(std::system_error(std::error_code(error, std::system_category())));
+    std::error_code error_code(error, std::system_category());
+    BOOST_THROW_EXCEPTION(std::system_error(error_code));
     }
   Handle handle = CreateFileA(
       file_name,
