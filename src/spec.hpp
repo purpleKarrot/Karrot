@@ -9,27 +9,32 @@
 #ifndef KARROT_SPEC_HPP
 #define KARROT_SPEC_HPP
 
+#include "quark.hpp"
 #include "query.hpp"
+#include "url.hpp"
 
 namespace Karrot
 {
 
-class Url;
-
 class Spec
   {
   public:
-    Spec() {} // = default;
+    Spec() = default;
     Spec(
-        const std::string& id,
-        const std::string& component,
-        const std::string& query)
-        : id(id)
-        , component(component)
-        , query(query)
+      const std::string& id,
+      const std::string& component,
+      const std::string& query)
+      : id(id)
+      , component(component)
+      , query(query)
       {
       }
-    explicit Spec(const Url& url);
+    explicit Spec(const Url& url)
+      : id(url_to_string(url))
+      , component(quark_to_string(url.fragment))
+      , query(quark_to_string(url.query))
+      {
+      }
   public:
     std::string id;
     std::string component;

@@ -74,7 +74,6 @@ add_library(karrot
   query.hpp
   solve.cpp
   solve.hpp
-  spec.cpp
   spec.hpp
   url.cpp
   url.hpp
