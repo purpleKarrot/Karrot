@@ -93,6 +93,7 @@ enum _KOption
   K_OPT_DOT_FILENAME,
   K_OPT_FEED_CACHE,
   K_OPT_RELOAD_FEEDS,
+  K_OPT_IGNORE_SOURCE_CONFLICTS,
   };
 
 typedef enum _KOption KOption;

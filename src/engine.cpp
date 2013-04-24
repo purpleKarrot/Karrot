@@ -28,6 +28,7 @@ struct _KEngine
     : namespace_uri(namespace_uri)
     , feed_cache(".")
     , reload_feeds(false)
+    , ignore_source_conflicts(false)
     {
     if (this->namespace_uri.back() != '/')
       {
@@ -43,6 +44,7 @@ struct _KEngine
   std::string dot_filename;
   std::string feed_cache;
   bool reload_feeds;
+  bool ignore_source_conflicts;
   };
 
 KEngine *
@@ -94,6 +96,9 @@ void k_engine_setopt(KEngine *self, KOption option, ...)
       break;
     case K_OPT_RELOAD_FEEDS:
       self->reload_feeds = va_arg(arg, int);
+      break;
+    case K_OPT_IGNORE_SOURCE_CONFLICTS:
+      self->ignore_source_conflicts = va_arg(arg, int);
       break;
     }
   va_end(arg);
@@ -150,7 +155,7 @@ static bool engine_run(KEngine *self)
       }
     }
   std::vector<int> model;
-  if (!solve(self->database, self->requests, model))
+  if (!solve(self->database, self->requests, self->ignore_source_conflicts, model))
     {
     return false;
     }

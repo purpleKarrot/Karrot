@@ -33,7 +33,11 @@ inline bool satisfies(const KImplementation& impl, const Spec& spec)
 
 typedef std::vector<Spec> Requests;
 
-bool solve(const Database& database, const Requests& requests, std::vector<int>& model);
+bool solve(
+    Database const& database,
+    Requests const& requests,
+    bool ignore_source_conflicts,
+    std::vector<int>& model);
 
 } // namespace Karrot
 
