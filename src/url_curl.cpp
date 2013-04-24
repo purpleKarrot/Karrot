@@ -10,27 +10,13 @@
 
 #include "url.hpp"
 #include "quark.hpp"
-#include <fstream>
 #include <memory>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <curl/curl.h>
 
 namespace
 {
-
-std::string url_to_filename(const Karrot::Url& url)
-  {
-  std::string str = Karrot::quark_to_string(url.host);
-  str += Karrot::quark_to_string(url.path);
-  for (char& c : str)
-    {
-    if (c == '/')
-      {
-      c = '-';
-      }
-    }
-  return str;
-  }
 
 size_t write_fun(char* ptr, size_t size, size_t nmemb, void* userdata)
   {
@@ -38,28 +24,6 @@ size_t write_fun(char* ptr, size_t size, size_t nmemb, void* userdata)
   std::ofstream& file = *reinterpret_cast<std::ofstream*>(userdata);
   file.write(ptr, static_cast<std::streamsize>(nmemb));
   return nmemb;
-  }
-
-boost::filesystem::path cache_dir()
-  {
-  const char* cache = getenv("XDG_CACHE_HOME");
-  if (cache)
-    {
-    return cache;
-    }
-  const char* home = getenv("HOME");
-  if (home)
-    {
-    return boost::filesystem::path(home) / ".config";
-    }
-  return boost::filesystem::current_path();
-  }
-
-boost::filesystem::path make_cache_dir()
-  {
-  boost::filesystem::path cache = cache_dir() / "Karrot";
-  create_directory(cache);
-  return std::move(cache);
   }
 
 class Downloader
@@ -93,16 +57,16 @@ void Downloader::download(const Karrot::Url& url, std::ostream& file) const
 namespace Karrot
 {
 
-std::string download(Url const& url)
+std::string download(Url const& url, std::string const& feed_cache, bool force)
   {
-  static boost::filesystem::path cache = make_cache_dir();
-  boost::filesystem::path filepath = cache / url_to_filename(url);
-  if (!exists(filepath) || last_write_time(filepath) < std::time(0) - 86400)
+  namespace fs = boost::filesystem;
+  fs::path filepath = fs::path(feed_cache) / url_to_filename(url);
+  if (force || !exists(filepath))
     {
     static Downloader downloader;
     try
       {
-      std::ofstream file(filepath.string(), std::ios::binary);
+      fs::ofstream file(filepath, std::ios::binary);
       downloader.download(url, file);
       }
     catch (...)

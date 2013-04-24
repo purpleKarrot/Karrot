@@ -91,6 +91,8 @@ struct _KDriver
 enum _KOption
   {
   K_OPT_DOT_FILENAME,
+  K_OPT_FEED_CACHE,
+  K_OPT_RELOAD_FEEDS,
   };
 
 typedef enum _KOption KOption;

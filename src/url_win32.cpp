@@ -12,7 +12,6 @@
 #include "quark.hpp"
 #include <windows.h>
 #include <wininet.h>
-#include <shlobj.h>
 #include <shlwapi.h>
 #include <cstdint>
 #include <cstdlib>
@@ -296,29 +295,7 @@ class Downloader
     std::vector<Connection> connections;
   };
 
-
-class Handle
-  {
-  public:
-    Handle(HANDLE handle) : handle(handle)
-      {
-      }
-    ~Handle()
-      {
-      if (handle != INVALID_HANDLE_VALUE)
-        {
-        CloseHandle(handle);
-        }
-      }
-    operator HANDLE() const
-      {
-      return handle;
-      }
-  private:
-    HANDLE handle;
-  };
-
-bool is_cached(char const *file_name)
+bool file_exists(char const *file_name)
   {
   DWORD attr = GetFileAttributesA(file_name);
   if (attr == INVALID_FILE_ATTRIBUTES)
@@ -331,33 +308,7 @@ bool is_cached(char const *file_name)
     std::error_code error_code(error, std::system_category());
     BOOST_THROW_EXCEPTION(std::system_error(error_code));
     }
-  Handle handle = CreateFileA(
-      file_name,
-      0,
-      FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
-      0,
-      OPEN_EXISTING,
-      FILE_FLAG_BACKUP_SEMANTICS,
-      0);
-  if (handle == INVALID_HANDLE_VALUE)
-    {
-    std::error_code error(GetLastError(), std::system_category());
-    BOOST_THROW_EXCEPTION(std::system_error(error));
-    }
-  FILETIME write_time;
-  if (GetFileTime(handle, 0, 0, &write_time) == 0)
-    {
-    std::error_code error(GetLastError(), std::system_category());
-    BOOST_THROW_EXCEPTION(std::system_error(error));
-    }
-  FILETIME current_time;
-  GetSystemTimeAsFileTime(&current_time);
-  ULARGE_INTEGER write_large, current_large;
-  write_large.LowPart = write_time.dwLowDateTime;
-  write_large.HighPart = write_time.dwHighDateTime;
-  current_large.LowPart = current_time.dwLowDateTime;
-  current_large.HighPart = current_time.dwHighDateTime;
-  return current_large.QuadPart - write_large.QuadPart < 9000000000LL;
+  return true;
   }
 
 } // namespace
@@ -365,33 +316,24 @@ bool is_cached(char const *file_name)
 namespace Karrot
 {
 
-std::string download(Url const& url)
+std::string download(Url const& url, std::string const& feed_cache, bool force)
   {
   if (url.scheme == string_to_quark("file"))
     {
     return quark_to_string(url.path);
     }
   char filepath[MAX_PATH];
-  if (FAILED(SHGetFolderPathA(0, CSIDL_INTERNET_CACHE, 0, 0, filepath)))
+  if (GetFullPathNameA(feed_cache.c_str(), MAX_PATH, filepath, nullptr) == 0)
     {
     std::error_code error(GetLastError(), std::system_category());
     BOOST_THROW_EXCEPTION(std::system_error(error));
     }
-  std::string str = quark_to_string(url.host);
-  str += quark_to_string(url.path);
-  for (char& c : str)
-    {
-    if (c == '/')
-      {
-      c = '-';
-      }
-    }
-  if (FAILED(PathAppendA(filepath, str.c_str())))
+  if (FAILED(PathAppendA(filepath, url_to_filename(url).c_str())))
     {
     std::error_code error(GetLastError(), std::system_category());
     BOOST_THROW_EXCEPTION(std::system_error(error));
     }
-  if (!is_cached(filepath))
+  if (force || !file_exists(filepath))
     {
     static Downloader downloader;
     downloader.download(url, filepath);

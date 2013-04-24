@@ -184,4 +184,18 @@ std::string url_to_string(Url const& url)
   return result;
   }
 
+std::string url_to_filename(Url const& url)
+  {
+  std::string str = quark_to_string(url.host);
+  str += quark_to_string(url.path);
+  for (char& c : str)
+    {
+    if (c == '/')
+      {
+      c = '-';
+      }
+    }
+  return str;
+  }
+
 } // namespace Karrot

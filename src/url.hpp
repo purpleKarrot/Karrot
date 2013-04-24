@@ -29,7 +29,8 @@ class Url
   };
 
 std::string url_to_string(Url const& url);
-std::string download(Url const& url);
+std::string url_to_filename(Url const& url);
+std::string download(Url const& url, std::string const& feed_cache, bool force);
 
 } // namespace Karrot
 

@@ -25,20 +25,24 @@
 struct _KEngine
   {
   _KEngine(char const *namespace_uri)
-      : namespace_uri(namespace_uri)
+    : namespace_uri(namespace_uri)
+    , feed_cache(".")
+    , reload_feeds(false)
     {
     if (this->namespace_uri.back() != '/')
       {
       this->namespace_uri += '/';
       }
     }
+  std::string error;
   std::string namespace_uri;
   Karrot::FeedQueue feed_queue;
   Karrot::PackageHandler package_handler;
   Karrot::Requests requests;
   Karrot::Database database;
   std::string dot_filename;
-  std::string error;
+  std::string feed_cache;
+  bool reload_feeds;
   };
 
 KEngine *
@@ -84,6 +88,13 @@ void k_engine_setopt(KEngine *self, KOption option, ...)
       str = va_arg(arg, const char*);
       self->dot_filename = str ? str : "";
       break;
+    case K_OPT_FEED_CACHE:
+      str = va_arg(arg, const char*);
+      self->feed_cache = str ? str : ".";
+      break;
+    case K_OPT_RELOAD_FEEDS:
+      self->reload_feeds = va_arg(arg, int);
+      break;
     }
   va_end(arg);
   }
@@ -122,7 +133,7 @@ static bool engine_run(KEngine *self)
   while ((purl = self->feed_queue.get_next()))
     {
     const Url url(*purl); //explicit copy!
-    std::string local_path = download(url);
+    std::string local_path = download(url, self->feed_cache, self->reload_feeds);
     XmlReader xml(local_path);
     if (!xml.start_element())
       {
