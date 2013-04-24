@@ -37,7 +37,7 @@ class Driver
         }
       }
   public:
-    Driver(Driver&& other)
+    Driver(Driver&& other) noexcept
       : name_(std::move(other.name_))
       , namespace_uri_(std::move(other.namespace_uri_))
       , fields_(std::move(other.fields_))
@@ -51,7 +51,20 @@ class Driver
       other.target = nullptr;
       other.destroy_target = nullptr;
       }
-    //Driver& Driver=(Driver&& other)
+    Driver& operator=(Driver&& other) noexcept
+      {
+      name_ = std::move(other.name_);
+      namespace_uri_ = std::move(other.namespace_uri_);
+      fields_ = std::move(other.fields_);
+      download_ = other.download_;
+      filter_ = other.filter_;
+      target = other.target;
+      destroy_target = other.destroy_target;
+      other.download_ = nullptr;
+      other.filter_ = nullptr;
+      other.target = nullptr;
+      other.destroy_target = nullptr;
+      }
   public:
     Driver(Driver const&) = delete;
     Driver& operator=(Driver const&) = delete;
