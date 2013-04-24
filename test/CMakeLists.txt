@@ -12,6 +12,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(test_list
   quark
   url
+  version
   )
 
 create_test_sourcelist(test_sources
@@ -19,6 +20,7 @@ create_test_sourcelist(test_sources
   ${test_list}
   )
 
+add_definitions(-DKARROT_STATIC)
 add_executable(karrot_test_driver ${test_sources})
 
 if(WIN32 AND CMAKE_HOST_UNIX)

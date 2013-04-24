@@ -85,6 +85,7 @@ add_library(karrot
   variants.hpp
   vercmp.cpp
   vercmp.hpp
+  version.cpp
   xml_re2c.hpp
   xml_re2c.in.hpp
   xml_reader.cpp

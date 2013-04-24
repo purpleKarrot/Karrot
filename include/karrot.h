@@ -47,6 +47,9 @@ typedef void (*KDownload) (KImplementation const *impl, int requested, KError *e
 typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, void *self);
 typedef void (*KMapping) (char const *key, char const *val, void *self);
 
+KARROT_API char const *
+k_version (int *major, int *minor, int *patch);
+
 KARROT_API void
 k_error_set (KError *self, char const *what);
 
