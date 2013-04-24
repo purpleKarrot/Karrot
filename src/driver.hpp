@@ -7,7 +7,6 @@
  */
 
 #include <karrot.h>
-#include "delegate.hpp"
 #include "dictionary.hpp"
 #include "error.hpp"
 #include <functional>
@@ -24,10 +23,39 @@ class Driver
       : name_(driver->name)
       , namespace_uri_(namespace_uri + name_)
       , fields_(make_dict(driver->fields, driver->fields_length1))
-      , download_(driver->download, driver->download_target, driver->download_target_destroy_notify)
-      , filter_(driver->filter, driver->filter_target, driver->filter_target_destroy_notify)
+      , download_(driver->download)
+      , filter_(driver->filter)
+      , target(driver->target)
+      , destroy_target(driver->destroy_target)
       {
       }
+    ~Driver()
+      {
+      if (destroy_target)
+        {
+        destroy_target(target);
+        }
+      }
+  public:
+    Driver(Driver&& other)
+      : name_(std::move(other.name_))
+      , namespace_uri_(std::move(other.namespace_uri_))
+      , fields_(std::move(other.fields_))
+      , download_(other.download_)
+      , filter_(other.filter_)
+      , target(other.target)
+      , destroy_target(other.destroy_target)
+      {
+      other.download_ = nullptr;
+      other.filter_ = nullptr;
+      other.target = nullptr;
+      other.destroy_target = nullptr;
+      }
+    //Driver& Driver=(Driver&& other)
+  public:
+    Driver(Driver const&) = delete;
+    Driver& operator=(Driver const&) = delete;
+  public:
     std::string const& name() const
       {
       return name_;
@@ -43,7 +71,7 @@ class Driver
     void download(const KImplementation& impl, bool requested) const
       {
       KError error;
-      download_(&impl, requested, &error);
+      download_(&impl, requested, &error, target);
       if (error)
         {
         std::rethrow_exception(error);
@@ -51,7 +79,7 @@ class Driver
       }
     void filter(const KDictionary& fields, AddFun add) const
       {
-      filter_(&fields, add_fun, &add);
+      filter_(&fields, add_fun, &add, target);
       }
   private:
     static KDictionary make_dict(char const * const *fields, std::size_t size)
@@ -75,8 +103,10 @@ class Driver
     std::string name_;
     std::string namespace_uri_;
     KDictionary fields_;
-    Delegate<void, KImplementation const*, int, KError*> download_;
-    Delegate<void, KDictionary const*, KAddFun, void*> filter_;
+    KDownload download_;
+    KFilter filter_;
+    void *target;
+    void (*destroy_target) (void*);
   };
 
 } // namespace Karrot

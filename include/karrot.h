@@ -83,11 +83,9 @@ struct _KDriver
   char const *const *fields;
   size_t fields_length1;
   KDownload download;
-  void *download_target;
-  void (*download_target_destroy_notify) (void*);
   KFilter filter;
-  void *filter_target;
-  void (*filter_target_destroy_notify) (void*);
+  void *target;
+  void (*destroy_target) (void*);
   };
 
 KARROT_API KEngine *

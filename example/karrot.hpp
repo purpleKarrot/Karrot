@@ -193,11 +193,9 @@ class Engine
         nullptr,
         0,
         download_fun,
-        driver.get(),
-        destroy_fun,
         filter_fun,
         driver.get(),
-        nullptr
+        destroy_fun
         };
       Driver::Fields fields(kdriver.fields, kdriver.fields_length1);
       driver->fields(fields);
