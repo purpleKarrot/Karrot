@@ -88,6 +88,13 @@ struct _KDriver
   void (*destroy_target) (void*);
   };
 
+enum _KOption
+  {
+  K_OPT_DOT_FILENAME,
+  };
+
+typedef enum _KOption KOption;
+
 KARROT_API KEngine *
 k_engine_new (char const *namespace_uri);
 
@@ -98,7 +105,7 @@ KARROT_API void
 k_engine_add_request (KEngine *self, char const *url, int source);
 
 KARROT_API void
-k_engine_dot_filename (KEngine *self, char const *filename);
+k_engine_setopt (KEngine *self, KOption option, ...);
 
 KARROT_API int
 k_engine_run (KEngine *self);

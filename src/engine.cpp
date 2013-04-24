@@ -9,6 +9,7 @@
 #include <karrot.h>
 #include "database.hpp"
 #include <cstring>
+#include <cstdarg>
 #include <fstream>
 #include <algorithm>
 #include <stdexcept>
@@ -72,10 +73,19 @@ void k_engine_add_request(KEngine *self, char const *url_string, int source)
   self->requests.push_back(std::move(spec));
   }
 
-void k_engine_dot_filename(KEngine *self, char const *filename)
+void k_engine_setopt(KEngine *self, KOption option, ...)
   {
-  assert(filename);
-  self->dot_filename = filename;
+  va_list arg;
+  va_start(arg, option);
+  const char* str;
+  switch (option)
+    {
+    case K_OPT_DOT_FILENAME:
+      str = va_arg(arg, const char*);
+      self->dot_filename = str ? str : "";
+      break;
+    }
+  va_end(arg);
   }
 
 static void write_graphviz(std::string const& filename,

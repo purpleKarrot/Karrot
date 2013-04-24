@@ -208,7 +208,7 @@ class Engine
       }
     void dot_filename(char const *filename)
       {
-      k_engine_dot_filename (self, filename);
+      k_engine_setopt(self, K_OPT_DOT_FILENAME, filename);
       }
     bool run()
       {
