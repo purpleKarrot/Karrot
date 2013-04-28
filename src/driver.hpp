@@ -68,6 +68,7 @@ class Driver
       other.filter_ = nullptr;
       other.target = nullptr;
       other.destroy_target = nullptr;
+      return *this;
       }
   public:
     Driver(Driver const&) = delete;
