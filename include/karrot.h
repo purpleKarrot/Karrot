@@ -46,6 +46,7 @@ typedef void (*KAddFun) (char const **val, int size, int native, void *self);
 typedef void (*KDownload) (KImplementation const *impl, int requested, KError *error, void *self);
 typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, void *self);
 typedef void (*KMapping) (char const *key, char const *val, void *self);
+typedef void (*KPrintFun) (char const *string);
 
 KARROT_API char const *
 k_version (int *major, int *minor, int *patch);
@@ -90,6 +91,7 @@ struct _KDriver
 
 enum _KOption
   {
+  K_OPT_LOG_FUNCTION,
   K_OPT_DOT_FILENAME,
   K_OPT_FEED_CACHE,
   K_OPT_RELOAD_FEEDS,

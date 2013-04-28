@@ -157,12 +157,9 @@ int main(int argc, char* argv[])
       return -1;
       }
     }
-  catch (...)
+  catch (std::exception const& error)
     {
-    std::cerr
-      << "\nUnhandled exception caught!\n"
-      << boost::current_exception_diagnostic_information()
-      ;
+    std::cerr << error.what() << std::endl;
     return -1;
     }
   return 0;

@@ -29,6 +29,7 @@ struct _KEngine
     , feed_cache(".")
     , reload_feeds(false)
     , ignore_source_conflicts(false)
+    , log_function{[](char const*){}}
     {
     if (this->namespace_uri.back() != '/')
       {
@@ -45,6 +46,7 @@ struct _KEngine
   std::string feed_cache;
   bool reload_feeds;
   bool ignore_source_conflicts;
+  KPrintFun log_function;
   };
 
 KEngine *
@@ -86,6 +88,9 @@ void k_engine_setopt(KEngine *self, KOption option, ...)
   const char* str;
   switch (option)
     {
+    case K_OPT_LOG_FUNCTION:
+      self->log_function = va_arg(arg, KPrintFun);
+      break;
     case K_OPT_DOT_FILENAME:
       str = va_arg(arg, const char*);
       self->dot_filename = str ? str : "";
