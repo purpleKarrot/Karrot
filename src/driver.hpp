@@ -53,6 +53,10 @@ class Driver
       }
     Driver& operator=(Driver&& other) noexcept
       {
+      if (destroy_target)
+        {
+        destroy_target(target);
+        }
       name_ = std::move(other.name_);
       namespace_uri_ = std::move(other.namespace_uri_);
       fields_ = std::move(other.fields_);

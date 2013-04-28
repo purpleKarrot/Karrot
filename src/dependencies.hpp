@@ -72,8 +72,7 @@ class Dependencies
         {
         return;
         }
-      std::vector<boost::tribool> stack; // {true};
-	  stack.emplace_back(true);
+      std::vector<boost::tribool> stack{true};
       for (const Entry& entry : deps)
         {
         switch (entry.first)
