@@ -25,7 +25,7 @@ name                 = alpha (alnum | '-' | '_')*;
 else                 = [];
 */
 
-bool XmlReader::parse_name(Name& name)
+void XmlReader::parse_name(Name& name)
   {
   std::string quark;
   marker = cursor;
@@ -36,7 +36,7 @@ bool XmlReader::parse_name(Name& name)
     }
   else
     {
-    return false;
+    throw_error();
     }
   */
   /*!re2c
@@ -48,7 +48,7 @@ bool XmlReader::parse_name(Name& name)
     {
     name.prefix.clear();
     name.local = quark;
-    return true;
+    return;
     }
   */
   /*!re2c
@@ -56,83 +56,74 @@ bool XmlReader::parse_name(Name& name)
     {
     name.prefix = quark;
     name.local = std::string(marker, cursor);
-    return true;
+    return;
     }
   else
     {
-    return false;
+    throw_error();
     }
   */
   }
 
-bool XmlReader::parse_attribute(Attribute& attribute)
+void XmlReader::parse_attribute(Attribute& attribute)
   {
-  if (!parse_name(attribute.name))
-    {
-    return false;
-    }
+  parse_name(attribute.name);
   /*!re2c
   space* '=' space*
     {
     }
   else
     {
-    return false;
+    throw_error();
     }
   */
   marker = cursor;
   /*!re2c
   ["] [^"]* ["] | ['] [^']* [']
     {
-    attribute.value = std::string(marker + 1, cursor - 1);
-    return true;
+    attribute.value = std::string(marker.base() + 1, cursor.base() - 1);
+    return;
     }
   else
     {
-    return false;
+    throw_error();
     }
   */
   }
 
-bool XmlReader::parse_pi()
+void XmlReader::parse_pi()
   {
-  if (!parse_name(current_name))
-    {
-    return false;
-    }
+  parse_name(current_name);
   attributes.clear();
   token_ = token_pi;
 instruction:
   /*!re2c
   space* "?>"
     {
-    return true;
+    return;
     }
   space+
     {
     Attribute attr;
-    if (parse_attribute(attr))
-      {
-      attributes.push_back(attr);
-      goto instruction;
-      }
-    return false;
+    parse_attribute(attr);
+    attributes.push_back(attr);
+    goto instruction;
     }
   else
     {
-    return false;
+    throw_error();
     }
   */
   }
 
-bool XmlReader::parse_comment()
+void XmlReader::parse_comment()
   {
   token_ = token_comment;
 comment:
   /*!re2c
   "-->"
     {
-    return true;
+    return;
     }
   "--" | [^]
     {
@@ -141,12 +132,9 @@ comment:
   */
   }
 
-bool XmlReader::parse_element()
+void XmlReader::parse_element()
   {
-  if (!parse_name(current_name))
-    {
-    return false;
-    }
+  parse_name(current_name);
   token_ = token_element;
   attributes.clear();
 attribute:
@@ -155,64 +143,65 @@ attribute:
     {
     is_empty_element = true;
     pop_namespaces(push_namespaces());
-    return true;
+    return;
     }
   space* ">"
     {
     is_empty_element = false;
     push_tag();
-    return true;
+    return;
     }
   space+
     {
     Attribute attr;
-    if (parse_attribute(attr))
-      {
-      attributes.push_back(attr);
-      goto attribute;
-      }
-    return false;
+    parse_attribute(attr);
+    attributes.push_back(attr);
+    goto attribute;
     }
   else
     {
-    return false;
+    throw_error();
     }
   */
   }
 
-bool XmlReader::parse_end_element()
+void XmlReader::parse_end_element()
   {
   const Name& expected = open_tags.back().name;
-  if (!parse_name(current_name))
-    {
-    return false;
-    }
+  parse_name(current_name);
   /*!re2c
   space* ">"
     {
     }
   else
     {
-    return false;
+    throw_error();
     }
   */
   if (open_tags.empty())
     {
-    return false;
+    throw_error();
     }
   if (current_name.prefix != expected.prefix || current_name.local != expected.local)
     {
-    std::printf("Wrong end tag! %s:%s != %s:%s\n",
-      current_name.prefix.c_str(),
-      current_name.local.c_str(),
-      expected.prefix.c_str(),
-      expected.local.c_str());
-    return false;
+    try
+      {
+      throw_error();
+      }
+    catch (...)
+      {
+      // TODO: use Boost.Exception to append information
+      std::printf("Wrong end tag! %s:%s != %s:%s\n",
+        current_name.prefix.c_str(),
+        current_name.local.c_str(),
+        expected.prefix.c_str(),
+        expected.local.c_str());
+      throw;
+      }
     }
   token_ = token_end_element;
   is_empty_element = false;
   pop_tag();
-  return true;
   }
 
 bool XmlReader::parse_text()
@@ -220,7 +209,7 @@ bool XmlReader::parse_text()
   do
     {
     ++cursor;
-    if (cursor == buffer.end())
+    if (cursor.base() == buffer.end())
       {
       return false;
       }
@@ -232,26 +221,30 @@ bool XmlReader::parse_text()
 
 bool XmlReader::read()
   {
-  if (cursor == buffer.end())
+  if (cursor.base() == buffer.end())
     {
     return false;
     }
   /*!re2c
   "<?"
     {
-    return parse_pi();
+    parse_pi();
+    return true;
     }
   "<!--"
     {
-    return parse_comment();
+    parse_comment();
+    return true;
     }
   "<"
     {
-    return parse_element();
+    parse_element();
+    return true;
     }
   "</"
     {
-    return parse_end_element();
+    parse_end_element();
+    return true;
     }
   else
     {

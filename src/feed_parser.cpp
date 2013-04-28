@@ -41,36 +41,17 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
   this->url = url;
   if (xml.name() != "project" || xml.namespace_uri() != project_ns)
     {
-    printf("not a karrot feed\n");
+    printf("not a project feed\n");
     return false;
     }
   id = xml.attribute("href", project_ns);
-  if (id.empty())
-    {
-    printf("href missing!\n");
-    return false;
-    }
   name = xml.attribute("name", project_ns);
-  if (name.empty())
-    {
-    printf("name missing!\n");
-    return false;
-    }
-  //int href = xml.get_attribute (int.HREF, feed_ns);
-  //stdout.printf ("href: %s\n", href.to_string());
-
   std::string tag = next_element(xml);
   if (tag == "meta")
     {
-    // currently not interested in meta information!
     xml.skip();
     tag = next_element(xml);
     }
-  else
-    {
-    printf("meta expected!!\n");
-    }
-
   if (tag == "variants")
     {
     parse_variants(xml);
@@ -121,9 +102,9 @@ void FeedParser::parse_variants(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    std::string name = xml.attribute("name", project_ns);
-    std::string values = xml.attribute("values", project_ns);
-    variants.insert(std::make_pair(std::move(name), std::move(values)));
+    auto name = xml.attribute("name", project_ns);
+    auto values = xml.attribute("values", project_ns);
+    variants.emplace(std::move(name), std::move(values));
     xml.skip();
     }
   }
@@ -134,9 +115,9 @@ void FeedParser::parse_releases(XmlReader& xml)
     {
     if (xml.name() == "release" && xml.namespace_uri() == project_ns)
       {
-      std::string version = xml.attribute("version", project_ns);
-      std::string tag = xml.attribute("tag", project_ns);
-      releases.emplace_back(std::move(version), std::move(tag));
+      auto version = xml.attribute("version", project_ns);
+      auto tag = xml.optional_attribute("tag", project_ns);
+      releases.emplace_back(std::move(version), tag ? *tag : std::string());
       }
     xml.skip();
     }
@@ -250,22 +231,21 @@ void FeedParser::parse_packages(XmlReader& xml, Package group)
 
 void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
   {
-  std::string attr;
-  if (!(attr = xml.attribute("component", project_ns)).empty())
+  if (auto attr = xml.optional_attribute("component", project_ns))
     {
-    group.component = std::move(attr);
+    group.component = std::move(*attr);
     }
-  if (!(attr = xml.attribute("version", project_ns)).empty())
+  if (auto attr = xml.optional_attribute("version", project_ns))
     {
-    group.version = std::move(attr);
+    group.version = std::move(*attr);
     }
-  if (!(attr = xml.attribute("variant", project_ns)).empty())
+  if (auto attr = xml.optional_attribute("variant", project_ns))
     {
-    group.variant = parse_variant(attr);
+    group.variant = parse_variant(*attr);
     }
-  if (!(attr = xml.attribute("type", project_ns)).empty())
+  if (auto attr = xml.optional_attribute("type", project_ns))
     {
-    group.driver = this->ph.get(attr);
+    group.driver = this->ph.get(*attr);
     if (group.driver)
       {
       group.fields = group.driver->fields();
@@ -276,9 +256,9 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     std::string namespace_uri = group.driver->namespace_uri();
     for (auto& entry : group.fields)
       {
-      if (!(attr = xml.attribute(entry.first, namespace_uri)).empty())
+      if (auto attr = xml.optional_attribute(entry.first, namespace_uri))
         {
-        entry.second = std::move(attr);
+        entry.second = std::move(*attr);
         }
       }
     }

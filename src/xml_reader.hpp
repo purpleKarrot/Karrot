@@ -9,9 +9,10 @@
 #ifndef KARROT_XML_READER_HPP
 #define KARROT_XML_READER_HPP
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
+#include <boost/spirit/home/support/iterators/line_pos_iterator.hpp>
 
 namespace Karrot
 {
@@ -27,7 +28,7 @@ enum XmlToken
   token_comment
   };
 
-class XmlReader: boost::noncopyable
+class XmlReader
   {
   public:
     XmlReader(std::string const& filepath);
@@ -38,9 +39,15 @@ class XmlReader: boost::noncopyable
     std::string attribute(
       const std::string& name,
       const std::string& namespace_uri) const;
+    boost::optional<std::string> optional_attribute(
+      const std::string& name,
+      const std::string& namespace_uri) const;
     void skip();
     bool start_element();
     std::string content();
+  private:
+    XmlReader(XmlReader const&) = delete;
+    XmlReader& operator=(XmlReader const&) = delete;
   private:
     struct Name
       {
@@ -69,18 +76,21 @@ class XmlReader: boost::noncopyable
     std::size_t push_namespaces();
     void pop_namespaces(std::size_t n);
     void lookup_namespace(Name& name);
+    void throw_error() const;
   private:
-    bool parse_name(Name& name);
-    bool parse_attribute(Attribute& attribute);
-    bool parse_pi();
-    bool parse_comment();
-    bool parse_element();
-    bool parse_end_element();
+    void parse_name(Name& name);
+    void parse_attribute(Attribute& attribute);
+    void parse_pi();
+    void parse_comment();
+    void parse_element();
+    void parse_end_element();
     bool parse_text();
   private:
     std::vector<char> buffer;
-    std::vector<char>::iterator cursor;
-    std::vector<char>::iterator marker;
+    typedef std::vector<char>::iterator VectorIterator;
+    typedef boost::spirit::line_pos_iterator<VectorIterator> Iterator;
+    Iterator cursor;
+    Iterator marker;
     XmlToken token_;
     Name current_name;
     std::vector<Attribute> attributes;

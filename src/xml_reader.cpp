@@ -10,6 +10,7 @@
 #include "xml_re2c.hpp"
 
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 #include <boost/range/adaptor/reversed.hpp>
 
@@ -77,9 +78,35 @@ void XmlReader::pop_tag()
   open_tags.pop_back();
   }
 
-/******************************************************************************/
+void XmlReader::throw_error() const
+  {
+  auto begin = marker.base();
+  for (; begin != buffer.begin(); --begin)
+    {
+    if (*begin == '\n' || *begin == '\n')
+      {
+      break;
+      }
+    }
+  auto end = marker.base();
+  for (; end != buffer.end(); ++end)
+    {
+    if (*end == '\n' || *end == '\n')
+      {
+      break;
+      }
+    }
+  std::stringstream error;
+  error
+    << "XML parse error"
+    << " in line " << marker.position() << ".\n\n"
+    << std::string(begin, end) << '\n'
+    << std::string(marker.base() - begin, ' ') << "^\n"
+    ;
+  throw std::runtime_error(error.str());
+  }
 
-//#include "xml_re2c.h"
+/******************************************************************************/
 
 XmlReader::XmlReader(std::string const& filepath) :
     token_(token_none), is_empty_element(false)
@@ -94,7 +121,7 @@ XmlReader::XmlReader(std::string const& filepath) :
   std::size_t size = static_cast<std::size_t>(stream.tellg());
   stream.seekg(0);
   buffer.resize(size + 1);
-  cursor = marker = buffer.begin();
+  cursor = marker = Iterator(buffer.begin());
   stream.read(&buffer[0], static_cast<std::streamsize>(size));
   buffer[size] = 0;
   }
@@ -118,14 +145,36 @@ std::string XmlReader::attribute(
     const std::string& name,
     const std::string& namespace_uri) const
   {
-  for (const Attribute& attr : attributes)
+  if (auto attr = optional_attribute(name, namespace_uri))
+    {
+    return *attr;
+    }
+  std::stringstream error;
+  error << "Required XML attribute '" << name << "'";
+  if (!namespace_uri.empty())
+    {
+    error << " (namespace: '" << namespace_uri << "')";
+    }
+  error << " is missing in element '" << current_name.local << "'";
+  if (!current_name.namespace_uri.empty())
+    {
+    error << " (namespace: '" << current_name.namespace_uri << "')";
+    }
+  throw std::runtime_error(error.str());
+  }
+
+boost::optional<std::string> XmlReader::optional_attribute(
+    const std::string& name,
+    const std::string& namespace_uri) const
+  {
+  for (auto& attr : attributes)
     {
     if (attr.name.local == name && attr.name.namespace_uri == namespace_uri)
       {
       return attr.value;
       }
     }
-  return std::string();
+  return boost::none;
   }
 
 void XmlReader::skip()
@@ -176,8 +225,8 @@ std::string XmlReader::content()
     is_empty_element = false;
     return std::string();
     }
-  std::vector<char>::iterator begin = cursor;
-  std::vector<char>::iterator end;
+  Iterator begin = cursor;
+  Iterator end;
   std::size_t depth = 0;
   do
     {
