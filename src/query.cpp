@@ -24,6 +24,7 @@ static const int OR            = -10;
 #include "vercmp.hpp"
 #include "variants.hpp"
 #include <iostream>
+#include <sstream>
 
 namespace Karrot
 {
@@ -72,6 +73,27 @@ static inline bool is_relation(int op)
 static inline bool is_ident(int id)
   {
   return id >= 0;
+  }
+
+static inline int get_variant(const KDictionary& variants, int key)
+  {
+  auto it = variants.find(quark_to_string(key));
+  if (it != variants.end())
+    {
+    return to_quark(it->second);
+    }
+  std::stringstream message;
+  message
+    << "Unknown variable '"
+    << quark_to_string(key)
+    << "' used in test. Known variables are: "
+    ;
+  for (auto& entry : variants)
+    {
+    message << "'" << entry.first << "', ";
+    }
+  message << "and 'version'.";
+  throw std::runtime_error(message.str());
   }
 
 Query::Query(const std::string& string)
@@ -205,7 +227,7 @@ bool Query::evaluate(const std::string& version, const KDictionary& variants) co
         }
       else if (op1 > 1) // 1 == true!
         {
-        op1 = to_quark(variants.at(quark_to_string(op1)));
+        op1 = get_variant(variants, op1);
         }
       if (is_relation(c))
         {
