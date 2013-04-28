@@ -44,9 +44,9 @@ class FeedParser
       };
   public:
     FeedParser(FeedQueue& qq, Database& db, PackageHandler& ph, std::string project_ns);
-    bool parse(const Url& url, XmlReader& xml);
+    void parse(const Url& url, XmlReader& xml, KPrintFun log);
   private:
-    std::string next_element(XmlReader& xml) const;
+    std::string next_element(XmlReader& xml, KPrintFun log) const;
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
     void parse_build(XmlReader& xml, const std::string& type, const std::string& href);

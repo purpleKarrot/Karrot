@@ -154,13 +154,16 @@ static bool engine_run(KEngine *self)
         self->database,
         self->package_handler,
         self->namespace_uri + "project");
-    if (!parser.parse(url, xml))
-      {
-      std::cerr << "not a valid project feed" << std::endl;
-      }
+    parser.parse(url, xml, self->log_function);
     }
   std::vector<int> model;
-  if (!solve(self->database, self->requests, self->ignore_source_conflicts, model))
+  bool solvable = solve(
+      self->database,
+      self->requests,
+      self->ignore_source_conflicts,
+      self->log_function,
+      model);
+  if (!solvable)
     {
     return false;
     }

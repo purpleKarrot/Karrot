@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <cstdio>
+#include <sstream>
 
 namespace Karrot
 {
@@ -184,20 +184,14 @@ void XmlReader::parse_end_element()
     }
   if (current_name.prefix != expected.prefix || current_name.local != expected.local)
     {
-    try
+    std::stringstream error;
+    error << "Expected end tag: '";
+    if (!expected.prefix.empty())
       {
-      throw_error();
+      error << expected.prefix << ':';
       }
-    catch (...)
-      {
-      // TODO: use Boost.Exception to append information
-      std::printf("Wrong end tag! %s:%s != %s:%s\n",
-        current_name.prefix.c_str(),
-        current_name.local.c_str(),
-        expected.prefix.c_str(),
-        expected.local.c_str());
-      throw;
-      }
+    error << expected.local << "'.\n";
+    throw_error(error.str());
     }
   token_ = token_end_element;
   is_empty_element = false;

@@ -17,17 +17,6 @@
 namespace Karrot
 {
 
-#define sanity_check(url1, url2, elem) do {                                    \
-  if (url1.elem != url2.elem)                                                  \
-    {                                                                          \
-    std::printf("'%s/%s' first seen with " #elem " '%s', now with '%s'!\n",    \
-      quark_to_string(url1.host),                                              \
-      quark_to_string(url1.path),                                              \
-      quark_to_string(url1.elem),                                              \
-      quark_to_string(url2.elem));                                             \
-    }                                                                          \
-  } while (0)                                                                  \
-
 class FeedQueue
   {
   public:
@@ -41,13 +30,9 @@ class FeedQueue
         {
         if (cur.path == url.path && cur.host == url.host)
           {
-          sanity_check(cur, url, scheme);
-          sanity_check(cur, url, user_info);
-          sanity_check(cur, url, port);
           return;
           }
         }
-      //std::cout << url.host << url.path << std::endl;
       urls.push_back(url);
       }
     void current(const Url& url)

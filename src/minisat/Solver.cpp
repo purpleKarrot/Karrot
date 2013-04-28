@@ -716,7 +716,7 @@ void Solver::claRescaleActivity()
 |    'simplifyDB()' first to see that no top-level conflict is present (which would put the solver
 |    in an undefined state).
 |________________________________________________________________________________________________@*/
-bool Solver::solve(const vec<Lit>& assumps)
+bool Solver::solve(const vec<Lit>& assumps, KPrintFun log)
 {
     simplifyDB();
     if (!ok) return false;
@@ -758,21 +758,23 @@ bool Solver::solve(const vec<Lit>& assumps)
 
     // Search:
     if (verbosity >= 1){
-        reportf("==================================[MINISAT]===================================\n");
-        reportf("| Conflicts |     ORIGINAL     |              LEARNT              | Progress |\n");
-        reportf("|           | Clauses Literals |   Limit Clauses Literals  Lit/Cl |          |\n");
-        reportf("==============================================================================\n");
+        log("==================================[MINISAT]===================================");
+        log("| Conflicts |     ORIGINAL     |              LEARNT              | Progress |");
+        log("|           | Clauses Literals |   Limit Clauses Literals  Lit/Cl |          |");
+        log("==============================================================================");
     }
-
     while (status == l_Undef){
-        if (verbosity >= 1)
-            reportf("| %9d | %7d %8d | %7d %7d %8d %7.1f | %6.3f %% |\n", (int)stats.conflicts, nClauses(), (int)stats.clauses_literals, (int)nof_learnts, nLearnts(), (int)stats.learnts_literals, (double)stats.learnts_literals/nLearnts(), progress_estimate*100);
+        if (verbosity >= 1){
+            char buffer[80];
+            sprintf(buffer, "| %9d | %7d %8d | %7d %7d %8d %7.1f | %6.3f %% |", (int)stats.conflicts, nClauses(), (int)stats.clauses_literals, (int)nof_learnts, nLearnts(), (int)stats.learnts_literals, (double)stats.learnts_literals/nLearnts(), progress_estimate*100);
+            log(buffer);
+        }
         status = search((int)nof_conflicts, (int)nof_learnts, params);
         nof_conflicts *= 1.5;
         nof_learnts   *= 1.1;
     }
     if (verbosity >= 1)
-        reportf("==============================================================================\n");
+        log("==============================================================================");
 
     cancelUntil(0);
     return status == l_True;

@@ -21,15 +21,9 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #define Solver_h
 
 #include <vector>
+#include <karrot.h>
 #include "SolverTypes.h"
 #include "VarOrder.h"
-
-// Redfine if you want output to go somewhere else:
-#ifndef __GNUC__
-#	define reportf printf
-#else
-#	define reportf(format, args...) ( printf(format , ## args), fflush(stdout) )
-#endif
 
 //=================================================================================================
 // Solver -- the main class:
@@ -187,8 +181,8 @@ public:
     //
     bool    okay() { return ok; }       // FALSE means solver is in an conflicting state (must never be used again!)
     void    simplifyDB();
-    bool    solve(const vec<Lit>& assumps);
-    bool    solve() { vec<Lit> tmp; return solve(tmp); }
+    bool    solve(const vec<Lit>& assumps, KPrintFun log);
+    bool    solve(KPrintFun log) { vec<Lit> tmp; return solve(tmp, log); }
 
     double      progress_estimate;  // Set by 'search()'.
     vec<lbool>  model;              // If problem is satisfiable, this vector contains the model (if any).

@@ -179,10 +179,11 @@ class Engine
     Engine(char const *namespace_uri)
       {
       self = k_engine_new(namespace_uri);
-      k_engine_setopt(self, K_OPT_LOG_FUNCTION, [](char const *message)
+      KPrintFun log_function = [](char const *message)
         {
         std::puts(message);
-        });
+        };
+      k_engine_setopt(self, K_OPT_LOG_FUNCTION, log_function);
       }
     ~Engine()
       {

@@ -76,7 +76,7 @@ class XmlReader
     std::size_t push_namespaces();
     void pop_namespaces(std::size_t n);
     void lookup_namespace(Name& name);
-    void throw_error() const;
+    void throw_error(std::string const& message = std::string()) const;
   private:
     void parse_name(Name& name);
     void parse_attribute(Attribute& attribute);

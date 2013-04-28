@@ -9,7 +9,7 @@
 #include "feed_parser.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
-#include <iostream>
+#include "log.hpp"
 
 namespace Karrot
 {
@@ -22,7 +22,7 @@ FeedParser::FeedParser(FeedQueue& queue, Database& db, PackageHandler& ph, std::
   {
   }
 
-std::string FeedParser::next_element(XmlReader& xml) const
+std::string FeedParser::next_element(XmlReader& xml, KPrintFun log) const
   {
   while (xml.start_element())
     {
@@ -30,39 +30,38 @@ std::string FeedParser::next_element(XmlReader& xml) const
       {
       return xml.name();
       }
-    std::cout << "skipping {" << xml.namespace_uri() << "}:" << xml.name() << std::endl;
+    Log(log, "skipping '{%1%}:%2%'.") % xml.namespace_uri() % xml.name();
     xml.skip();
     }
   return std::string();
   }
 
-bool FeedParser::parse(const Url& url, XmlReader& xml)
+void FeedParser::parse(const Url& url, XmlReader& xml, KPrintFun log)
   {
   this->url = url;
   if (xml.name() != "project" || xml.namespace_uri() != project_ns)
     {
-    printf("not a project feed\n");
-    return false;
+    throw std::runtime_error("not a project feed");
     }
   id = xml.attribute("href", project_ns);
   name = xml.attribute("name", project_ns);
-  std::string tag = next_element(xml);
+  std::string tag = next_element(xml, log);
   if (tag == "meta")
     {
     xml.skip();
-    tag = next_element(xml);
+    tag = next_element(xml, log);
     }
   if (tag == "variants")
     {
     parse_variants(xml);
     xml.skip();
-    tag = next_element(xml);
+    tag = next_element(xml, log);
     }
   if (tag == "releases")
     {
     parse_releases(xml);
     xml.skip();
-    tag = next_element(xml);
+    tag = next_element(xml, log);
     }
   if (tag == "build")
     {
@@ -70,32 +69,31 @@ bool FeedParser::parse(const Url& url, XmlReader& xml)
     std::string href = xml.attribute("href", project_ns);
     parse_build(xml, vcs, href);
     xml.skip();
-    tag = next_element(xml);
+    tag = next_element(xml, log);
     }
   if (tag == "runtime")
     {
     parse_runtime(xml);
     xml.skip();
-    tag = next_element(xml);
+    tag = next_element(xml, log);
     }
   else if (tag == "components")
     {
     parse_components(xml);
     xml.skip();
-    tag = next_element(xml);
+    tag = next_element(xml, log);
     }
   if (tag == "packages")
     {
     Package group;
     parse_packages(xml, group);
     xml.skip();
-    tag = next_element(xml);
+    tag = next_element(xml, log);
     }
   if (!tag.empty())
     {
-    std::cerr << "element " << tag << " not expected!!" << std::endl;
+    Log(log, "element '%1%' not expected!!") % tag;
     }
-  return true;
   }
 
 void FeedParser::parse_variants(XmlReader& xml)

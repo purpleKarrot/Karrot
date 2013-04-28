@@ -37,6 +37,7 @@ bool solve(
     Database const& database,
     Requests const& requests,
     bool ignore_source_conflicts,
+    KPrintFun log,
     std::vector<int>& model);
 
 } // namespace Karrot

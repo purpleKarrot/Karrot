@@ -12,9 +12,9 @@
 #include "vercmp.hpp"
 #include "minisat/Solver.h"
 #include "url.hpp"
+#include "log.hpp"
 #include <algorithm>
 #include <stdexcept>
-#include <iostream>
 
 namespace Karrot
 {
@@ -186,6 +186,7 @@ bool solve(
     const Database& database,
     const Requests& requests,
     bool ignore_source_conflicts,
+    KPrintFun log,
     std::vector<int>& model)
   {
   Hash hash;
@@ -216,7 +217,11 @@ bool solve(
     query(hash, database, spec, choices);
     if (choices.size() == 0)
       {
-      std::clog << "no implementation satisfies the request" << std::endl;
+      Log(log, "no implementation satisfies '%1%'") % spec;
+      for (auto& entry : database)
+        {
+        Log(log, "%1%") % entry.id;
+        }
       return false;
       }
     if (choices.size() == 1)
@@ -230,8 +235,7 @@ bool solve(
     }
   if (request.size() == 0)
     {
-    std::clog << "request is not specific enough" << std::endl;
-    return false;
+    log("Warning: request is ambiguous.");
     }
 
   dependency_clauses(hash, database, solver);
@@ -243,9 +247,9 @@ bool solve(
     source_conflict_clauses(database, solver);
     }
 
-  if (!solver.solve(request))
+  if (!solver.solve(request, log))
     {
-    std::clog << "no solution exists, because of conflicts" << std::endl;
+    log("no solution exists, because of conflicts");
     return false;
     }
   for (int i = 0; i < solver.nVars(); ++i)

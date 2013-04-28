@@ -78,7 +78,7 @@ void XmlReader::pop_tag()
   open_tags.pop_back();
   }
 
-void XmlReader::throw_error() const
+void XmlReader::throw_error(std::string const& message) const
   {
   auto begin = marker.base();
   for (; begin != buffer.begin(); --begin)
@@ -99,7 +99,8 @@ void XmlReader::throw_error() const
   std::stringstream error;
   error
     << "XML parse error"
-    << " in line " << marker.position() << ".\n\n"
+    << " in line " << marker.position() << ".\n"
+    << message << '\n'
     << std::string(begin, end) << '\n'
     << std::string(marker.base() - begin, ' ') << "^\n"
     ;

@@ -12,6 +12,7 @@
 #include "quark.hpp"
 #include "query.hpp"
 #include "url.hpp"
+#include <iostream>
 
 namespace Karrot
 {
@@ -26,18 +27,34 @@ class Spec
       const std::string& query)
       : id(id)
       , component(component)
+      , query_str(query)
       , query(query)
       {
       }
     explicit Spec(const Url& url)
       : id(url_to_string(url))
       , component(quark_to_string(url.fragment))
-      , query(quark_to_string(url.query))
+      , query_str(quark_to_string(url.query))
+      , query(query_str)
       {
+      }
+    friend std::ostream& operator<<(std::ostream &os, Spec const& spec)
+      {
+      os << spec.id;
+      if (!spec.query_str.empty())
+        {
+        os << '?' << spec.query_str;
+        }
+      if (!spec.component.empty())
+        {
+        os << '#' << spec.component;
+        }
+      return os;
       }
   public:
     std::string id;
     std::string component;
+    std::string query_str;
     Query query;
   };
 
