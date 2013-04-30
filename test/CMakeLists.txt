@@ -12,6 +12,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(test_list
   quark
   url
+  vercmp
   version
   )
 
