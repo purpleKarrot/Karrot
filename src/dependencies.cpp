@@ -65,7 +65,7 @@ void Dependencies::replay(
       case DEPENDS:
         if (stack.back())
           {
-          feed_queue.push(entry.second);
+          feed_queue->push(entry.second);
           depends.push_back(entry.second);
           }
         break;
