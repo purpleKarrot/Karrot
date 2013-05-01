@@ -13,6 +13,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
 
 namespace Karrot
 {
@@ -184,18 +185,11 @@ std::string url_to_string(Url const& url)
   return result;
   }
 
-std::string url_to_filename(Url const& url)
+std::string url_to_filename(std::string url)
   {
-  std::string str = quark_to_string(url.host);
-  str += quark_to_string(url.path);
-  for (char& c : str)
-    {
-    if (c == '/')
-      {
-      c = '-';
-      }
-    }
-  return str;
+  replace(begin(url), end(url), ':', ';');
+  replace(begin(url), end(url), '/', '%');
+  return url;
   }
 
 } // namespace Karrot

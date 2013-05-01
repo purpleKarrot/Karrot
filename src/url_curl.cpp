@@ -36,14 +36,14 @@ class Downloader
       curl_easy_setopt(curl_handle.get(), CURLOPT_USERAGENT, "Karrot/0.1");
       curl_easy_setopt(curl_handle.get(), CURLOPT_FOLLOWLOCATION, 1);
       }
-    void download(Karrot::Url const& url, std::ostream& file) const;
+    void download(std::string const& url, std::ostream& file) const;
   private:
     std::unique_ptr<CURL, void (*)(CURL*)> curl_handle;
   };
 
-void Downloader::download(const Karrot::Url& url, std::ostream& file) const
+void Downloader::download(std::string const& url, std::ostream& file) const
   {
-  curl_easy_setopt(curl_handle.get(), CURLOPT_URL, url_to_string(url).c_str());
+  curl_easy_setopt(curl_handle.get(), CURLOPT_URL, url.c_str());
   curl_easy_setopt(curl_handle.get(), CURLOPT_FILE, &file);
   CURLcode res = curl_easy_perform(curl_handle.get());
   if (res != CURLE_OK)
@@ -57,7 +57,7 @@ void Downloader::download(const Karrot::Url& url, std::ostream& file) const
 namespace Karrot
 {
 
-std::string download(Url const& url, std::string const& feed_cache, bool force)
+std::string download(std::string const& url, std::string const& feed_cache, bool force)
   {
   namespace fs = boost::filesystem;
   fs::path filepath = fs::path(feed_cache) / url_to_filename(url);

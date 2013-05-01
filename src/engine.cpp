@@ -143,7 +143,7 @@ static bool engine_run(KEngine *self)
   while ((purl = self->feed_queue.get_next()))
     {
     const Url url(*purl); //explicit copy!
-    std::string local_path = download(url, self->feed_cache, self->reload_feeds);
+    std::string local_path = download(url_to_string(url), self->feed_cache, self->reload_feeds);
     XmlReader xml(local_path);
     if (!xml.start_element())
       {

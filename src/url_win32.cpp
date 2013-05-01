@@ -20,6 +20,7 @@
 #include <system_error>
 #include <vector>
 #include <boost/throw_exception.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace
 {
@@ -316,11 +317,11 @@ bool file_exists(char const *file_name)
 namespace Karrot
 {
 
-std::string download(Url const& url, std::string const& feed_cache, bool force)
+std::string download(std::string const& url, std::string const& feed_cache, bool force)
   {
-  if (url.scheme == string_to_quark("file"))
+  if (boost::starts_with(url, "file://"))
     {
-    return quark_to_string(url.path);
+    return url.substr(7);
     }
   char filepath[MAX_PATH];
   if (GetFullPathNameA(feed_cache.c_str(), MAX_PATH, filepath, nullptr) == 0)
@@ -336,7 +337,7 @@ std::string download(Url const& url, std::string const& feed_cache, bool force)
   if (force || !file_exists(filepath))
     {
     static Downloader downloader;
-    downloader.download(url, filepath);
+    downloader.download(Url(url.c_str()), filepath);
     }
   return filepath;
   }
