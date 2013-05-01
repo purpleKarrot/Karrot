@@ -30,6 +30,7 @@ class Url
 
 std::string url_to_string(Url const& url);
 std::string url_to_filename(std::string url);
+std::string resolve_uri(std::string const& base, std::string const& relative);
 std::string download(std::string const& url, std::string const& feed_cache, bool force);
 
 } // namespace Karrot

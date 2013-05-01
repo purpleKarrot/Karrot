@@ -12,6 +12,16 @@
 
 int url(int argc, char* argv[])
   {
+  using Karrot::resolve_uri;
+  std::string base("scheme://host/path/file?query#fragment");
+
+  BOOST_TEST_EQ(resolve_uri(base, "http://host/path"), "http://host/path");
+  BOOST_TEST_EQ(resolve_uri(base, "//host2/path"), "scheme://host2/path");
+  BOOST_TEST_EQ(resolve_uri(base, "/path2/file2"), "scheme://host/path2/file2");
+  BOOST_TEST_EQ(resolve_uri(base, "?query2"), "scheme://host/path/file?query2");
+  BOOST_TEST_EQ(resolve_uri(base, "#fragment2"), "scheme://host/path/file?query#fragment2");
+  BOOST_TEST_EQ(resolve_uri(base, "file2"), "scheme://host/path/file2");
+
   Karrot::Url url1("scheme://host/path?query#fragment");
   BOOST_TEST_EQ(url1.scheme, Karrot::string_to_quark("scheme"));
   BOOST_TEST_EQ(url1.host, Karrot::string_to_quark("host"));

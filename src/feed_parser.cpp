@@ -198,19 +198,13 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
       }
     else if (name == "depends")
       {
-      std::string href = xml.attribute("href", project_ns);
-      Url base_url(spec.id.c_str());
-      Url dep_url(href.c_str(), &base_url);
-      Spec dep_spec(url_to_string(dep_url).c_str());
-      depends.depends(dep_spec);
+      std::string dep = resolve_uri(spec.id, xml.attribute("href", project_ns));
+      depends.depends(Spec(dep.c_str()));
       }
     else if (name == "conflicts")
       {
-      std::string href = xml.attribute("href", project_ns);
-      Url base_url(spec.id.c_str());
-      Url dep_url(href.c_str(), &base_url);
-      Spec dep_spec(url_to_string(dep_url).c_str());
-      depends.conflicts(dep_spec);
+      std::string dep = resolve_uri(spec.id, xml.attribute("href", project_ns));
+      depends.conflicts(Spec(dep.c_str()));
       }
     xml.skip();
     }
