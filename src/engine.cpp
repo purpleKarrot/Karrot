@@ -16,6 +16,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 
+#include "url.hpp"
 #include "solve.hpp"
 #include "feed_queue.hpp"
 #include "feed_parser.hpp"
@@ -68,17 +69,15 @@ void k_engine_add_driver(KEngine *self, KDriver *driver)
   self->package_handler.add(driver, self->namespace_uri);
   }
 
-void k_engine_add_request(KEngine *self, char const *url_string, int source)
+void k_engine_add_request(KEngine *self, char const *url, int source)
   {
-  using namespace Karrot;
-  Url url(url_string);
-  self->feed_queue.push(url);
-  Spec spec(url);
+  Karrot::Spec spec(url);
+  self->feed_queue.push(spec);
   if (source != 0)
     {
     spec.component = "SOURCE";
     }
-  self->requests.push_back(std::move(spec));
+  self->requests.push_back(spec);
   }
 
 void k_engine_setopt(KEngine *self, KOption option, ...)
@@ -139,22 +138,22 @@ static void write_graphviz(std::string const& filename,
 static bool engine_run(KEngine *self)
   {
   using namespace Karrot;
-  const Url* purl;
-  while ((purl = self->feed_queue.get_next()))
+  Spec* spec;
+  while ((spec = self->feed_queue.get_next()))
     {
-    const Url url(*purl); //explicit copy!
-    std::string local_path = download(url_to_string(url), self->feed_cache, self->reload_feeds);
+    std::string local_path = download(spec->id, self->feed_cache, self->reload_feeds);
     XmlReader xml(local_path);
     if (!xml.start_element())
       {
       BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + local_path));
       }
     FeedParser parser(
+        *spec,
         self->feed_queue,
         self->database,
         self->package_handler,
         self->namespace_uri + "project");
-    parser.parse(url, xml, self->log_function);
+    parser.parse(xml, self->log_function);
     }
   std::vector<int> model;
   bool solvable = solve(

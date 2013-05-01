@@ -9,10 +9,9 @@
 #ifndef KARROT_SPEC_HPP
 #define KARROT_SPEC_HPP
 
-#include "quark.hpp"
 #include "query.hpp"
-#include "url.hpp"
 #include <iostream>
+#include <cstring>
 
 namespace Karrot
 {
@@ -31,12 +30,22 @@ class Spec
       , query(query)
       {
       }
-    explicit Spec(const Url& url)
-      : id(url_to_string(url))
-      , component(quark_to_string(url.fragment))
-      , query_str(quark_to_string(url.query))
-      , query(query_str)
+    explicit Spec(char const* url)
       {
+      std::size_t length = std::strcspn(url, "?#");
+      id = std::string(url, length);
+      if (*url == '?')
+        {
+        length = std::strcspn(++url, "#");
+        query_str = std::string(url, length);
+        query = Query(query_str);
+        url += length;
+        }
+      if (*url == '#')
+        {
+        ++url;
+        component = std::string(url, strlen(url));
+        }
       }
     friend std::ostream& operator<<(std::ostream &os, Spec const& spec)
       {

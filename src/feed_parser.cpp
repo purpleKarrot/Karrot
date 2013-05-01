@@ -10,11 +10,13 @@
 #include "xml_reader.hpp"
 #include "variants.hpp"
 #include "log.hpp"
+#include "url.hpp"
 
 namespace Karrot
 {
 
-FeedParser::FeedParser(FeedQueue& queue, Database& db, PackageHandler& ph, std::string project_ns) :
+FeedParser::FeedParser(Spec& spec, FeedQueue& queue, Database& db, PackageHandler& ph, std::string project_ns) :
+    spec(spec),
     queue(queue),
     db(db),
     ph(ph),
@@ -36,14 +38,13 @@ std::string FeedParser::next_element(XmlReader& xml, KPrintFun log) const
   return std::string();
   }
 
-void FeedParser::parse(const Url& url, XmlReader& xml, KPrintFun log)
+void FeedParser::parse(XmlReader& xml, KPrintFun log)
   {
-  this->url = url;
   if (xml.name() != "project" || xml.namespace_uri() != project_ns)
     {
     throw std::runtime_error("not a project feed");
     }
-  id = xml.attribute("href", project_ns);
+  spec.id = xml.attribute("href", project_ns);
   name = xml.attribute("name", project_ns);
   std::string tag = next_element(xml, log);
   if (tag == "meta")
@@ -131,7 +132,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     {
     return;
     }
-  KImplementation impl(this->id, this->name, "SOURCE");
+  KImplementation impl(spec.id, this->name, "SOURCE");
   impl.values["href"] = href;
   impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
@@ -194,15 +195,20 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
     else if (name == "depends")
       {
       std::string href = xml.attribute("href", project_ns);
-      Url dep(href.c_str(), &url);
-      queue.push(dep);
-      depends.depends(Spec(dep));
+      Url base_url(spec.id.c_str());
+      Url dep_url(href.c_str(), &base_url);
+      Spec dep_spec(url_to_string(dep_url).c_str());
+      queue.push(dep_spec);
+      depends.depends(dep_spec);
       }
     else if (name == "conflicts")
       {
       std::string href = xml.attribute("href", project_ns);
-      Url dep(href.c_str(), &url);
-      depends.conflicts(Spec(dep));
+      Url base_url(spec.id.c_str());
+      Url dep_url(href.c_str(), &base_url);
+      Spec dep_spec(url_to_string(dep_url).c_str());
+      queue.push(dep_spec);
+      depends.conflicts(dep_spec);
       }
     xml.skip();
     }
@@ -291,7 +297,7 @@ void FeedParser::add_package(const Package& package)
     [&](DictView const& values, bool system)
     {
     KImplementation impl(
-        this->id,
+        spec.id,
         this->name,
         package.component,
         package.version,

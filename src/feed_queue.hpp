@@ -9,10 +9,8 @@
 #ifndef KARROT_FEED_QUEUE_HPP
 #define KARROT_FEED_QUEUE_HPP
 
-#include "url.hpp"
-#include "quark.hpp"
+#include "spec.hpp"
 #include <vector>
-#include <cstdio>
 
 namespace Karrot
 {
@@ -24,22 +22,18 @@ class FeedQueue
         next(0)
       {
       }
-    void push(const Url& url)
+    void push(Spec const& spec)
       {
-      for (const Url& cur : urls)
+      for (const Spec& cur : urls)
         {
-        if (cur.path == url.path && cur.host == url.host)
+        if (cur.id == spec.id)
           {
           return;
           }
         }
-      urls.push_back(url);
+      urls.push_back(spec);
       }
-    void current(const Url& url)
-      {
-      urls[next] = url;
-      }
-    Url* get_next()
+    Spec* get_next()
       {
       if (next < urls.size())
         {
@@ -48,7 +42,7 @@ class FeedQueue
       return 0;
       }
   private:
-    std::vector<Url> urls;
+    std::vector<Spec> urls;
     std::size_t next;
   };
 
