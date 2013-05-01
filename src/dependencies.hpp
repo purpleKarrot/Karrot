@@ -9,14 +9,7 @@
 #ifndef KARROT_DEPENDENCIES_HPP
 #define KARROT_DEPENDENCIES_HPP
 
-#include <karrot.h>
-#include <vector>
 #include "spec.hpp"
-#include "quark.hpp"
-#include "query.hpp"
-#include <boost/logic/tribool.hpp>
-#include <utility>
-#include <iostream>
 
 namespace Karrot
 {
@@ -66,65 +59,7 @@ class Dependencies
         const std::string& version,
         const KDictionary& values,
         std::vector<Spec>& depends,
-        std::vector<Spec>& conflicts) const
-      {
-      if (component != name && component != "*")
-        {
-        return;
-        }
-      std::vector<boost::tribool> stack{true};
-      for (const Entry& entry : deps)
-        {
-        switch (entry.first)
-          {
-          case IF:
-            if (stack.back() == true)
-              {
-              stack.push_back(entry.second.query.evaluate(version, values));
-              }
-            else
-              {
-              stack.push_back(boost::indeterminate);
-              }
-            break;
-          case ELSE:
-            if (stack.back() == true)
-              {
-              stack.back() = boost::indeterminate;
-              }
-            else if (stack.back() == false)
-              {
-              stack.back() = true;
-              }
-            break;
-          case ELSEIF:
-            if (stack.back() == true)
-              {
-              stack.back() = boost::indeterminate;
-              }
-            else if (stack.back() == false)
-              {
-              stack.back() = entry.second.query.evaluate(version, values);
-              }
-            break;
-          case ENDIF:
-            stack.pop_back();
-            break;
-          case DEPENDS:
-            if (stack.back())
-              {
-              depends.push_back(entry.second);
-              }
-            break;
-          case CONFLICTS:
-            if (stack.back())
-              {
-              conflicts.push_back(entry.second);
-              }
-            break;
-          }
-        }
-      }
+        std::vector<Spec>& conflicts) const;
   private:
     enum Code
       {
@@ -140,6 +75,6 @@ class Dependencies
     std::vector<Entry> deps;
   };
 
-} // namespace
+} // namespace Karrot
 
 #endif /* KARROT_DEPENDENCIES_HPP */
