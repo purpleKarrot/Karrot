@@ -125,7 +125,7 @@ void FeedParser::parse_releases(XmlReader& xml)
 
 void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std::string& href)
   {
-  Dependencies depends("*");
+  Dependencies depends(this->queue, "*");
   parse_depends(xml, depends);
   Driver const *driver = this->ph.get(type);
   if (!driver)
@@ -141,6 +141,10 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     impl.values["tag"] = releases[i].tag();
     foreach_variant(variants, [&](KDictionary variant)
       {
+      if (!spec.query.evaluate(impl.version, variant))
+        {
+        return;
+        }
       impl.variant = variant;
       impl.depends.clear();
       impl.conflicts.clear();
@@ -152,7 +156,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
 
 void FeedParser::parse_runtime(XmlReader& xml)
   {
-  components.emplace_back();
+  components.emplace_back(this->queue);
   parse_depends(xml, components.back());
   }
 
@@ -162,7 +166,7 @@ void FeedParser::parse_components(XmlReader& xml)
     {
     if (xml.name() == "component" && xml.namespace_uri() == project_ns)
       {
-      components.emplace_back(xml.attribute("name", project_ns));
+      components.emplace_back(this->queue, xml.attribute("name", project_ns));
       parse_depends(xml, components.back());
       }
     xml.skip();
@@ -198,7 +202,6 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
       Url base_url(spec.id.c_str());
       Url dep_url(href.c_str(), &base_url);
       Spec dep_spec(url_to_string(dep_url).c_str());
-      queue.push(dep_spec);
       depends.depends(dep_spec);
       }
     else if (name == "conflicts")
@@ -207,7 +210,6 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
       Url base_url(spec.id.c_str());
       Url dep_url(href.c_str(), &base_url);
       Spec dep_spec(url_to_string(dep_url).c_str());
-      queue.push(dep_spec);
       depends.conflicts(dep_spec);
       }
     xml.skip();
