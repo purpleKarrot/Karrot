@@ -187,8 +187,12 @@ std::string url_to_string(Url const& url)
 
 std::string url_to_filename(std::string url)
   {
-  replace(begin(url), end(url), ':', ';');
-  replace(begin(url), end(url), '/', '%');
+  std::size_t scheme = url.find("://");
+  if (scheme != std::string::npos)
+    {
+    url.erase(0, scheme + 3);
+    }
+  replace(begin(url), end(url), '/', '-');
   return url;
   }
 
