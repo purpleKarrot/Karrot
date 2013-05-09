@@ -61,6 +61,7 @@ class Archive: public Driver
       }
     void download(const Implementation& impl, bool requested) //override
       {
+      std::cout << "download " << impl.name() << std::endl;
       }
   private:
     std::string machine;
@@ -80,6 +81,7 @@ class Source: public Driver
       }
     void download(const Implementation& impl, bool requested) //override
       {
+      std::cout << name_ << " download " << impl.name() << std::endl;
       }
   private:
     const char* name_;

@@ -14,6 +14,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <cstdio>
 
 class Dictionary;
 class Implementation;
