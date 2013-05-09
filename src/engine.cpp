@@ -16,6 +16,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 
+#include "log.hpp"
 #include "url.hpp"
 #include "solve.hpp"
 #include "feed_queue.hpp"
@@ -140,6 +141,7 @@ static bool engine_run(KEngine *self)
   using namespace Karrot;
   while (auto spec = self->feed_queue.get_next())
     {
+    Log(self->log_function, "Reading feed '%1%'") % *spec;
     std::string local_path = download(spec->id, self->feed_cache, self->reload_feeds);
     XmlReader xml(local_path);
     if (!xml.start_element())
@@ -155,6 +157,7 @@ static bool engine_run(KEngine *self)
     parser.parse(xml, self->log_function);
     }
   std::vector<int> model;
+  Log(self->log_function, "Solving SAT with %1% variables") % self->database.size();
   bool solvable = solve(
       self->database,
       self->requests,
