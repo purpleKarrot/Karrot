@@ -34,9 +34,11 @@ class Spec
       {
       std::size_t length = std::strcspn(url, "?#");
       id = std::string(url, length);
+      url += length;
       if (*url == '?')
         {
-        length = std::strcspn(++url, "#");
+        ++url;
+        length = std::strcspn(url, "#");
         query_str = std::string(url, length);
         query = Query(query_str);
         url += length;
