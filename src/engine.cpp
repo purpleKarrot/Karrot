@@ -18,6 +18,7 @@
 
 #include "log.hpp"
 #include "url.hpp"
+#include "graph.hpp"
 #include "solve.hpp"
 #include "feed_queue.hpp"
 #include "feed_parser.hpp"
@@ -109,33 +110,6 @@ void k_engine_setopt(KEngine *self, KOption option, ...)
   va_end(arg);
   }
 
-static void write_graphviz(std::string const& filename,
-    std::vector<int> const& model, Karrot::Database const& database)
-  {
-  std::ofstream dot_file(filename);
-  dot_file << "digraph G {\n";
-  for (std::size_t i = 0; i < model.size(); ++i)
-    {
-    auto& entry = database[model[i]];
-    dot_file << "  " << i << " ["
-      << "label=\"" << entry.name << ' ' << entry.version << "\", "
-      << "URL=\"" << entry.id << "\""
-      << "];" << std::endl;
-      ;
-    for (std::size_t k = 0; k < model.size(); ++k)
-      {
-      for (auto& spec : database[model[k]].depends)
-        {
-        if (satisfies(entry, spec))
-          {
-          dot_file << "  " << k << " -> " << i << ";\n";
-          }
-        }
-      }
-    }
-  dot_file << "}\n";
-  }
-
 static bool engine_run(KEngine *self)
   {
   using namespace Karrot;
@@ -167,6 +141,10 @@ static bool engine_run(KEngine *self)
   if (!solvable)
     {
     return false;
+    }
+  if (true /*topological sort enabled*/)
+    {
+    model = topological_sort(model, self->database);
     }
   if (!self->dot_filename.empty())
     {

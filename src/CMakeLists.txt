@@ -62,6 +62,8 @@ add_library(karrot
   feed_parser.cpp
   feed_parser.hpp
   feed_queue.hpp
+  graph.cpp
+  graph.hpp
   hash.hpp
   implementation.cpp
   implementation.hpp
