@@ -11,6 +11,7 @@
 
 #include "spec.hpp"
 #include <vector>
+#include <boost/optional.hpp>
 
 namespace Karrot
 {
@@ -18,8 +19,8 @@ namespace Karrot
 class FeedQueue
   {
   public:
-    FeedQueue() :
-        next(0)
+    FeedQueue()
+      : next(0)
       {
       }
     void push(Spec const& spec)
@@ -33,13 +34,17 @@ class FeedQueue
         }
       urls.push_back(spec);
       }
-    Spec* get_next()
+    void current_id(std::string const& id)
+      {
+      urls[next - 1].id = id;
+      }
+    boost::optional<Spec> get_next()
       {
       if (next < urls.size())
         {
-        return &urls[next++];
+        return urls[next++];
         }
-      return 0;
+      return boost::none;
       }
   private:
     std::vector<Spec> urls;

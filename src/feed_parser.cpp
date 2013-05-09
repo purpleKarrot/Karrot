@@ -15,7 +15,7 @@
 namespace Karrot
 {
 
-FeedParser::FeedParser(Spec& spec, FeedQueue& queue, Database& db, PackageHandler& ph, std::string project_ns) :
+FeedParser::FeedParser(Spec const& spec, FeedQueue& queue, Database& db, PackageHandler& ph, std::string project_ns) :
     spec(spec),
     queue(queue),
     db(db),
@@ -44,7 +44,12 @@ void FeedParser::parse(XmlReader& xml, KPrintFun log)
     {
     throw std::runtime_error("not a project feed");
     }
-  spec.id = xml.attribute("href", project_ns);
+  std::string id = xml.attribute("href", project_ns);
+  if (id != spec.id)
+    {
+    spec.id = id;
+    queue.current_id(id);
+    }
   name = xml.attribute("name", project_ns);
   std::string tag = next_element(xml, log);
   if (tag == "meta")

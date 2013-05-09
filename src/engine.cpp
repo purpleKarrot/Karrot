@@ -138,8 +138,7 @@ static void write_graphviz(std::string const& filename,
 static bool engine_run(KEngine *self)
   {
   using namespace Karrot;
-  Spec* spec;
-  while ((spec = self->feed_queue.get_next()))
+  while (auto spec = self->feed_queue.get_next())
     {
     std::string local_path = download(spec->id, self->feed_cache, self->reload_feeds);
     XmlReader xml(local_path);
