@@ -14,21 +14,6 @@
 namespace Karrot
 {
 
-class Url
-  {
-  public:
-    Url();
-    Url(const char* str, Url* base = 0);
-    int scheme;
-    int user_info;
-    int host;
-    int port;
-    int path;
-    int query;
-    int fragment;
-  };
-
-std::string url_to_string(Url const& url);
 std::string url_to_filename(std::string url);
 std::string resolve_uri(std::string const& base, std::string const& relative);
 std::string download(std::string const& url, std::string const& feed_cache, bool force);
