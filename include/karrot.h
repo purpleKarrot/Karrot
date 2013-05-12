@@ -96,6 +96,7 @@ enum _KOption
   K_OPT_FEED_CACHE              = (1u << 2),
   K_OPT_RELOAD_FEEDS            = (1u << 3),
   K_OPT_IGNORE_SOURCE_CONFLICTS = (1u << 4),
+  K_OPT_NO_TOPOLOGICAL_ORDER    = (1u << 5),
   };
 
 typedef enum _KOption KOption;

@@ -32,6 +32,7 @@ struct _KEngine
     , feed_cache(".")
     , reload_feeds(false)
     , ignore_source_conflicts(false)
+    , no_topological_order(false)
     , log_function{[](char const*){}}
     {
     if (this->namespace_uri.back() != '/')
@@ -49,6 +50,7 @@ struct _KEngine
   std::string feed_cache;
   bool reload_feeds;
   bool ignore_source_conflicts;
+  bool no_topological_order;
   KPrintFun log_function;
   };
 
@@ -106,6 +108,11 @@ void k_engine_setopt(KEngine *self, KOption option, ...)
     case K_OPT_IGNORE_SOURCE_CONFLICTS:
       self->ignore_source_conflicts = va_arg(arg, int);
       break;
+    case K_OPT_NO_TOPOLOGICAL_ORDER:
+      self->no_topological_order = va_arg(arg, int);
+      break;
+    default:
+      break;
     }
   va_end(arg);
   }
@@ -150,7 +157,7 @@ static bool engine_run(KEngine *self)
     {
     return false;
     }
-  if (true /*topological sort enabled*/)
+  if (!self->no_topological_order)
     {
     model = topological_sort(model, self->database);
     }
