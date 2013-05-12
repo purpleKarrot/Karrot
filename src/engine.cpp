@@ -122,7 +122,7 @@ static bool engine_run(KEngine *self)
   using namespace Karrot;
   while (auto spec = self->feed_queue.get_next())
     {
-    Log(self->log_function, "Reading feed '%1%'") % *spec;
+    Log(self->log_function, "Reading feed '%1%'") % spec->id;
     std::string local_path = download(spec->id, self->feed_cache, self->reload_feeds);
     XmlReader xml(local_path);
     if (!xml.start_element())
@@ -170,6 +170,7 @@ static bool engine_run(KEngine *self)
     const KImplementation& impl = self->database[i];
     if (impl.driver)
       {
+      Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
       bool requested = std::any_of(self->requests.begin(), self->requests.end(),
         [&impl](const Spec& spec)
         {

@@ -54,7 +54,7 @@ static void r_variants_recurse(
     const std::function<void(KDictionary)>& func)
   {
   assert(cur != end);
-  std::vector < std::string > values;
+  std::vector<std::string> values;
   split(values, cur->second, boost::is_any_of(";"), boost::token_compress_on);
   for (const std::string& val : values)
     {
