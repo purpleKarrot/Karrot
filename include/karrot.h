@@ -101,26 +101,77 @@ enum _KOption
 
 typedef enum _KOption KOption;
 
+/**
+ * @defgroup Engine class
+ * @ingroup Karrot
+ * @{
+ */
+
+/**
+ * Create a new Engine.
+ *
+ * @param namespace_uri The base url for the feed namespace.
+ * @return a `KEngine` instance
+ */
 KARROT_API KEngine *
 k_engine_new (char const *namespace_uri);
 
+/**
+ * Add a Driver to an Engine.
+ *
+ * @param self a `KEngine` instance
+ * @param driver a `KDriver` instance
+ */
 KARROT_API void
 k_engine_add_driver (KEngine *self, KDriver *driver);
 
+/**
+ * Add a Request to an Engine.
+ *
+ * @param self a `KEngine` instance
+ * @param url the url of the requested feed
+ * @param source limit the request to source implementations
+ */
 KARROT_API void
 k_engine_add_request (KEngine *self, char const *url, int source);
 
+/**
+ * Configure options of the Engine.
+ *
+ * @param self a `KEngine` instance
+ * @param option the `KOption` to set
+ * @param ... the value to be set
+ */
 KARROT_API void
 k_engine_setopt (KEngine *self, KOption option, ...);
 
+/**
+ * Run the Engine.
+ *
+ * @param self a `KEngine` instance
+ * @return zero indicates success
+ */
 KARROT_API int
 k_engine_run (KEngine *self);
 
+/**
+ * Get the error message of the Engine.
+ *
+ * @param self a `KEngine` instance
+ * @return the error message string
+ */
 KARROT_API char const *
 k_engine_error_message (KEngine *self);
 
+/**
+ * Engine destructor
+ *
+ * @param self a `KEngine` instance
+ */
 KARROT_API void
 k_engine_free (KEngine *self);
+
+/** @} */
 
 #ifdef __cplusplus
 } /* extern "C" */
