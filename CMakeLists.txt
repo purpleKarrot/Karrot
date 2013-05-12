@@ -51,7 +51,6 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     if(HAVE_STD0X)
       set(CMAKE_CXX_FLAGS -std=c++0x)
     endif()
-    add_definitions(-Doverride)
   endif()
 endif()
 
