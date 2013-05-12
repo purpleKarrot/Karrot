@@ -1,0 +1,10 @@
+{
+ "name":   "Karrot",
+ "github": "purpleKarrot/Karrot",
+ "input":  "include",
+ "prefix": "k_",
+ "output": "docs",
+ "branch": "gh-pages",
+ "examples": "examples"
+}
+

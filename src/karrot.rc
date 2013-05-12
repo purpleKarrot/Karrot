@@ -1,0 +1,43 @@
+/*
+ * Copyright (C) 2013 Daniel Pfeifer <daniel@pfeifer-mail.de>
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * See accompanying file LICENSE_1_0.txt or copy at
+ *   http://www.boost.org/LICENSE_1_0.txt
+ */
+
+#include <winver.h>
+#include <karrot.h>
+
+VS_VERSION_INFO   VERSIONINFO
+  FILEVERSION     KARROT_VER_MAJOR, KARROT_VER_MINOR, KARROT_VER_PATCH, 0
+  PRODUCTVERSION  KARROT_VER_MAJOR, KARROT_VER_MINOR, KARROT_VER_PATCH, 0
+  FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+  FILEFLAGS       1
+#else
+  FILEFLAGS       0
+#endif
+  FILEOS          VOS__WINDOWS32
+  FILETYPE        VFT_DLL
+  FILESUBTYPE     0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "FileDescription", "Project Dependency Solver\0"
+      VALUE "FileVersion", KARROT_VERSION "\0"
+      VALUE "InternalName", "karrot.dll\0"
+      VALUE "LegalCopyright", "Copyright (C) Daniel Pfeifer. All rights reserved.\0"
+      VALUE "OriginalFilename", "karrot.dll\0"
+      VALUE "ProductName", "Karrot\0"
+      VALUE "ProductVersion", KARROT_VERSION "\0"
+      VALUE "Comments", "For more information visit http://purplekarrot.net/\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0409, 1252
+  END
+END
