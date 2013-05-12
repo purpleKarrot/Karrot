@@ -94,6 +94,24 @@ class WinHTTP: private Library
       LPWSTR proxy;
       LPWSTR proxy_bypass;
       };
+    struct UrlComponents
+      {
+      DWORD struct_size;
+      LPWSTR scheme;
+      DWORD scheme_length;
+      int scheme_type;
+      LPWSTR hostname;
+      DWORD hostname_length;
+      WORD port;
+      LPWSTR username;
+      DWORD username_length;
+      LPWSTR password;
+      DWORD password_length;
+      LPWSTR path;
+      DWORD path_length;
+      LPWSTR extra;
+      DWORD extra_length;
+      };
   public:
     WinHTTP() : Library("winhttp.dll")
       {
@@ -107,6 +125,7 @@ class WinHTTP: private Library
       require("WinHttpSendRequest", send_request);
       require("WinHttpGetProxyForUrl", get_proxy_for_url);
       require("WinHttpSetOption", set_option);
+      require("WinHttpCrackUrl", crack_url);
       }
   public:
     BOOL (WINAPI *close_handle) (HINTERNET);
@@ -119,47 +138,8 @@ class WinHTTP: private Library
     BOOL (WINAPI *send_request) (HINTERNET, LPCWSTR, DWORD, LPVOID, DWORD, DWORD, DWORD_PTR);
     BOOL (WINAPI *get_proxy_for_url) (HINTERNET, LPCWSTR, AutoProxyOptions*, ProxyInfo*);
     BOOL (WINAPI *set_option) (HINTERNET, DWORD, LPVOID, DWORD);
+    BOOL (WINAPI *crack_url) (LPCWSTR, DWORD, DWORD, UrlComponents*);
   };
-
-class Wide
-  {
-  public:
-    Wide(char const *str)
-      {
-      int len = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, 0);
-      if (len <= 0)
-        {
-        std::error_code error(GetLastError(), std::system_category());
-        BOOST_THROW_EXCEPTION(std::system_error(error));
-        }
-      impl.resize(len);
-      MultiByteToWideChar(CP_ACP, 0, str, -1, &impl[0], impl.length());
-      }
-    operator LPCWSTR() const
-      {
-      return impl.c_str();
-      }
-  private:
-    std::wstring impl;
-  };
-
-char const* get_host(Karrot::Url const& url)
-  {
-  return Karrot::quark_to_string(url.host);
-  }
-
-short get_port(Karrot::Url const& url)
-  {
-  if (url.port)
-    {
-    return std::atoi(Karrot::quark_to_string(url.port));
-    }
-  if (url.scheme == Karrot::string_to_quark("https"))
-    {
-    return 443;
-    }
-  return 80;
-  }
 
 class Downloader
   {
@@ -174,18 +154,30 @@ class Downloader
         }
       }
   public:
-    void download(Karrot::Url const& url, std::string const& filepath)
+    void download(std::string const& url, std::string const& filepath)
       {
-      HINTERNET conn = get_connection(get_host(url), get_port(url));
+      int wide_url_length = MultiByteToWideChar(CP_ACP, 0, url.c_str(), url.length(), NULL, 0);
+      if (wide_url_length <= 0)
+        {
+        std::error_code error(GetLastError(), std::system_category());
+        BOOST_THROW_EXCEPTION(std::system_error(error));
+        }
+      std::wstring wide_url(wide_url_length, L'\0');
+      MultiByteToWideChar(CP_ACP, 0, url.c_str(), url.length(), &wide_url[0], wide_url_length);
+      WinHTTP::UrlComponents url_components = {sizeof(WinHTTP::UrlComponents)};
+      url_components.scheme_length = -1;
+      url_components.hostname_length = -1;
+      url_components.path_length = -1;
+      if (!win_http.crack_url(wide_url.c_str(), wide_url_length, 0, &url_components))
+        {
+        std::error_code error(GetLastError(), std::system_category());
+        BOOST_THROW_EXCEPTION(std::system_error(error));
+        }
+      HINTERNET conn = get_connection(
+          std::wstring(url_components.hostname, url_components.hostname_length),
+          url_components.port);
       Handle request(
-          win_http.open_request(
-              conn,
-              L"GET",
-              Wide(Karrot::quark_to_string(url.path)),
-              L"HTTP/1.1",
-              0,
-              0,
-              0 /*0x00800000*/),
+          win_http.open_request(conn, L"GET", url_components.path, L"HTTP/1.1", 0, 0, 0),
           win_http.close_handle);
       if (!request)
         {
@@ -200,11 +192,7 @@ class Downloader
       auto_proxy_options.flags = 0x00000001;
       auto_proxy_options.auto_detect_flags = 0x00000001 | 0x00000002;
       auto_proxy_options.auto_logon_if_challenged = TRUE;
-      if (win_http.get_proxy_for_url(
-          session.get(),
-          Wide(Karrot::url_to_string(url).c_str()),
-          &auto_proxy_options,
-          &proxy_info))
+      if (win_http.get_proxy_for_url(session.get(), wide_url.c_str(), &auto_proxy_options, &proxy_info))
         {
         if (!win_http.set_option(request.get(), 38, &proxy_info, sizeof(proxy_info)))
           {
@@ -246,7 +234,7 @@ class Downloader
       while (down > 0);
       }
   private:
-    HINTERNET get_connection(std::string const& host, short port)
+    HINTERNET get_connection(std::wstring const& host, short port)
       {
       for (const Connection& conn : connections)
         {
@@ -256,7 +244,7 @@ class Downloader
           }
         }
       Handle handle(
-          win_http.connect(session.get(), Wide(host.c_str()), port, 0),
+          win_http.connect(session.get(), host.c_str(), port, 0),
           win_http.close_handle);
       if (!handle)
         {
@@ -285,11 +273,11 @@ class Downloader
     Handle session;
     struct Connection
       {
-      Connection(std::string const& host, short port, Handle&& handle) :
+      Connection(std::wstring const& host, short port, Handle&& handle) :
           host(host), port(port), handle(std::move(handle))
         {
         }
-      std::string host;
+      std::wstring host;
       short port;
       Handle handle;
       };
@@ -337,7 +325,7 @@ std::string download(std::string const& url, std::string const& feed_cache, bool
   if (force || !file_exists(filepath))
     {
     static Downloader downloader;
-    downloader.download(Url(url.c_str()), filepath);
+    downloader.download(url, filepath);
     }
   return filepath;
   }
