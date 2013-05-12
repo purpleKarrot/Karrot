@@ -91,11 +91,11 @@ struct _KDriver
 
 enum _KOption
   {
-  K_OPT_LOG_FUNCTION,
-  K_OPT_DOT_FILENAME,
-  K_OPT_FEED_CACHE,
-  K_OPT_RELOAD_FEEDS,
-  K_OPT_IGNORE_SOURCE_CONFLICTS,
+  K_OPT_LOG_FUNCTION            = (1u << 0),
+  K_OPT_DOT_FILENAME            = (1u << 1),
+  K_OPT_FEED_CACHE              = (1u << 2),
+  K_OPT_RELOAD_FEEDS            = (1u << 3),
+  K_OPT_IGNORE_SOURCE_CONFLICTS = (1u << 4),
   };
 
 typedef enum _KOption KOption;
