@@ -17,39 +17,38 @@ namespace Karrot
 class Hash
   {
   public:
-    Hash() :
-        mask(0), table(0)
+    Hash() : mask{0}, table{nullptr}
       {
       }
     ~Hash()
       {
       std::free(table);
       }
-    bool rehash_needed(int size)
+    bool rehash_needed(std::size_t size)
       {
-      size *= 2;
+      size *= 2u;
       if (size <= mask)
         {
         return false;
         }
-      while (size & (size - 1))
+      while (size & (size - 1u))
         {
-        size &= size - 1;
+        size &= size - 1u;
         }
-      mask = size * 2 - 1;
+      mask = (size * 2u) - 1u;
       std::free(table);
       table = (int*) std::calloc(mask + 1, sizeof(int));
       return true;
       }
     std::size_t begin() const
       {
-      return 7;
+      return 7u;
       }
     std::size_t next(std::size_t h, std::size_t& hh) const
       {
       return (h + hh++) & mask;
       }
-    int mask;
+    std::size_t mask;
     int* table;
   };
 
