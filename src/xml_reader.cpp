@@ -83,7 +83,7 @@ void XmlReader::throw_error(std::string const& message) const
   auto begin = marker.base();
   for (; begin != buffer.begin(); --begin)
     {
-    if (*begin == '\n' || *begin == '\n')
+    if (*begin == '\n' || *begin == '\r')
       {
       break;
       }
@@ -91,20 +91,17 @@ void XmlReader::throw_error(std::string const& message) const
   auto end = marker.base();
   for (; end != buffer.end(); ++end)
     {
-    if (*end == '\n' || *end == '\n')
+    if (*end == '\n' || *end == '\r')
       {
       break;
       }
     }
-  std::stringstream error;
-  error
-    << "XML parse error"
-    << " in line " << marker.position() << ".\n"
-    << message << '\n'
-    << std::string(begin, end) << '\n'
-    << std::string(marker.base() - begin, ' ') << "^\n"
-    ;
-  throw std::runtime_error(error.str());
+  XmlParseError error;
+  error.line = marker.position();
+  error.column = marker.base() - begin;
+  error.current_line = std::string(begin, end);
+  error.message = message;
+  throw error;
   }
 
 /******************************************************************************/

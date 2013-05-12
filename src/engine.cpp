@@ -128,7 +128,15 @@ static bool engine_run(KEngine *self)
         self->database,
         self->package_handler,
         self->namespace_uri + "project");
-    parser.parse(xml, self->log_function);
+    try
+      {
+      parser.parse(xml, self->log_function);
+      }
+    catch (XmlParseError& error)
+      {
+      error.filename = local_path;
+      throw;
+      }
     }
   std::vector<int> model;
   Log(self->log_function, "Solving SAT with %1% variables") % self->database.size();
@@ -171,6 +179,18 @@ int k_engine_run(KEngine *self)
   try
     {
     return engine_run(self) ? 0 : 1;
+    }
+  catch (Karrot::XmlParseError& error)
+    {
+    std::stringstream stream;
+     stream
+      << error.what()
+      << " in '" << error.filename << "' at line " << error.line << ".\n"
+      << error.current_line << '\n'
+      << std::string(error.column, ' ') << "^\n"
+      << error.message << '\n'
+      ;
+    self->error = stream.str();
     }
   catch (...)
     {
