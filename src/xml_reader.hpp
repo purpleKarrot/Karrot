@@ -17,6 +17,18 @@
 namespace Karrot
 {
 
+struct XmlParseError: std::exception
+  {
+  const char* what() const noexcept
+    {
+    return "xml parse error";
+    }
+  std::size_t line, column;
+  std::string current_line;
+  std::string message;
+  std::string filename;
+  };
+
 enum XmlToken
   {
   token_none,
