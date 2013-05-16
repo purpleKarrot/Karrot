@@ -19,6 +19,9 @@ namespace Karrot
 
 struct XmlParseError: std::exception
   {
+  ~XmlParseError() noexcept
+    {
+    }
   const char* what() const noexcept
     {
     return "xml parse error";
