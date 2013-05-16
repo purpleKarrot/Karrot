@@ -7,11 +7,21 @@
 #=============================================================================
 
 find_package(Boost "1.46" REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(
+  ${Boost_INCLUDE_DIRS}
+  ${Karrot_BINARY_DIR}/src
+  ${Karrot_SOURCE_DIR}/src
+  )
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
+configure_file(coveralls.in ${CMAKE_BINARY_DIR}/coveralls @ONLY)
 
 set(test_list
   quark
+  query
   url
+  variants
   vercmp
   version
   )
