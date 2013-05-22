@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "../src/vercmp.cpp"
+#include "../src/vercmp.hpp"
 #include <boost/detail/lightweight_test.hpp>
 
 int vercmp(int argc, char* argv[])

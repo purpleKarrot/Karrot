@@ -27,17 +27,6 @@ if(MSVC)
     )
 endif()
 
-if(CMAKE_CROSSCOMPILING AND CMAKE_HOST_UNIX)
-  set(Boost_INCLUDE_DIR "${CMAKE_BINARY_DIR}/boost_root")
-  if(NOT EXISTS "${Boost_INCLUDE_DIR}/boost")
-    file(MAKE_DIRECTORY "${Boost_INCLUDE_DIR}")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-      "/usr/include/boost"
-      "${Boost_INCLUDE_DIR}/boost"
-      )
-  endif()
-endif()
-
 if(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
   set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libstdc++")
   set(CMAKE_CXX_LINK_FLAGS "-std=c++11 -stdlib=libstdc++")
@@ -51,6 +40,33 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     if(HAVE_STD0X)
       set(CMAKE_CXX_FLAGS -std=c++0x)
     endif()
+  endif()
+endif()
+
+option(BUILD_COVERAGE "build with gcov support" OFF)
+if(BUILD_COVERAGE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+  set(CMAKE_CXX_FLAGS_DEBUG
+    "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage"
+    )
+  set(CMAKE_EXE_LINKER_FLAGS_DEBUG
+    "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage"
+    )
+endif()
+
+option(BUILD_VISIBILITY_HIDDEN "build with gcov support" ON)
+if(BUILD_VISIBILITY_HIDDEN AND NOT WIN32)
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-fvisibility=hidden VISIBILITY_HIDDEN)
+  if(VISIBILITY_HIDDEN)
+    set(CMAKE_CXX_FLAGS_RELEASE
+      "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility=hidden"
+      )
+  endif()
+  check_cxx_compiler_flag(-fvisibility-inlines-hidden VISIBILITY_INLINES_HIDDEN)
+  if(VISIBILITY_INLINES_HIDDEN)
+    set(CMAKE_CXX_FLAGS_RELEASE
+      "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility-inlines-hidden"
+      )
   endif()
 endif()
 

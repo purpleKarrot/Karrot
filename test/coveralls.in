@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ 0 -eq $(find -iname *.gcda | wc -l) ]
+then
+  exit 0
+fi
+
 gcov --source-prefix @CMAKE_SOURCE_DIR@ --preserve-paths --relative-only $(find -iname *.gcda) 1>/dev/null || exit 0
 
 cat >coverage.json <<EOF

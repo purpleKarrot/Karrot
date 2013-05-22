@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "../src/version.cpp"
+#include <karrot.h>
 #include <boost/detail/lightweight_test.hpp>
 #include <cstring>
 

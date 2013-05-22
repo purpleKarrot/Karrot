@@ -26,7 +26,7 @@ before_install:
 script:
   - mkdir _build
   - cd _build
-  - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && make -k all test
+  - cmake -DBUILD_COVERAGE=ON -DBUILD_VISIBILITY_HIDDEN=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && make -k all test
 
 after_success:
   - ./coveralls
