@@ -15,6 +15,8 @@
 namespace Karrot
 {
 
+static const String SOURCE{"SOURCE"};
+
 FeedParser::FeedParser(Spec const& spec, FeedQueue& queue, Database& db, PackageHandler& ph, std::string project_ns) :
     spec(spec),
     queue(queue),
@@ -79,20 +81,29 @@ void FeedParser::parse(XmlReader& xml, KPrintFun log)
     }
   if (tag == "runtime")
     {
-    parse_runtime(xml);
+    if (spec.component != SOURCE)
+      {
+      parse_runtime(xml);
+      }
     xml.skip();
     tag = next_element(xml, log);
     }
   else if (tag == "components")
     {
-    parse_components(xml);
+    if (spec.component != SOURCE)
+      {
+      parse_components(xml);
+      }
     xml.skip();
     tag = next_element(xml, log);
     }
   if (tag == "packages")
     {
-    Package group;
-    parse_packages(xml, group);
+    if (spec.component != SOURCE)
+      {
+      Package group;
+      parse_packages(xml, group);
+      }
     xml.skip();
     tag = next_element(xml, log);
     }
@@ -137,7 +148,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     {
     return;
     }
-  KImplementation impl(spec.id, this->name, "SOURCE");
+  KImplementation impl(spec.id, this->name, SOURCE);
   impl.values["href"] = href;
   impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
@@ -324,6 +335,10 @@ void FeedParser::add_package(const Package& package)
         impl.values[key] = val;
         }
       });
+    if (!spec.query.evaluate(impl.version, impl.variant))
+      {
+      return;
+      }
     if (!system)
       {
       bool supported = std::any_of(begin(releases), end(releases),

@@ -19,6 +19,8 @@
 namespace Karrot
 {
 
+static const String SOURCE{"SOURCE"};
+
 static inline std::size_t hash_artefact(const std::string& id)
   {
   std::hash<std::string> hash_fn;
@@ -61,11 +63,11 @@ static std::vector<Var> make_preferences(const Database& database)
     {
     const KImplementation& impl1 = database[var1];
     const KImplementation& impl2 = database[var2];
-    if (impl1.component != "SOURCE" && impl2.component == "SOURCE")
+    if (impl1.component != SOURCE && impl2.component == SOURCE)
       {
       return true;
       }
-    if (impl1.component == "SOURCE" && impl2.component != "SOURCE")
+    if (impl1.component == SOURCE && impl2.component != SOURCE)
       {
       return false;
       }
@@ -147,7 +149,7 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
           impl1.variant != impl2.variant ||
           impl1.component == impl2.component ||
           impl1.component == "*" || impl2.component == "*" ||
-          impl1.component == "SOURCE" || impl2.component == "SOURCE")
+          impl1.component == SOURCE || impl2.component == SOURCE)
         {
         solver.addBinary(~Lit(i), ~Lit(k));
         }
@@ -161,13 +163,13 @@ static void source_conflict_clauses(const Database& database, Solver& solver)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
-    if (database[i].component != "SOURCE")
+    if (database[i].component != SOURCE)
       {
       continue;
       }
     for (std::size_t k = 0; k < database.size(); ++k)
       {
-      if (database[k].component == "SOURCE")
+      if (database[k].component == SOURCE)
         {
         continue;
         }

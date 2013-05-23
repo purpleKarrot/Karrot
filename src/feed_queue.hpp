@@ -19,16 +19,17 @@ namespace Karrot
 class FeedQueue
   {
   public:
-    FeedQueue()
-      : next(0)
-      {
-      }
     void push(Spec const& spec)
       {
-      for (const Spec& cur : urls)
+      for (Spec& cur : urls)
         {
         if (cur.id == spec.id)
           {
+          if (cur.component != spec.component)
+            {
+            cur.component = String{};
+            }
+          cur.query = Query{};
           return;
           }
         }
@@ -48,7 +49,7 @@ class FeedQueue
       }
   private:
     std::vector<Spec> urls;
-    std::size_t next;
+    std::size_t next = 0;
   };
 
 } // namespace Karrot

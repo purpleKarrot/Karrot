@@ -76,11 +76,11 @@ void k_engine_add_driver(KEngine *self, KDriver *driver)
 void k_engine_add_request(KEngine *self, char const *url, int source)
   {
   Karrot::Spec spec(url);
-  self->feed_queue.push(spec);
   if (source != 0)
     {
     spec.component = "SOURCE";
     }
+  self->feed_queue.push(spec);
   self->requests.push_back(spec);
   }
 
