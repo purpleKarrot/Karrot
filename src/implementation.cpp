@@ -25,28 +25,34 @@ _KImplementation::_KImplementation(
   {
   }
 
+static inline const char *
+c_str(std::string const& str)
+  {
+  return str.c_str();
+  }
+
 char const *
 k_implementation_get_id(KImplementation const *self)
   {
-  return self->id.c_str();
+  return c_str(self->id);
   }
 
 char const *
 k_implementation_get_name(KImplementation const *self)
   {
-  return self->name.c_str();
+  return c_str(self->name);
   }
 
 char const *
 k_implementation_get_component(KImplementation const *self)
   {
-  return self->component.c_str();
+  return c_str(self->component);
   }
 
 char const *
 k_implementation_get_version(KImplementation const *self)
   {
-  return self->version.c_str();
+  return c_str(self->version);
   }
 
 KDictionary const *
@@ -59,4 +65,18 @@ KDictionary const *
 k_implementation_get_values(KImplementation const *self)
   {
   return &self->values;
+  }
+
+std::ostream& operator<<(std::ostream &os, _KImplementation const& impl)
+  {
+  os << impl.id;
+  if (!impl.version.get().empty())
+    {
+    os << "?version==" << impl.version;
+    }
+  if (!impl.component.get().empty())
+    {
+    os << '#' << impl.component;
+    }
+  return os;
   }

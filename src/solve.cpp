@@ -77,7 +77,7 @@ static std::vector<Var> make_preferences(const Database& database)
       {
       return false;
       }
-    return vercmp(impl1.version.c_str(), impl2.version.c_str()) < 0;
+    return vercmp(impl1.version, impl2.version) < 0;
     });
   return std::move(preferences);
   }

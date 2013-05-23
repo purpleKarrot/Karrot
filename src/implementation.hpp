@@ -11,7 +11,8 @@
 
 #include <karrot.h>
 #include "dictionary.hpp"
-#include <vector>
+#include "string.hpp"
+#include <iosfwd>
 
 namespace Karrot
 {
@@ -28,15 +29,17 @@ struct _KImplementation
     std::string const& version = std::string(),
     KDictionary const& variant = KDictionary(),
     KDictionary const& values = KDictionary());
-  std::string id;
-  std::string name;
-  std::string component;
-  std::string version;
+  Karrot::String id;
+  Karrot::String name;
+  Karrot::String component;
+  Karrot::String version;
   KDictionary variant;
   KDictionary values;
   std::vector<Karrot::Spec> depends;
   std::vector<Karrot::Spec> conflicts;
   Karrot::Driver const *driver;
   };
+
+std::ostream& operator<<(std::ostream &os, _KImplementation const& impl);
 
 #endif /* KARROT_IMPLEMENTATION_HPP */

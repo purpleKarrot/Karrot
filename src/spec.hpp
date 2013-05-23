@@ -10,6 +10,7 @@
 #define KARROT_SPEC_HPP
 
 #include "query.hpp"
+#include "string.hpp"
 #include <iostream>
 #include <cstring>
 
@@ -26,7 +27,6 @@ class Spec
       const std::string& query)
       : id(id)
       , component(component)
-      , query_str(query)
       , query(query)
       {
       }
@@ -39,33 +39,31 @@ class Spec
         {
         ++url;
         length = std::strcspn(url, "#");
-        query_str = std::string(url, length);
-        query = Query(query_str);
+        query = Query(String(url, length));
         url += length;
         }
       if (*url == '#')
         {
         ++url;
-        component = std::string(url, strlen(url));
+        component = String(url);
         }
       }
     friend std::ostream& operator<<(std::ostream &os, Spec const& spec)
       {
       os << spec.id;
-      if (!spec.query_str.empty())
+      if (!spec.query.empty())
         {
-        os << '?' << spec.query_str;
+        os << '?' << spec.query;
         }
-      if (!spec.component.empty())
+      if (!spec.component.get().empty())
         {
         os << '#' << spec.component;
         }
       return os;
       }
   public:
-    std::string id;
-    std::string component;
-    std::string query_str;
+    String id;
+    String component;
     Query query;
   };
 

@@ -9,10 +9,12 @@
 #ifndef KARROT_VERCMP_HPP
 #define KARROT_VERCMP_HPP
 
+#include <string>
+
 namespace Karrot
 {
 
-int vercmp(const char *s1, const char *s2);
+int vercmp(std::string const& str1, std::string const& str2);
 
 } // namespace Karrot
 

@@ -10,8 +10,9 @@
 #define KARROT_QUERY_HPP
 
 #include <karrot.h>
-#include <string>
+#include <iostream>
 #include <vector>
+#include "string.hpp"
 
 namespace Karrot
 {
@@ -20,10 +21,21 @@ class Query
   {
   public:
     Query() = default;
-    Query(const std::string& string);
-    bool evaluate(const std::string& version, const KDictionary& variants) const;
+    Query(std::string const& string);
+  public:
+    bool empty() const
+      {
+      return string.get().empty();
+      }
+    bool evaluate(std::string const& version, const KDictionary& variants) const;
+  private:
+    friend std::ostream& operator<<(std::ostream &os, Query const& query)
+      {
+      return os << query.string;
+      }
   private:
     std::vector<int> queryspace;
+    String string;
   };
 
 } // namespace Karrot

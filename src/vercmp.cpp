@@ -13,9 +13,11 @@
 namespace Karrot
 {
 
-int vercmp(const char *s1, const char *s2)
+int vercmp(std::string const& str1, std::string const& str2)
   {
   int r = 0;
+  const char *s1 = str1.c_str();
+  const char *s2 = str2.c_str();
   const char *e1, *e2;
   while (*s1 && *s2)
     {

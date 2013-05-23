@@ -11,8 +11,8 @@
 
 int vercmp(int argc, char* argv[])
   {
-  const char* version1 = "1.11";
-  const char* version2 = "1.12";
+  const std::string version1{"1.11"};
+  const std::string version2{"1.12"};
 
   BOOST_TEST(Karrot::vercmp(version1, version1) == 0);
   BOOST_TEST(Karrot::vercmp(version1, version1) >= 0);

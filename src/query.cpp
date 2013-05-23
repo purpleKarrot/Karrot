@@ -7,6 +7,7 @@
  */
 
 #include "query.hpp"
+#include "string.hpp"
 
 static const int LPAREN        = - 1;
 static const int RPAREN        = - 2;
@@ -97,6 +98,7 @@ static inline int get_variant(const KDictionary& variants, int key)
   }
 
 Query::Query(const std::string& string)
+  : string{string}
   {
   if (string.empty())
     {
