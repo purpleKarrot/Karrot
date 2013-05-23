@@ -217,19 +217,26 @@ bool solve(
     query(hash, database, spec, choices);
     if (choices.size() == 0)
       {
-      Log(log, "no implementation satisfies '%1%'") % spec;
+      Log(log, "No implementation for '%1%':") % spec;
       for (auto& entry : database)
         {
-        Log(log, "%1%") % entry.id;
+        Log(log, "  - %1%") % entry;
         }
       return false;
       }
     if (choices.size() == 1)
       {
+      Log(log, "Exactly one implementation for '%1%':") % spec;
+      Log(log, "  + %1%") % database[var(choices[0])];
       request.push(choices[0]);
       }
     else
       {
+      Log(log, "Multiple implementations for '%1%':") % spec;
+      for (int i = 0; i < choices.size(); ++i)
+        {
+        Log(log, "  + %1%") % database[var(choices[i])];
+        }
       solver.addClause(choices);
       }
     }
@@ -250,6 +257,12 @@ bool solve(
   if (!solver.solve(request, log))
     {
     log("no solution exists, because of conflicts");
+    vec<Lit> const& conflict = solver.conflict;
+    for (int i = 0; i < conflict.size(); ++i)
+      {
+      Lit const& lit = conflict[i];
+      Log(log, "  %1% %2%") % (sign(lit) ? "-" : "+") % database[var(lit)];
+      }
     return false;
     }
   for (int i = 0; i < solver.nVars(); ++i)

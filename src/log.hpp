@@ -27,9 +27,9 @@ class Log
       fun(format.str().c_str());
       }
     template<typename Arg>
-    Log& operator%(Arg arg)
+    Log& operator%(Arg&& arg)
       {
-      format % arg;
+      format % std::forward<Arg>(arg);
       return *this;
       }
   private:
