@@ -9,7 +9,6 @@
 #ifndef _WIN32
 
 #include "url.hpp"
-#include "quark.hpp"
 #include <memory>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>

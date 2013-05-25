@@ -7,7 +7,6 @@
  */
 
 #include "../src/url.hpp"
-#include "../src/quark.hpp"
 #include <boost/detail/lightweight_test.hpp>
 
 int url(int argc, char* argv[])

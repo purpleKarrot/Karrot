@@ -9,19 +9,7 @@
 #include "query.hpp"
 #include "string.hpp"
 
-static const int LPAREN        = - 1;
-static const int RPAREN        = - 2;
-static const int LESS          = - 3;
-static const int LESS_EQUAL    = - 4;
-static const int GREATER       = - 5;
-static const int GREATER_EQUAL = - 6;
-static const int NOT_EQUAL     = - 7;
-static const int EQUAL         = - 8;
-static const int AND           = - 9;
-static const int OR            = -10;
-
 #include "query_re2c.hpp"
-#include "quark.hpp"
 #include "vercmp.hpp"
 #include "variants.hpp"
 #include <iostream>
@@ -30,30 +18,30 @@ static const int OR            = -10;
 namespace Karrot
 {
 
-static const int ASTERISK      = string_to_quark("*");
-static const int VERSION       = string_to_quark("version");
+static const String ASTERISK{"*"};
+static const String VERSION{"version"};
 
-static int op_preced(int op)
+static int op_preced(Query::Token::Id op)
   {
   switch (op)
     {
-    case LESS:
-    case LESS_EQUAL:
-    case GREATER:
-    case GREATER_EQUAL:
+    case Query::Token::LESS:
+    case Query::Token::LESS_EQUAL:
+    case Query::Token::GREATER:
+    case Query::Token::GREATER_EQUAL:
       {
       return 4;
       }
-    case EQUAL:
-    case NOT_EQUAL:
+    case Query::Token::EQUAL:
+    case Query::Token::NOT_EQUAL:
       {
       return 3;
       }
-    case AND:
+    case Query::Token::AND:
       {
       return 2;
       }
-    case OR:
+    case Query::Token::OR:
       {
       return 1;
       }
@@ -61,32 +49,33 @@ static int op_preced(int op)
   return 0;
   }
 
-static inline bool is_operator(int op)
+static inline bool is_operator(Query::Token::Id id)
   {
-  return op <= LESS && op >= OR;
+  return id <= Query::Token::LESS && id >= Query::Token::OR;
   }
 
-static inline bool is_relation(int op)
+static inline bool is_relation(Query::Token::Id id)
   {
-  return op <= LESS && op >= GREATER_EQUAL;
+  return id <= Query::Token::LESS && id >= Query::Token::GREATER_EQUAL;
   }
 
-static inline bool is_ident(int id)
+static inline bool is_ident(Query::Token::Id id)
   {
-  return id >= 0;
+  return id == Query::Token::IDENTIFIER;
   }
 
-static inline int get_variant(const KDictionary& variants, int key)
+static inline String
+get_variant(const KDictionary& variants, String const& key)
   {
-  auto it = variants.find(quark_to_string(key));
+  auto it = variants.find(key);
   if (it != variants.end())
     {
-    return to_quark(it->second);
+    return String{it->second};
     }
   std::stringstream message;
   message
     << "Unknown variable '"
-    << quark_to_string(key)
+    << key
     << "' used in test. Known variables are: "
     ;
   for (auto& entry : variants)
@@ -97,35 +86,34 @@ static inline int get_variant(const KDictionary& variants, int key)
   throw std::runtime_error(message.str());
   }
 
-Query::Query(const std::string& string)
-  : string{string}
+Query::Implementation::Implementation(const std::string& string)
   {
   if (string.empty())
     {
     return;
     }
-  std::string::const_iterator strpos = string.begin();
-  std::string::const_iterator strend = string.end();
+  auto strpos = string.begin();
+  auto strend = string.end();
 
   // TODO: change to use std::vector/std::array
-  int stack[32]; // operator stack
+  Token::Id stack[32]; // operator stack
   unsigned int sl = 0; // stack length
 
   while (strpos != strend)
     {
     // read one token from the input stream
-    int c = query_tokenize(strpos, strend);
+    Token c = query_tokenize(strpos, strend);
     // If the token is a number (identifier), then add it to the output queue.
-    if (is_ident(c))
+    if (is_ident(c.id))
       {
-      queryspace.push_back(c);
+      compiled.push_back(c);
       }
     // If the token is an operator, op1, then:
-    else if (is_operator(c))
+    else if (is_operator(c.id))
       {
       while (sl > 0)
         {
-        int sc = stack[sl - 1];
+        Token::Id sc = stack[sl - 1];
         // While there is an operator token, op2, at the top of the stack
         // op1 is left-associative and its precedence is less than or equal to that of op2,
         // or op1 has precedence less than that of op2,
@@ -133,10 +121,10 @@ Query::Query(const std::string& string)
         // Correct transformation from 1^2+3 is 12^3+
         // The differing operator priority decides pop / push
         // If 2 operators have equal priority then associativity decides.
-        if (is_operator(sc) && op_preced(c) <= op_preced(sc))
+        if (is_operator(sc) && op_preced(c.id) <= op_preced(sc))
           {
           // Pop op2 off the stack, onto the output queue;
-          queryspace.push_back(sc);
+          compiled.emplace_back(sc);
           sl--;
           }
         else
@@ -145,30 +133,30 @@ Query::Query(const std::string& string)
           }
         }
       // push op1 onto the stack.
-      stack[sl++] = c;
+      stack[sl++] = c.id;
       }
     // If the token is a left parenthesis, then push it onto the stack.
-    else if (c == LPAREN)
+    else if (c.id == Token::LPAREN)
       {
-      stack[sl++] = c;
+      stack[sl++] = c.id;
       }
     // If the token is a right parenthesis:
-    else if (c == RPAREN)
+    else if (c.id == Token::RPAREN)
       {
       int pe = false;
       // Until the token at the top of the stack is a left parenthesis,
       // pop operators off the stack onto the output queue
       while (sl > 0)
         {
-        int sc = stack[sl - 1];
-        if (sc == LPAREN)
+        Token::Id sc = stack[sl - 1];
+        if (sc == Token::LPAREN)
           {
           pe = true;
           break;
           }
         else
           {
-          queryspace.push_back(sc);
+          compiled.emplace_back(sc);
           sl--;
           }
         }
@@ -185,12 +173,12 @@ Query::Query(const std::string& string)
   // While there are still operator tokens in the stack:
   while (sl > 0)
     {
-    int sc = stack[sl - 1];
-    if (sc == LPAREN || sc == RPAREN)
+    Token::Id sc = stack[sl - 1];
+    if (sc == Token::LPAREN || sc == Token::RPAREN)
       {
       throw std::runtime_error("Query: parentheses mismatched");
       }
-    queryspace.push_back(sc);
+    compiled.emplace_back(sc);
     --sl;
     }
   }
@@ -198,71 +186,75 @@ Query::Query(const std::string& string)
 
 bool Query::evaluate(const std::string& version, const KDictionary& variants) const
   {
-  if (queryspace.empty())
+  auto& compiled = implementation.get().compiled;
+  if (compiled.empty())
     {
     return true;
     }
 
   // TODO: change to use std::vector/std::array
-  unsigned int stack[32];
+  Token stack[32];
   unsigned int sl = 0; // stack length
 
-  for(int c : queryspace)
+  for (auto& c : compiled)
     {
-    if (is_ident(c))
+    if (is_ident(c.id))
       {
       stack[sl++] = c;
       }
-    else if (is_operator(c))
+    else if (is_operator(c.id))
       {
       if (sl < 2)
         {
         std::cout << "(Error) insufficient values in the expression." << std::endl;
         return false;
         }
-      int op2 = stack[--sl];
-      int op1 = stack[--sl];
-      int diff, res;
-      if (op1 == VERSION)
+      Token op2 = stack[--sl];
+      Token op1 = stack[--sl];
+      int diff; bool res;
+      if (is_ident(op1.id))
         {
-        op1 = to_quark(version);
+        if (op1.value == VERSION)
+          {
+          op1.value = version;
+          }
+        else
+          {
+          op1.value = get_variant(variants, op1.value);
+          }
         }
-      else if (op1 > 1) // 1 == true!
+      if (is_relation(c.id))
         {
-        op1 = get_variant(variants, op1);
+        diff = vercmp(op1.value, op2.value);
         }
-      if (is_relation(c))
+      switch (c.id)
         {
-        diff = vercmp(quark_to_string(op1), quark_to_string(op2));
-        }
-      switch (c)
-        {
-        case LESS:
+        case Token::LESS:
           res = diff < 0;
           break;
-        case LESS_EQUAL:
+        case Token::LESS_EQUAL:
           res = diff <= 0;
           break;
-        case GREATER:
+        case Token::GREATER:
           res = diff > 0;
           break;
-        case GREATER_EQUAL:
+        case Token::GREATER_EQUAL:
           res = diff >= 0;
           break;
-        case NOT_EQUAL:
-          res = op1 != op2 && op1 != ASTERISK && op2 != ASTERISK;
+        case Token::NOT_EQUAL:
+          res = op1.value != op2.value && op1.value != ASTERISK && op2.value != ASTERISK;
           break;
-        case EQUAL:
-          res = op1 == op2 || op1 == ASTERISK || op2 == ASTERISK;
+        case Token::EQUAL:
+          res = op1.value == op2.value || op1.value == ASTERISK || op2.value == ASTERISK;
           break;
-        case AND:
-          res = op1 && op2;
+        case Token::AND:
+          res = op1.id != Token::FALSE && op2.id != Token::FALSE;
           break;
-        case OR:
-          res = op1 || op2;
+        case Token::OR:
+          res = op1.id != Token::FALSE || op2.id != Token::FALSE;
           break;
         }
-      stack[sl++] = res;
+      stack[sl++] = Token{res};
       }
     }
   if (sl != 1)
@@ -270,7 +262,7 @@ bool Query::evaluate(const std::string& version, const KDictionary& variants) co
     std::cout << "ERROR: " << sl << " elements left on the stack!" << std::endl;
     return false;
     }
-  return stack[0] != 0;
+  return stack[0].id != Token::FALSE;
   }
 
 } // namespace Karrot

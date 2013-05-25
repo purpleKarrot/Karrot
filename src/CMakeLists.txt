@@ -57,8 +57,6 @@ add_library(karrot
   implementation.hpp
   package_handler.hpp
   package.hpp
-  quark.cpp
-  quark.hpp
   query_re2c.hpp
   query_re2c.in.hpp
   query.cpp

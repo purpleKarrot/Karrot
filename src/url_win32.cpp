@@ -9,7 +9,6 @@
 #ifdef _WIN32
 
 #include "url.hpp"
-#include "quark.hpp"
 #include <windows.h>
 #include <wininet.h>
 #include <shlwapi.h>

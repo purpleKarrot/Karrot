@@ -17,7 +17,6 @@ set(test_list
 # unit tests
 if(NOT BUILD_SHARED_LIBS OR (NOT BUILD_VISIBILITY_HIDDEN AND NOT WIN32))
   list(APPEND test_list
-    quark
     query
     spec
     url

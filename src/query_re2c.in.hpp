@@ -7,7 +7,6 @@
  */
 
 #include <stdexcept>
-#include "quark.hpp"
 
 namespace Karrot
 {
@@ -16,11 +15,13 @@ namespace Karrot
   {                                                                            \
   if (cursor != marker)                                                        \
     {                                                                          \
-    return string_to_quark(&(*marker), cursor - marker);                       \
+    return Query::Token{String(&(*marker), cursor - marker)};                  \
     }                                                                          \
   }                                                                            \
 
-static int query_tokenize(std::string::const_iterator& cursor,std::string::const_iterator limit)
+static Query::Token query_tokenize(
+    std::string::const_iterator& cursor,
+    std::string::const_iterator limit)
   {
   std::string::const_iterator marker = cursor;
   /*!re2c
@@ -31,47 +32,47 @@ static int query_tokenize(std::string::const_iterator& cursor,std::string::const
   re2c:define:YYFILL:naked = 1;
   "("
     {
-    return LPAREN;
+    return Query::Token{Query::Token::LPAREN};
     }
   ")"
     {
-    return RPAREN;
+    return Query::Token{Query::Token::RPAREN};
     }
   "<"  | "&lt;"
     {
-    return LESS;
+    return Query::Token{Query::Token::LESS};
     }
   "<=" | "&lt;="
     {
-    return LESS_EQUAL;
+    return Query::Token{Query::Token::LESS_EQUAL};
     }
   ">"  | "&gt;"
     {
-    return GREATER;
+    return Query::Token{Query::Token::GREATER};
     }
   ">=" | "&gt;="
     {
-    return GREATER_EQUAL;
+    return Query::Token{Query::Token::GREATER_EQUAL};
     }
   "=="
     {
-    return EQUAL;
+    return Query::Token{Query::Token::EQUAL};
     }
   "!="
     {
-    return NOT_EQUAL;
+    return Query::Token{Query::Token::NOT_EQUAL};
     }
   "&&"
     {
-    return AND;
+    return Query::Token{Query::Token::AND};
     }
   "||"
     {
-    return OR;
+    return Query::Token{Query::Token::OR};
     }
   [^()<>!=&|]+
     {
-    return string_to_quark(&(*marker), cursor - marker);
+    return Query::Token{String(&(*marker), cursor - marker)};
     }
   [^]
     {

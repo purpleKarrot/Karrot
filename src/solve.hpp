@@ -11,7 +11,6 @@
 
 #include "database.hpp"
 #include "spec.hpp"
-#include "quark.hpp"
 #include <vector>
 #include <set>
 

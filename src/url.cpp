@@ -7,7 +7,6 @@
  */
 
 #include "url.hpp"
-#include "quark.hpp"
 
 #include <cctype>
 #include <cstring>
