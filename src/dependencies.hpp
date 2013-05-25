@@ -14,12 +14,12 @@
 namespace Karrot
 {
 
-class FeedQueue;
+class FeedPreQueue;
 
 class Dependencies
   {
   public:
-    Dependencies(FeedQueue& feed_queue, const std::string& name = std::string())
+    Dependencies(FeedPreQueue& feed_queue, const std::string& name = std::string())
       : name(name)
       , feed_queue(&feed_queue)
       {
@@ -77,7 +77,7 @@ class Dependencies
     std::string name;
     typedef std::pair<Code, Spec> Entry;
     std::vector<Entry> deps;
-    FeedQueue* feed_queue;
+    FeedPreQueue* feed_queue;
   };
 
 } // namespace Karrot

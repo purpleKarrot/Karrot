@@ -62,7 +62,7 @@ class FeedParser
     KDictionary variants;
     std::vector<Release> releases;
     std::vector<Dependencies> components;
-    FeedQueue& queue;
+    FeedPreQueue queue;
     Database& db;
     PackageHandler& ph;
     std::string project_ns;

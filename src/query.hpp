@@ -72,6 +72,10 @@ class Query
       {
       return os << query.implementation.get_key();
       }
+    friend bool operator!=(Query const& q1, Query const& q2)
+      {
+      return q1.implementation != q2.implementation;
+      }
   private:
     struct Implementation
       {

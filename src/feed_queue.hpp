@@ -25,11 +25,14 @@ class FeedQueue
         {
         if (cur.id == spec.id)
           {
-          if (cur.component != spec.component)
+          if (cur.component.get().empty())
             {
-            cur.component = String{};
+            cur.component = spec.component;
             }
-          cur.query = Query{};
+          if (cur.query.empty())
+            {
+            cur.query = spec.query;
+            }
           return;
           }
         }
@@ -50,6 +53,48 @@ class FeedQueue
   private:
     std::vector<Spec> urls;
     std::size_t next = 0;
+  };
+
+class FeedPreQueue
+  {
+  public:
+    FeedPreQueue(FeedQueue& feed_queue)
+      : feed_queue(feed_queue)
+      {
+      }
+    ~FeedPreQueue()
+      {
+      for (auto& url: urls)
+        {
+        feed_queue.push(url);
+        }
+      }
+    void push(Spec const& spec)
+      {
+      for (Spec& cur : urls)
+        {
+        if (cur.id == spec.id)
+          {
+          if (cur.component != spec.component)
+            {
+            cur.component = String{};
+            }
+          if (cur.query != spec.query)
+            {
+            cur.query = Query{};
+            }
+          return;
+          }
+        }
+      urls.push_back(spec);
+      }
+    void current_id(std::string const& id)
+      {
+      feed_queue.current_id(id);
+      }
+  private:
+    FeedQueue& feed_queue;
+    std::vector<Spec> urls;
   };
 
 } // namespace Karrot
