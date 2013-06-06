@@ -7,6 +7,7 @@
  */
 
 #include "feed_parser.hpp"
+#include "engine.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
 #include "log.hpp"
@@ -17,12 +18,11 @@ namespace Karrot
 
 static const String SOURCE{"SOURCE"};
 
-FeedParser::FeedParser(Spec const& spec, FeedQueue& queue, Database& db, PackageHandler& ph, std::string project_ns) :
+FeedParser::FeedParser(Spec const& spec, KEngine& engine) :
     spec(spec),
-    queue(queue),
-    db(db),
-    ph(ph),
-    project_ns(std::move(project_ns))
+    queue(engine.feed_queue),
+    engine(engine),
+    project_ns{engine.namespace_uri + "project"}
   {
   }
 
@@ -143,7 +143,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
   {
   Dependencies depends(this->queue, "*");
   parse_depends(xml, depends);
-  Driver const *driver = this->ph.get(type);
+  Driver const *driver = this->engine.package_handler.get(type);
   if (!driver)
     {
     return;
@@ -165,7 +165,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
       impl.depends.clear();
       impl.conflicts.clear();
       depends.replay("*", impl.version, variant, impl.depends, impl.conflicts);
-      db.push_back(impl);
+      this->engine.database.push_back(impl);
       });
     }
   }
@@ -262,7 +262,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if (auto attr = xml.optional_attribute("type", project_ns))
     {
-    group.driver = this->ph.get(*attr);
+    group.driver = this->engine.package_handler.get(*attr);
     if (group.driver)
       {
       group.fields = group.driver->fields();
@@ -360,7 +360,7 @@ void FeedParser::add_package(const Package& package)
             impl.conflicts);
         }
       }
-    this->db.push_back(impl);
+    this->engine.database.push_back(impl);
     });
   }
 
