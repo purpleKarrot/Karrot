@@ -163,6 +163,12 @@ k_engine_run (KEngine *self);
 KARROT_API char const *
 k_engine_error_message (KEngine *self);
 
+KARROT_API void
+k_engine_set_error (KEngine *self, int code, char const *domain, char const *message);
+
+KARROT_API int
+k_engine_get_error (KEngine const *self, int *code, char const **domain, char const **message);
+
 /**
  * Engine destructor
  *

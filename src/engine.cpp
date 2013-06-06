@@ -25,6 +25,49 @@
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
 
+_KEngine::_KEngine(char const *namespace_uri)
+  : namespace_uri{namespace_uri}
+  {
+  if (this->namespace_uri.back() != '/')
+    {
+    this->namespace_uri += '/';
+    }
+  }
+
+void KEngine::set_error(int code, char const *domain, char const *message)
+  {
+  error_ =  Error{code};
+  if (domain)
+    {
+    error_->domain = domain;
+    }
+  if (message)
+    {
+    error_->message = message;
+    }
+  }
+
+bool KEngine::get_error(int *code, char const **domain, char const **message) const
+  {
+  if (!error_)
+    {
+    return 0;
+    }
+  if (code)
+    {
+    *code = error_->code;
+    }
+  if (domain)
+    {
+    *domain = error_->domain.c_str();
+    }
+  if (message)
+    {
+    *message = error_->message.c_str();
+    }
+  return 1;
+  }
+
 KEngine *
 k_engine_new(char const *namespace_base)
   {
@@ -176,4 +219,14 @@ int k_engine_run(KEngine *self)
 char const *k_engine_error_message(KEngine *self)
   {
   return self->error.c_str();
+  }
+
+void k_engine_set_error(KEngine *self, int code, char const *domain, char const *message)
+  {
+  self->set_error(code, domain, message);
+  }
+
+int k_engine_get_error(KEngine const *self, int *code, char const **domain, char const **message)
+  {
+  return self->get_error(code, domain, message) ? 1 : 0;
   }

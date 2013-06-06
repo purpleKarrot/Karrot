@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 #include "feed_queue.hpp"
 #include "package_handler.hpp"
@@ -28,15 +29,18 @@ using Database = std::vector<KImplementation>;
 
 struct _KEngine
   {
-  public:
-    _KEngine(char const *namespace_uri)
-      : namespace_uri{namespace_uri}
+  private:
+    struct Error
       {
-      if (this->namespace_uri.back() != '/')
-        {
-        this->namespace_uri += '/';
-        }
-      }
+      int code;
+      std::string domain;
+      std::string message;
+      };
+  public:
+    _KEngine(char const *namespace_uri);
+  public:
+    void set_error(int code, char const *domain, char const *message);
+    bool get_error(int *code, char const **domain, char const **message) const;
   public:
     std::string error;
     std::string namespace_uri;
@@ -50,6 +54,8 @@ struct _KEngine
     bool ignore_source_conflicts = false;
     bool no_topological_order = false;
     KPrintFun log_function = [](char const*){};
+  private:
+    boost::optional<Error> error_;
   };
 
 #endif /* KARROT_ENGINE_HPP */
