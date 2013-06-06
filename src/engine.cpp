@@ -25,6 +25,10 @@
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
 
+struct ClientError
+  {
+  };
+
 _KEngine::_KEngine(char const *namespace_uri)
   : namespace_uri{namespace_uri}
   {
@@ -66,6 +70,40 @@ bool KEngine::get_error(int *code, char const **domain, char const **message) co
     *message = error_->message.c_str();
     }
   return 1;
+  }
+
+void KEngine::set_handle_fn(KHandle fn, void *target, void (*destroy)(void*))
+  {
+  handle_fn = Karrot::Handle{fn, target, destroy};
+  }
+
+void KEngine::set_depend_fn(KDepend fn, void *target, void (*destroy)(void*))
+  {
+  depend_fn = Karrot::Depend{fn, target, destroy};
+  }
+
+void KEngine::handle(KImplementation const& impl, bool requested) const
+  {
+  if (!handle_fn)
+    {
+    return;
+    }
+  if (!handle_fn(impl, requested))
+    {
+    throw ClientError{};
+    }
+  }
+
+void KEngine::depend(KImplementation const& impl, KImplementation const& other) const
+  {
+  if (!depend_fn)
+    {
+    return;
+    }
+  if (!depend_fn(impl, other))
+    {
+    throw ClientError{};
+    }
   }
 
 KEngine *
@@ -177,15 +215,27 @@ static bool engine_run(KEngine *self)
   for (int i : model)
     {
     const KImplementation& impl = self->database[i];
+    bool requested = std::any_of(self->requests.begin(), self->requests.end(),
+      [&impl](const Spec& spec)
+      {
+      return satisfies(impl, spec);
+      });
     if (impl.driver)
       {
       Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
-      bool requested = std::any_of(self->requests.begin(), self->requests.end(),
-        [&impl](const Spec& spec)
-        {
-        return satisfies(impl, spec);
-        });
       impl.driver->download(impl, requested);
+      }
+    self->handle(impl, requested);
+    for (int k : model)
+      {
+      const KImplementation& other = self->database[k];
+      for (auto& spec : other.depends)
+        {
+        if (satisfies(impl, spec))
+          {
+          self->depend(impl, other);
+          }
+        }
       }
     }
   return true;
@@ -196,6 +246,9 @@ int k_engine_run(KEngine *self)
   try
     {
     return engine_run(self) ? 0 : 1;
+    }
+  catch (ClientError)
+    {
     }
   catch (Karrot::XmlParseError& error)
     {
@@ -229,4 +282,14 @@ void k_engine_set_error(KEngine *self, int code, char const *domain, char const 
 int k_engine_get_error(KEngine const *self, int *code, char const **domain, char const **message)
   {
   return self->get_error(code, domain, message) ? 1 : 0;
+  }
+
+void k_engine_set_handle_fn(KEngine *self, KHandle fn, void *target, void (*destroy)(void*))
+  {
+  self->set_handle_fn(fn, target, destroy);
+  }
+
+void k_engine_set_depend_fn(KEngine *self, KDepend fn, void *target, void (*destroy)(void*))
+  {
+  self->set_depend_fn(fn, target, destroy);
   }

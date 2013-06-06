@@ -48,6 +48,9 @@ typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, v
 typedef void (*KMapping) (char const *key, char const *val, void *self);
 typedef void (*KPrintFun) (char const *string);
 
+typedef int (*KHandle) (void *target, KImplementation const *impl, int requested);
+typedef int (*KDepend) (void *target, KImplementation const *impl, KImplementation const *other);
+
 KARROT_API char const *
 k_version (int *major, int *minor, int *patch);
 
@@ -115,6 +118,12 @@ typedef enum _KOption KOption;
  */
 KARROT_API KEngine *
 k_engine_new (char const *namespace_uri);
+
+KARROT_API void
+k_engine_set_handle_fn (KEngine *self, KHandle fn, void *target, void (*destroy)(void*));
+
+KARROT_API void
+k_engine_set_depend_fn (KEngine *self, KDepend fn, void *target, void (*destroy)(void*));
 
 /**
  * Add a Driver to an Engine.
