@@ -146,10 +146,6 @@ void k_engine_setopt(KEngine *self, KOption option, ...)
     case K_OPT_LOG_FUNCTION:
       self->log_function = va_arg(arg, KPrintFun);
       break;
-    case K_OPT_DOT_FILENAME:
-      str = va_arg(arg, const char*);
-      self->dot_filename = str ? str : "";
-      break;
     case K_OPT_FEED_CACHE:
       str = va_arg(arg, const char*);
       self->feed_cache = str ? str : ".";
@@ -207,10 +203,6 @@ static bool engine_run(KEngine *self)
   if (!self->no_topological_order)
     {
     model = topological_sort(model, self->database);
-    }
-  if (!self->dot_filename.empty())
-    {
-    write_graphviz(self->dot_filename, model, self->database);
     }
   for (int i : model)
     {

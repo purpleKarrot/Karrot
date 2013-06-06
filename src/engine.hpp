@@ -55,7 +55,6 @@ struct _KEngine
     Karrot::PackageHandler package_handler;
     Karrot::Requests requests;
     Karrot::Database database;
-    std::string dot_filename;
     std::string feed_cache = ".";
     bool reload_feeds = false;
     bool ignore_source_conflicts = false;

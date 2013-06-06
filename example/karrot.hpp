@@ -212,10 +212,6 @@ class Engine
       {
       k_engine_add_request(self, url, source);
       }
-    void dot_filename(char const *filename)
-      {
-      k_engine_setopt(self, K_OPT_DOT_FILENAME, filename);
-      }
     bool run()
       {
       int result = k_engine_run(self);
