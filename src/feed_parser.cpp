@@ -8,6 +8,7 @@
 
 #include "feed_parser.hpp"
 #include "engine.hpp"
+#include "implementation.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
 #include "log.hpp"

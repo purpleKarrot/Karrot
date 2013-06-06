@@ -10,7 +10,7 @@
 #define KARROT_FEED_PARSER_HPP
 
 #include <vector>
-#include "database.hpp"
+#include "engine.hpp"
 #include "dependencies.hpp"
 #include "feed_queue.hpp"
 #include "package_handler.hpp"

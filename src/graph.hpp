@@ -9,7 +9,7 @@
 #ifndef KARROT_GRAPH_HPP
 #define KARROT_GRAPH_HPP
 
-#include "database.hpp"
+#include "engine.hpp"
 
 namespace Karrot
 {
