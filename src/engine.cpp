@@ -6,8 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot.h>
-#include "database.hpp"
+#include "engine.hpp"
+
 #include <cstring>
 #include <cstdarg>
 #include <fstream>
@@ -24,35 +24,6 @@
 #include "feed_parser.hpp"
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
-
-struct _KEngine
-  {
-  _KEngine(char const *namespace_uri)
-    : namespace_uri(namespace_uri)
-    , feed_cache(".")
-    , reload_feeds(false)
-    , ignore_source_conflicts(false)
-    , no_topological_order(false)
-    , log_function{[](char const*){}}
-    {
-    if (this->namespace_uri.back() != '/')
-      {
-      this->namespace_uri += '/';
-      }
-    }
-  std::string error;
-  std::string namespace_uri;
-  Karrot::FeedQueue feed_queue;
-  Karrot::PackageHandler package_handler;
-  Karrot::Requests requests;
-  Karrot::Database database;
-  std::string dot_filename;
-  std::string feed_cache;
-  bool reload_feeds;
-  bool ignore_source_conflicts;
-  bool no_topological_order;
-  KPrintFun log_function;
-  };
 
 KEngine *
 k_engine_new(char const *namespace_base)
@@ -129,12 +100,7 @@ static bool engine_run(KEngine *self)
       {
       BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + local_path));
       }
-    FeedParser parser(
-        *spec,
-        self->feed_queue,
-        self->database,
-        self->package_handler,
-        self->namespace_uri + "project");
+    FeedParser parser{*spec, *self};
     try
       {
       parser.parse(xml, self->log_function);

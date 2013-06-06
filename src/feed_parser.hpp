@@ -43,7 +43,7 @@ class FeedParser
         std::string version_, tag_;
       };
   public:
-    FeedParser(Spec const& spec, FeedQueue& qq, Database& db, PackageHandler& ph, std::string project_ns);
+    FeedParser(Spec const& spec, KEngine& engine);
     void parse(XmlReader& xml, KPrintFun log);
   private:
     std::string next_element(XmlReader& xml, KPrintFun log) const;
@@ -63,8 +63,7 @@ class FeedParser
     std::vector<Release> releases;
     std::vector<Dependencies> components;
     FeedPreQueue queue;
-    Database& db;
-    PackageHandler& ph;
+    KEngine& engine;
     std::string project_ns;
   };
 

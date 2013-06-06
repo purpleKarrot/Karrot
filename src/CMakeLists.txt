@@ -45,6 +45,7 @@ add_library(karrot
   dictionary.hpp
   driver.hpp
   engine.cpp
+  engine.hpp
   error.cpp
   error.hpp
   feed_parser.cpp
