@@ -38,7 +38,6 @@ add_library(karrot
   minisat/Solver.h
   minisat/SolverTypes.h
   minisat/VarOrder.h
-  database.hpp
   dependencies.cpp
   dependencies.hpp
   dictionary.cpp

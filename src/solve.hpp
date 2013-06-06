@@ -9,10 +9,9 @@
 #ifndef KARROT_SOLVE_HPP
 #define KARROT_SOLVE_HPP
 
-#include "database.hpp"
+#include "engine.hpp"
+#include "implementation.hpp"
 #include "spec.hpp"
-#include <vector>
-#include <set>
 
 namespace Karrot
 {
@@ -29,8 +28,6 @@ inline bool satisfies(const KImplementation& impl, const Spec& spec)
     }
   return spec.query.evaluate(impl.version, impl.variant);
   }
-
-typedef std::vector<Spec> Requests;
 
 bool solve(
     Database const& database,

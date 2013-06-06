@@ -12,11 +12,19 @@
 #include <karrot.h>
 
 #include <string>
+#include <vector>
 
-#include "database.hpp"
-#include "solve.hpp"
 #include "feed_queue.hpp"
 #include "package_handler.hpp"
+
+namespace Karrot
+{
+
+class Spec;
+using Requests = std::vector<Spec>;
+using Database = std::vector<KImplementation>;
+
+} // namespace Karrot
 
 struct _KEngine
   {
