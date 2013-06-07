@@ -62,7 +62,7 @@ static Query::Token query_tokenize(
     {
     return Query::Token{Query::Token::NotEqual};
     }
-  "&&"
+  "&&" | "&amp;&amp;"
     {
     return Query::Token{Query::Token::And};
     }
