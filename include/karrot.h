@@ -36,10 +36,10 @@
 extern "C" {
 #endif
 
-typedef struct _KDictionary KDictionary;
-typedef struct _KImplementation KImplementation;
-typedef struct _KDriver KDriver;
-typedef struct _KEngine KEngine;
+typedef struct KDictionary KDictionary;
+typedef struct KImplementation KImplementation;
+typedef struct KDriver KDriver;
+typedef struct KEngine KEngine;
 
 typedef void (*KAdd) (KDictionary const *dict, int native, void *self);
 typedef void (*KPrintFun) (char const *string);
@@ -85,7 +85,7 @@ KARROT_API KDictionary const *
 k_implementation_get_values (KImplementation const *self);
 
 
-struct _KDriver
+struct KDriver
   {
   void *ctx;
   int (*fields) (void *self, KDictionary *dict);

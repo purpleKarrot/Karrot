@@ -75,7 +75,7 @@ class Dependencies
       CONFLICTS,
       };
     std::string name;
-    typedef std::pair<Code, Spec> Entry;
+    using Entry = std::pair<Code, Spec>;
     std::vector<Entry> deps;
     FeedPreQueue* feed_queue;
   };

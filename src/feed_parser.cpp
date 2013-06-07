@@ -142,14 +142,14 @@ void FeedParser::parse_releases(XmlReader& xml)
 
 void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std::string& href)
   {
-  Dependencies depends(this->queue, "*");
-  parse_depends(xml, depends);
   Driver const *driver = this->engine.package_handler.get(type);
   if (!driver)
     {
     return;
     }
-  KImplementation impl(spec.id, this->name, SOURCE);
+  Dependencies depends(this->queue, "*");
+  parse_depends(xml, depends);
+  KImplementation impl{spec.id, String{this->name}, String{}, SOURCE};
   impl.values["href"] = href;
   impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
@@ -309,13 +309,15 @@ void FeedParser::add_package(const Package& package)
   package.driver->filter(package.fields,
     [&](KDictionary const& values, bool system)
     {
-    KImplementation impl(
-        spec.id,
-        this->name,
-        package.component,
-        package.version,
-        package.variant,
-        package.values);
+    KImplementation impl
+      {
+      spec.id,
+      String{this->name},
+      String{package.version},
+      String{package.component},
+      package.variant,
+      package.values
+      };
     impl.driver = package.driver;
     for (auto& entry : values)
       {

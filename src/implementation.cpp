@@ -9,22 +9,6 @@
 #include "implementation.hpp"
 #include "spec.hpp"
 
-_KImplementation::_KImplementation(
-  std::string const& id,
-  std::string const& name,
-  std::string const& component,
-  std::string const& version,
-  KDictionary const& variant,
-  KDictionary const& values)
-  : id(id)
-  , name(name)
-  , component(component)
-  , version(version)
-  , variant(variant)
-  , values(values)
-  {
-  }
-
 static inline const char *
 c_str(std::string const& str)
   {
@@ -67,7 +51,7 @@ k_implementation_get_values(KImplementation const *self)
   return &self->values;
   }
 
-std::ostream& operator<<(std::ostream &os, _KImplementation const& impl)
+std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
   {
   os << impl.id;
   if (!impl.version.get().empty())

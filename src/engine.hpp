@@ -26,10 +26,10 @@ using Database = std::vector<KImplementation>;
 
 } // namespace Karrot
 
-struct _KEngine
+struct KEngine
   {
   public:
-    _KEngine(char const *namespace_uri)
+    KEngine(char const *namespace_uri)
       : namespace_uri{namespace_uri}
       {
       if (this->namespace_uri.back() != '/')

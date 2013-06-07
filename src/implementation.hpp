@@ -20,19 +20,12 @@ class Spec;
 class Driver;
 }
 
-struct _KImplementation
+struct KImplementation
   {
-  _KImplementation(
-    std::string const& id,
-    std::string const& name,
-    std::string const& component,
-    std::string const& version = std::string(),
-    KDictionary const& variant = KDictionary(),
-    KDictionary const& values = KDictionary());
   Karrot::String id;
   Karrot::String name;
-  Karrot::String component;
   Karrot::String version;
+  Karrot::String component;
   KDictionary variant;
   KDictionary values;
   std::vector<Karrot::Spec> depends;
@@ -40,6 +33,6 @@ struct _KImplementation
   Karrot::Driver const *driver;
   };
 
-std::ostream& operator<<(std::ostream &os, _KImplementation const& impl);
+std::ostream& operator<<(std::ostream &os, KImplementation const& impl);
 
 #endif /* KARROT_IMPLEMENTATION_HPP */
