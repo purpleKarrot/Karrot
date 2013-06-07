@@ -45,8 +45,11 @@ static int op_preced(Query::Token::Id op)
       {
       return 1;
       }
+    default:
+      {
+      return 0;
+      }
     }
-  return 0;
   }
 
 static inline bool is_operator(Query::Token::Id id)
@@ -252,6 +255,9 @@ bool Query::evaluate(const std::string& version, const KDictionary& variants) co
           break;
         case Token::Or:
           res = op1.id != Token::False || op2.id != Token::False;
+          break;
+        default:
+          res = false;
           break;
         }
       stack[sl++] = Token{res};
