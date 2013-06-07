@@ -13,7 +13,6 @@
 #include "engine.hpp"
 #include "dependencies.hpp"
 #include "feed_queue.hpp"
-#include "package_handler.hpp"
 #include "package.hpp"
 
 namespace Karrot

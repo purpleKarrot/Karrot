@@ -36,26 +36,21 @@
 extern "C" {
 #endif
 
-typedef struct _KError KError;
 typedef struct _KDictionary KDictionary;
 typedef struct _KImplementation KImplementation;
-typedef struct _KDriver KDriver;
 typedef struct _KEngine KEngine;
 
-typedef void (*KAddFun) (char const **val, int size, int native, void *self);
-typedef void (*KDownload) (KImplementation const *impl, int requested, KError *error, void *self);
-typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, void *self);
 typedef void (*KMapping) (char const *key, char const *val, void *self);
 typedef void (*KPrintFun) (char const *string);
 
+typedef int (*KAdd)    (void *target, KDictionary const *values, int native);
+typedef int (*KFields) (void *target, char const *driver, KDictionary *fields);
+typedef int (*KFilter) (void *target, char const *driver, KDictionary const *fields, KAdd add, void *add_target);
 typedef int (*KHandle) (void *target, KImplementation const *impl, int requested);
 typedef int (*KDepend) (void *target, KImplementation const *impl, KImplementation const *other);
 
 KARROT_API char const *
 k_version (int *major, int *minor, int *patch);
-
-KARROT_API void
-k_error_set (KError *self, char const *what);
 
 KARROT_API void
 k_dictionary_foreach (KDictionary const *self, KMapping mapping, void *target);
@@ -80,17 +75,6 @@ k_implementation_get_variant (KImplementation const *self);
 
 KARROT_API KDictionary const *
 k_implementation_get_values (KImplementation const *self);
-
-struct _KDriver
-  {
-  char const *name;
-  char const *const *fields;
-  size_t fields_length1;
-  KDownload download;
-  KFilter filter;
-  void *target;
-  void (*destroy_target) (void*);
-  };
 
 enum _KOption
   {
@@ -119,19 +103,16 @@ KARROT_API KEngine *
 k_engine_new (char const *namespace_uri);
 
 KARROT_API void
+k_engine_set_fields_fn (KEngine *self, KFields fn, void *target, void (*destroy)(void*));
+
+KARROT_API void
+k_engine_set_filter_fn (KEngine *self, KFilter fn, void *target, void (*destroy)(void*));
+
+KARROT_API void
 k_engine_set_handle_fn (KEngine *self, KHandle fn, void *target, void (*destroy)(void*));
 
 KARROT_API void
 k_engine_set_depend_fn (KEngine *self, KDepend fn, void *target, void (*destroy)(void*));
-
-/**
- * Add a Driver to an Engine.
- *
- * @param self a `KEngine` instance
- * @param driver a `KDriver` instance
- */
-KARROT_API void
-k_engine_add_driver (KEngine *self, KDriver *driver);
 
 /**
  * Add a Request to an Engine.
@@ -161,15 +142,6 @@ k_engine_setopt (KEngine *self, KOption option, ...);
  */
 KARROT_API int
 k_engine_run (KEngine *self);
-
-/**
- * Get the error message of the Engine.
- *
- * @param self a `KEngine` instance
- * @return the error message string
- */
-KARROT_API char const *
-k_engine_error_message (KEngine *self);
 
 KARROT_API void
 k_engine_set_error (KEngine *self, int code, char const *domain, char const *message);

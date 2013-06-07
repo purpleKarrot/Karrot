@@ -140,9 +140,9 @@ int main(int argc, char* argv[])
   try
     {
     Engine engine("http://purplekarrot.net/2013/");
-    engine.add_driver(make_driver<Archive>(machine, sysname));
-    engine.add_driver(make_driver<Source>("git"));
-    engine.add_driver(make_driver<Source>("subversion"));
+    //engine.add_driver(make_driver<Archive>(machine, sysname));
+    //engine.add_driver(make_driver<Source>("git"));
+    //engine.add_driver(make_driver<Source>("subversion"));
     for (const std::string& url : request_urls)
       {
       engine.add_request(url.c_str(), true);

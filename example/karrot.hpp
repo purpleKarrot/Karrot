@@ -154,24 +154,6 @@ class DriverDecorator: public Driver
 class Engine
   {
   private:
-    static void download_fun(KImplementation const *impl, int requested, KError *error, void *self)
-      {
-      try
-        {
-        Driver* driver = reinterpret_cast<Driver*>(self);
-        driver->download(Implementation(impl), requested != 0);
-        }
-      catch (std::exception& exception)
-        {
-        k_error_set(error, exception.what());
-        }
-      }
-    static void filter_fun(KDictionary const *fields, KAddFun fun, void *target, void *self)
-      {
-      using namespace std::placeholders;
-      Driver* driver = reinterpret_cast<Driver*>(self);
-      driver->filter(Dictionary(fields), std::bind(fun, _1, _2, _3, target));
-      }
     static void destroy_fun(void *self)
       {
       delete reinterpret_cast<Driver*>(self);
@@ -191,35 +173,13 @@ class Engine
       k_engine_free(self);
       }
   public:
-    void add_driver(std::unique_ptr<Driver>&& driver)
-      {
-      KDriver kdriver =
-        {
-        driver->name(),
-        nullptr,
-        0,
-        download_fun,
-        filter_fun,
-        driver.get(),
-        destroy_fun
-        };
-      Driver::Fields fields(kdriver.fields, kdriver.fields_length1);
-      driver->fields(fields);
-      k_engine_add_driver(self, &kdriver);
-      driver.release();
-      }
     void add_request(const char* url, bool source)
       {
       k_engine_add_request(self, url, source);
       }
     bool run()
       {
-      int result = k_engine_run(self);
-      if (result < 0)
-        {
-        throw std::runtime_error(k_engine_error_message(self));
-        }
-      return result == 0;
+      return k_engine_run(self) == 0;
       }
   private:
     KEngine *self;

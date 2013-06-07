@@ -74,6 +74,41 @@ class Closure<Ret(*)(void*, Args...)>: ClosureBase<Ret, Args...>
 
 } // namespace detail
 
+class Fields: public detail::Closure<KFields>
+  {
+  public:
+    using detail::Closure<KFields>::Closure;
+  public:
+    bool operator()(std::string const& driver, KDictionary& fields) const
+      {
+      return this->call(driver.c_str(), &fields) == 0;
+      }
+  };
+
+class Filter: public detail::Closure<KFilter>
+  {
+  public:
+    using detail::Closure<KFilter>::Closure;
+  public:
+    template<typename Add>
+    bool operator()(std::string const& driver, KDictionary const& fields, Add add) const
+      {
+      KAdd add_fun = [](void *target, KDictionary const* values, int native) -> int
+        {
+        try
+          {
+          Add const& add = *reinterpret_cast<Add*>(target);
+          add(*values, native != 0);
+          return 0;
+          }
+        catch (...)
+          {
+          return -1;
+          }
+        };
+      return this->call(driver.c_str(), &fields, add_fun, &add) == 0;
+      }
+  };
 
 class Handle: public detail::Closure<KHandle>
   {

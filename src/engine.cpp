@@ -22,7 +22,6 @@
 #include "solve.hpp"
 #include "feed_queue.hpp"
 #include "feed_parser.hpp"
-#include "package_handler.hpp"
 #include "xml_reader.hpp"
 
 struct ClientError
@@ -38,38 +37,87 @@ _KEngine::_KEngine(char const *namespace_uri)
     }
   }
 
+void KEngine::set_error_current_exception()
+  {
+  try
+    {
+    throw;
+    }
+  catch (ClientError)
+    {
+    }
+  catch (Karrot::XmlParseError& pe)
+    {
+    std::stringstream stream;
+    stream
+      << pe.what()
+      << " in '" << pe.filename << "' at line " << pe.line << ".\n"
+      << pe.current_line << '\n'
+      << std::string(pe.column, ' ') << "^\n"
+      << pe.message << '\n'
+      ;
+    error = Error{-1};
+    error->domain = "XmlParseError";
+    error->message = stream.str();
+    }
+#ifdef NDEBUG
+  catch (std::exception& exception)
+    {
+    error = Error{-1};
+    error->domain = "Exception";
+    error->message = exception.what();
+    }
+#endif
+  catch (...)
+    {
+    error = Error{-1};
+    error->domain = "Unknown";
+    error->message = boost::current_exception_diagnostic_information();
+    }
+  }
+
 void KEngine::set_error(int code, char const *domain, char const *message)
   {
-  error_ =  Error{code};
+  error = Error{code};
   if (domain)
     {
-    error_->domain = domain;
+    error->domain = domain;
     }
   if (message)
     {
-    error_->message = message;
+    error->message = message;
     }
   }
 
 bool KEngine::get_error(int *code, char const **domain, char const **message) const
   {
-  if (!error_)
+  if (!error)
     {
     return 0;
     }
   if (code)
     {
-    *code = error_->code;
+    *code = error->code;
     }
   if (domain)
     {
-    *domain = error_->domain.c_str();
+    *domain = error->domain.c_str();
     }
   if (message)
     {
-    *message = error_->message.c_str();
+    *message = error->message.c_str();
     }
   return 1;
+  }
+
+void KEngine::set_fields_fn(KFields fn, void *target, void (*destroy)(void*))
+  {
+  fields_fn = Karrot::Fields{fn, target, destroy};
+  }
+
+void KEngine::set_filter_fn(KFilter fn, void *target, void (*destroy)(void*))
+  {
+  filter_fn = Karrot::Filter{fn, target, destroy};
   }
 
 void KEngine::set_handle_fn(KHandle fn, void *target, void (*destroy)(void*))
@@ -80,6 +128,11 @@ void KEngine::set_handle_fn(KHandle fn, void *target, void (*destroy)(void*))
 void KEngine::set_depend_fn(KDepend fn, void *target, void (*destroy)(void*))
   {
   depend_fn = Karrot::Depend{fn, target, destroy};
+  }
+
+bool KEngine::fields(std::string const& driver, KDictionary& fields) const
+  {
+  return fields_fn ? fields_fn(driver, fields) : false;
   }
 
 void KEngine::handle(KImplementation const& impl, bool requested) const
@@ -116,13 +169,6 @@ k_engine_new(char const *namespace_base)
 void k_engine_free(KEngine *self)
   {
   delete self;
-  }
-
-void k_engine_add_driver(KEngine *self, KDriver *driver)
-  {
-  assert(driver);
-  assert(driver->name);
-  self->package_handler.add(driver, self->namespace_uri);
   }
 
 void k_engine_add_request(KEngine *self, char const *url, int source)
@@ -212,11 +258,6 @@ static bool engine_run(KEngine *self)
       {
       return satisfies(impl, spec);
       });
-    if (impl.driver)
-      {
-      Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
-      impl.driver->download(impl, requested);
-      }
     self->handle(impl, requested);
     for (int k : model)
       {
@@ -239,31 +280,11 @@ int k_engine_run(KEngine *self)
     {
     return engine_run(self) ? 0 : 1;
     }
-  catch (ClientError)
-    {
-    }
-  catch (Karrot::XmlParseError& error)
-    {
-    std::stringstream stream;
-     stream
-      << error.what()
-      << " in '" << error.filename << "' at line " << error.line << ".\n"
-      << error.current_line << '\n'
-      << std::string(error.column, ' ') << "^\n"
-      << error.message << '\n'
-      ;
-    self->error = stream.str();
-    }
   catch (...)
     {
-    self->error = boost::current_exception_diagnostic_information();
+    self->set_error_current_exception();
     }
   return -1;
-  }
-
-char const *k_engine_error_message(KEngine *self)
-  {
-  return self->error.c_str();
   }
 
 void k_engine_set_error(KEngine *self, int code, char const *domain, char const *message)
@@ -274,6 +295,16 @@ void k_engine_set_error(KEngine *self, int code, char const *domain, char const 
 int k_engine_get_error(KEngine const *self, int *code, char const **domain, char const **message)
   {
   return self->get_error(code, domain, message) ? 1 : 0;
+  }
+
+void k_engine_set_fields_fn(KEngine *self, KFields fn, void *target, void (*destroy)(void*))
+  {
+  self->set_fields_fn(fn, target, destroy);
+  }
+
+void k_engine_set_filter_fn(KEngine *self, KFilter fn, void *target, void (*destroy)(void*))
+  {
+  self->set_filter_fn(fn, target, destroy);
   }
 
 void k_engine_set_handle_fn(KEngine *self, KHandle fn, void *target, void (*destroy)(void*))

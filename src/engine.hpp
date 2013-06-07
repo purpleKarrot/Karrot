@@ -17,7 +17,6 @@
 
 #include "closures.hpp"
 #include "feed_queue.hpp"
-#include "package_handler.hpp"
 
 namespace Karrot
 {
@@ -40,19 +39,26 @@ struct _KEngine
   public:
     _KEngine(char const *namespace_uri);
   public:
+    void set_error_current_exception();
     void set_error(int code, char const *domain, char const *message);
     bool get_error(int *code, char const **domain, char const **message) const;
   public:
+    void set_fields_fn(KFields fn, void *target, void (*destroy)(void*));
+    void set_filter_fn(KFilter fn, void *target, void (*destroy)(void*));
     void set_handle_fn(KHandle fn, void *target, void (*destroy)(void*));
     void set_depend_fn(KDepend fn, void *target, void (*destroy)(void*));
   public:
+    template<typename Add>
+    void filter(std::string const& driver, KDictionary const& fields, Add add) const
+      {
+      filter_fn(driver, fields, add);
+      }
+    bool fields(std::string const& driver, KDictionary& fields) const;
     void handle(KImplementation const& impl, bool requested) const;
     void depend(KImplementation const& impl, KImplementation const& other) const;
   public:
-    std::string error;
     std::string namespace_uri;
     Karrot::FeedQueue feed_queue;
-    Karrot::PackageHandler package_handler;
     Karrot::Requests requests;
     Karrot::Database database;
     std::string feed_cache = ".";
@@ -61,7 +67,9 @@ struct _KEngine
     bool no_topological_order = false;
     KPrintFun log_function = [](char const*){};
   private:
-    boost::optional<Error> error_;
+    boost::optional<Error> error;
+    Karrot::Fields fields_fn;
+    Karrot::Filter filter_fn;
     Karrot::Handle handle_fn;
     Karrot::Depend depend_fn;
   };

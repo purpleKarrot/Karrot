@@ -14,21 +14,15 @@
 namespace Karrot
 {
 
-class Driver;
-
 class Package
   {
-  public:
-    Package() : driver(nullptr)
-      {
-      }
   public:
     std::string component;
     std::string version;
     KDictionary variant;
     KDictionary values;
     KDictionary fields;
-    Driver const *driver;
+    std::string driver;
     std::string namespace_uri;
   };
 

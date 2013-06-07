@@ -38,16 +38,12 @@ add_library(karrot
   minisat/Solver.h
   minisat/SolverTypes.h
   minisat/VarOrder.h
-  database.hpp
   dependencies.cpp
   dependencies.hpp
   dictionary.cpp
   dictionary.hpp
-  driver.hpp
   engine.cpp
   engine.hpp
-  error.cpp
-  error.hpp
   feed_parser.cpp
   feed_parser.hpp
   feed_queue.hpp
@@ -56,7 +52,6 @@ add_library(karrot
   hash.hpp
   implementation.cpp
   implementation.hpp
-  package_handler.hpp
   package.hpp
   query_re2c.hpp
   query_re2c.in.hpp

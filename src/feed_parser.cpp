@@ -142,16 +142,16 @@ void FeedParser::parse_releases(XmlReader& xml)
 
 void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std::string& href)
   {
-  Dependencies depends(this->queue, "*");
-  parse_depends(xml, depends);
-  Driver const *driver = this->engine.package_handler.get(type);
-  if (!driver)
+  KDictionary fields;
+  if (!engine.fields(type, fields))
     {
     return;
     }
+  Dependencies depends(this->queue, "*");
+  parse_depends(xml, depends);
   KImplementation impl(spec.id, this->name, SOURCE);
   impl.values["href"] = href;
-  impl.driver = driver;
+  impl.driver = type;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
     impl.version = releases[i].version();
@@ -263,15 +263,14 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if (auto attr = xml.optional_attribute("type", project_ns))
     {
-    group.driver = this->engine.package_handler.get(*attr);
-    if (group.driver)
+    if (engine.fields(*attr, group.fields))
       {
-      group.fields = group.driver->fields();
+      group.driver = *attr;
       }
     }
-  if (group.driver)
+  if (!group.driver.empty())
     {
-    std::string namespace_uri = group.driver->namespace_uri();
+    std::string namespace_uri = engine.namespace_uri + group.driver;
     for (auto& entry : group.fields)
       {
       if (auto attr = xml.optional_attribute(entry.first, namespace_uri))
@@ -284,7 +283,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
 
 static bool package_is_valid(const Package& package)
   {
-  if (!package.driver)
+  if (package.driver.empty())
     {
     return false;
     }
@@ -306,8 +305,8 @@ void FeedParser::add_package(const Package& package)
     {
     return;
     }
-  package.driver->filter(package.fields,
-    [&](DictView const& values, bool system)
+  engine.filter(package.driver, package.fields,
+    [&](KDictionary const& values, bool system)
     {
     KImplementation impl(
         spec.id,
@@ -317,25 +316,21 @@ void FeedParser::add_package(const Package& package)
         package.variant,
         package.values);
     impl.driver = package.driver;
-    values.foreach([&impl](const std::string& key, const std::string& val)
+    for (auto& entry : values)
       {
-      if (key == "name")
+      if (entry.first == "version")
         {
-        impl.name = val;
+        impl.version = entry.second;
         }
-      else if (key == "component")
+      else if (entry.first == "component")
         {
-        impl.component = val;
-        }
-      else if (key == "version")
-        {
-        impl.version = val;
+        impl.component = entry.second;
         }
       else
         {
-        impl.values[key] = val;
+        impl.values[entry.first] = entry.second;
         }
-      });
+      }
     if (!spec.query.evaluate(impl.version, impl.variant))
       {
       return;

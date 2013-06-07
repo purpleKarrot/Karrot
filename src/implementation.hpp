@@ -17,7 +17,6 @@
 namespace Karrot
 {
 class Spec;
-class Driver;
 }
 
 struct _KImplementation
@@ -37,7 +36,7 @@ struct _KImplementation
   KDictionary values;
   std::vector<Karrot::Spec> depends;
   std::vector<Karrot::Spec> conflicts;
-  Karrot::Driver const *driver;
+  Karrot::String driver;
   };
 
 std::ostream& operator<<(std::ostream &os, _KImplementation const& impl);
