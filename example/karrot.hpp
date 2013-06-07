@@ -21,7 +21,7 @@ class Implementation;
 class Driver;
 class Engine;
 
-typedef std::function<void(const char*, const char*)> Mapping;
+typedef std::function<void(const char*, const char*)> Visit;
 typedef std::function<void(char const **val, int size, bool native)> AddFun;
 
 class Dictionary
@@ -29,20 +29,21 @@ class Dictionary
   public:
     std::string operator[](const char *key) const
       {
-      char const *value = k_dictionary_lookup(self, key);
+      char const *value = k_dictionary_get(self, key);
       return value ? value : std::string();
       }
-    void foreach(Mapping mapping) const
+    void foreach(Visit visit) const
       {
-      k_dictionary_foreach(self, &mapping_fun, &mapping);
+      KVisit visit_fn = [](void *target, char const *key, char const *val) -> int
+        {
+        reinterpret_cast<Visit*>(target)->operator()(key, val);
+        return 0;
+        };
+      k_dictionary_foreach(self, visit_fn, &visit);
       }
   private:
     Dictionary(KDictionary const *self) : self(self)
       {
-      }
-    static void mapping_fun(char const *key, char const *val, void *self)
-      {
-      reinterpret_cast<Mapping*>(self)->operator()(key, val);
       }
     KDictionary const *self;
     friend class Implementation;

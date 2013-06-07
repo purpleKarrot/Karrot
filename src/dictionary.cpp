@@ -8,18 +8,39 @@
 
 #include "dictionary.hpp"
 
-void
-k_dictionary_foreach(KDictionary const *self, KMapping mapping, void *target)
+KDictionary *
+k_dictionary_new ()
   {
-  for (const auto& entry : *self)
-    {
-    mapping(entry.first.c_str(), entry.second.c_str(), target);
-    }
+  return new KDictionary;
+  }
+
+void
+k_dictionary_free (KDictionary *self)
+  {
+  delete self;
+  }
+
+void
+k_dictionary_set (KDictionary *self, char const *key, char const *value)
+  {
+  self->emplace(key, value);
   }
 
 char const *
-k_dictionary_lookup(KDictionary const *self, char const *str)
+k_dictionary_get (KDictionary const *self, char const *key)
   {
-  auto it = self->find(str);
+  auto it = self->find(key);
   return it != self->end() ? it->second.c_str() : nullptr;
+  }
+
+void
+k_dictionary_foreach (KDictionary const *self, KVisit visit, void *target)
+  {
+  for (auto& entry : *self)
+    {
+    if (visit(target, entry.first.c_str(), entry.second.c_str()))
+      {
+      return;
+      }
+    }
   }
