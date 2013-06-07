@@ -45,8 +45,9 @@ typedef struct _KEngine KEngine;
 typedef void (*KAddFun) (char const **val, int size, int native, void *self);
 typedef void (*KDownload) (KImplementation const *impl, int requested, KError *error, void *self);
 typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, void *self);
-typedef void (*KMapping) (char const *key, char const *val, void *self);
 typedef void (*KPrintFun) (char const *string);
+typedef int  (*KVisit) (void *target, char const *key, char const *val);
+
 
 KARROT_API char const *
 k_version (int *major, int *minor, int *patch);
@@ -54,11 +55,22 @@ k_version (int *major, int *minor, int *patch);
 KARROT_API void
 k_error_set (KError *self, char const *what);
 
+
+KARROT_API KDictionary *
+k_dictionary_new (void);
+
 KARROT_API void
-k_dictionary_foreach (KDictionary const *self, KMapping mapping, void *target);
+k_dictionary_free (KDictionary *self);
+
+KARROT_API void
+k_dictionary_set (KDictionary *self, char const *key, char const *value);
 
 KARROT_API char const *
-k_dictionary_lookup (KDictionary const *self, char const *str);
+k_dictionary_get (KDictionary const *self, char const *key);
+
+KARROT_API void
+k_dictionary_foreach (KDictionary const *self, KVisit visit, void *target);
+
 
 KARROT_API char const *
 k_implementation_get_id (KImplementation const *self);
