@@ -25,19 +25,19 @@ class Query
       {
       enum Id
         {
-        FALSE         =   0,
-        TRUE          =   1,
-        IDENTIFIER    =   3,
-        LPAREN        = - 1,
-        RPAREN        = - 2,
-        LESS          = - 3,
-        LESS_EQUAL    = - 4,
-        GREATER       = - 5,
-        GREATER_EQUAL = - 6,
-        NOT_EQUAL     = - 7,
-        EQUAL         = - 8,
-        AND           = - 9,
-        OR            = -10,
+        False        =   0,
+        True         =   1,
+        Identifier   =   3,
+        LParen       = - 1,
+        RParen       = - 2,
+        Less         = - 3,
+        LessEqual    = - 4,
+        Greater      = - 5,
+        GreaterEqual = - 6,
+        NotEqual     = - 7,
+        Equal        = - 8,
+        And          = - 9,
+        Or           = -10,
         };
       Token() = default;
       explicit Token(Id id)
@@ -45,11 +45,11 @@ class Query
         {
         }
       explicit Token(bool b)
-        : id{b ? TRUE : FALSE}
+        : id{b ? True : False}
         {
         }
       explicit Token(String const& value)
-        : id{IDENTIFIER}, value{value}
+        : id{Identifier}, value{value}
         {
         }
       Id id;

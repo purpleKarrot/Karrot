@@ -25,23 +25,23 @@ static int op_preced(Query::Token::Id op)
   {
   switch (op)
     {
-    case Query::Token::LESS:
-    case Query::Token::LESS_EQUAL:
-    case Query::Token::GREATER:
-    case Query::Token::GREATER_EQUAL:
+    case Query::Token::Less:
+    case Query::Token::LessEqual:
+    case Query::Token::Greater:
+    case Query::Token::GreaterEqual:
       {
       return 4;
       }
-    case Query::Token::EQUAL:
-    case Query::Token::NOT_EQUAL:
+    case Query::Token::Equal:
+    case Query::Token::NotEqual:
       {
       return 3;
       }
-    case Query::Token::AND:
+    case Query::Token::And:
       {
       return 2;
       }
-    case Query::Token::OR:
+    case Query::Token::Or:
       {
       return 1;
       }
@@ -51,17 +51,17 @@ static int op_preced(Query::Token::Id op)
 
 static inline bool is_operator(Query::Token::Id id)
   {
-  return id <= Query::Token::LESS && id >= Query::Token::OR;
+  return id <= Query::Token::Less && id >= Query::Token::Or;
   }
 
 static inline bool is_relation(Query::Token::Id id)
   {
-  return id <= Query::Token::LESS && id >= Query::Token::GREATER_EQUAL;
+  return id <= Query::Token::Less && id >= Query::Token::GreaterEqual;
   }
 
 static inline bool is_ident(Query::Token::Id id)
   {
-  return id == Query::Token::IDENTIFIER;
+  return id == Query::Token::Identifier;
   }
 
 static inline String
@@ -136,12 +136,12 @@ Query::Implementation::Implementation(const std::string& string)
       stack[sl++] = c.id;
       }
     // If the token is a left parenthesis, then push it onto the stack.
-    else if (c.id == Token::LPAREN)
+    else if (c.id == Token::LParen)
       {
       stack[sl++] = c.id;
       }
     // If the token is a right parenthesis:
-    else if (c.id == Token::RPAREN)
+    else if (c.id == Token::RParen)
       {
       int pe = false;
       // Until the token at the top of the stack is a left parenthesis,
@@ -149,7 +149,7 @@ Query::Implementation::Implementation(const std::string& string)
       while (sl > 0)
         {
         Token::Id sc = stack[sl - 1];
-        if (sc == Token::LPAREN)
+        if (sc == Token::LParen)
           {
           pe = true;
           break;
@@ -174,7 +174,7 @@ Query::Implementation::Implementation(const std::string& string)
   while (sl > 0)
     {
     Token::Id sc = stack[sl - 1];
-    if (sc == Token::LPAREN || sc == Token::RPAREN)
+    if (sc == Token::LParen || sc == Token::RParen)
       {
       throw std::runtime_error("Query: parentheses mismatched");
       }
@@ -229,29 +229,29 @@ bool Query::evaluate(const std::string& version, const KDictionary& variants) co
         }
       switch (c.id)
         {
-        case Token::LESS:
+        case Token::Less:
           res = diff < 0;
           break;
-        case Token::LESS_EQUAL:
+        case Token::LessEqual:
           res = diff <= 0;
           break;
-        case Token::GREATER:
+        case Token::Greater:
           res = diff > 0;
           break;
-        case Token::GREATER_EQUAL:
+        case Token::GreaterEqual:
           res = diff >= 0;
           break;
-        case Token::NOT_EQUAL:
+        case Token::NotEqual:
           res = op1.value != op2.value && op1.value != ASTERISK && op2.value != ASTERISK;
           break;
-        case Token::EQUAL:
+        case Token::Equal:
           res = op1.value == op2.value || op1.value == ASTERISK || op2.value == ASTERISK;
           break;
-        case Token::AND:
-          res = op1.id != Token::FALSE && op2.id != Token::FALSE;
+        case Token::And:
+          res = op1.id != Token::False && op2.id != Token::False;
           break;
-        case Token::OR:
-          res = op1.id != Token::FALSE || op2.id != Token::FALSE;
+        case Token::Or:
+          res = op1.id != Token::False || op2.id != Token::False;
           break;
         }
       stack[sl++] = Token{res};
@@ -262,7 +262,7 @@ bool Query::evaluate(const std::string& version, const KDictionary& variants) co
     std::cout << "ERROR: " << sl << " elements left on the stack!" << std::endl;
     return false;
     }
-  return stack[0].id != Token::FALSE;
+  return stack[0].id != Token::False;
   }
 
 } // namespace Karrot

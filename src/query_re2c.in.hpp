@@ -32,43 +32,43 @@ static Query::Token query_tokenize(
   re2c:define:YYFILL:naked = 1;
   "("
     {
-    return Query::Token{Query::Token::LPAREN};
+    return Query::Token{Query::Token::LParen};
     }
   ")"
     {
-    return Query::Token{Query::Token::RPAREN};
+    return Query::Token{Query::Token::RParen};
     }
   "<"  | "&lt;"
     {
-    return Query::Token{Query::Token::LESS};
+    return Query::Token{Query::Token::Less};
     }
   "<=" | "&lt;="
     {
-    return Query::Token{Query::Token::LESS_EQUAL};
+    return Query::Token{Query::Token::LessEqual};
     }
   ">"  | "&gt;"
     {
-    return Query::Token{Query::Token::GREATER};
+    return Query::Token{Query::Token::Greater};
     }
   ">=" | "&gt;="
     {
-    return Query::Token{Query::Token::GREATER_EQUAL};
+    return Query::Token{Query::Token::GreaterEqual};
     }
   "=="
     {
-    return Query::Token{Query::Token::EQUAL};
+    return Query::Token{Query::Token::Equal};
     }
   "!="
     {
-    return Query::Token{Query::Token::NOT_EQUAL};
+    return Query::Token{Query::Token::NotEqual};
     }
   "&&"
     {
-    return Query::Token{Query::Token::AND};
+    return Query::Token{Query::Token::And};
     }
   "||"
     {
-    return Query::Token{Query::Token::OR};
+    return Query::Token{Query::Token::Or};
     }
   [^()<>!=&|]+
     {
