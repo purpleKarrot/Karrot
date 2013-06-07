@@ -28,6 +28,7 @@ struct KImplementation
   Karrot::String component;
   KDictionary variant;
   KDictionary values;
+  std::shared_ptr<KDictionary> meta;
   std::vector<Karrot::Spec> depends;
   std::vector<Karrot::Spec> conflicts;
   Karrot::Driver const *driver;

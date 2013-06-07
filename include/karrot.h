@@ -73,10 +73,16 @@ KARROT_API char const *
 k_implementation_get_name (KImplementation const *self);
 
 KARROT_API char const *
+k_implementation_get_version (KImplementation const *self);
+
+KARROT_API char const *
 k_implementation_get_component (KImplementation const *self);
 
 KARROT_API char const *
-k_implementation_get_version (KImplementation const *self);
+k_implementation_get_driver (KImplementation const *self);
+
+KARROT_API KDictionary const *
+k_implementation_get_meta (KImplementation const *self);
 
 KARROT_API KDictionary const *
 k_implementation_get_variant (KImplementation const *self);

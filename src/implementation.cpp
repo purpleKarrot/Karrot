@@ -7,6 +7,7 @@
  */
 
 #include "implementation.hpp"
+#include "driver.hpp"
 #include "spec.hpp"
 
 static inline const char *
@@ -28,15 +29,27 @@ k_implementation_get_name(KImplementation const *self)
   }
 
 char const *
+k_implementation_get_version(KImplementation const *self)
+  {
+  return c_str(self->version);
+  }
+
+char const *
 k_implementation_get_component(KImplementation const *self)
   {
   return c_str(self->component);
   }
 
 char const *
-k_implementation_get_version(KImplementation const *self)
+k_implementation_get_driver (KImplementation const *self)
   {
-  return c_str(self->version);
+  self->driver->name().c_str();
+  }
+
+KDictionary const *
+k_implementation_get_meta(KImplementation const *self)
+  {
+  return &*self->meta;
   }
 
 KDictionary const *

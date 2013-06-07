@@ -47,6 +47,7 @@ class FeedParser
     void parse(XmlReader& xml, KPrintFun log);
   private:
     std::string next_element(XmlReader& xml, KPrintFun log) const;
+    void parse_meta(XmlReader& xml);
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
     void parse_build(XmlReader& xml, const std::string& type, const std::string& href);
@@ -59,6 +60,7 @@ class FeedParser
   private:
     Spec spec;
     std::string name;
+    std::shared_ptr<KDictionary> meta = std::make_shared<KDictionary>();
     KDictionary variants;
     std::vector<Release> releases;
     std::vector<Dependencies> components;

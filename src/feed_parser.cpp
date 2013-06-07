@@ -57,6 +57,7 @@ void FeedParser::parse(XmlReader& xml, KPrintFun log)
   std::string tag = next_element(xml, log);
   if (tag == "meta")
     {
+    parse_meta(xml);
     xml.skip();
     tag = next_element(xml, log);
     }
@@ -114,6 +115,17 @@ void FeedParser::parse(XmlReader& xml, KPrintFun log)
     }
   }
 
+void FeedParser::parse_meta(XmlReader& xml)
+  {
+  while (xml.start_element())
+    {
+    auto name = xml.name();
+    auto value = xml.content();
+    meta->emplace(std::move(name), std::move(value));
+    xml.skip();
+    }
+  }
+
 void FeedParser::parse_variants(XmlReader& xml)
   {
   while (xml.start_element())
@@ -151,6 +163,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
   parse_depends(xml, depends);
   KImplementation impl{spec.id, String{this->name}, String{}, SOURCE};
   impl.values["href"] = href;
+  impl.meta = this->meta;
   impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
@@ -316,7 +329,8 @@ void FeedParser::add_package(const Package& package)
       String{package.version},
       String{package.component},
       package.variant,
-      package.values
+      package.values,
+      this->meta,
       };
     impl.driver = package.driver;
     for (auto& entry : values)
