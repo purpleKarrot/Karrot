@@ -71,6 +71,5 @@ if(BUILD_VISIBILITY_HIDDEN AND NOT WIN32)
 endif()
 
 add_subdirectory(doc)
-add_subdirectory(example)
 add_subdirectory(src)
 add_subdirectory(test)
