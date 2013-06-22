@@ -271,10 +271,10 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     }
   if (group.driver)
     {
-    std::string namespace_uri = group.driver->namespace_uri();
+    auto& xmlns = group.driver->xmlns();
     for (auto& entry : group.fields)
       {
-      if (auto attr = xml.optional_attribute(entry.first, namespace_uri))
+      if (auto attr = xml.optional_attribute(entry.first, xmlns))
         {
         entry.second = std::move(*attr);
         }
@@ -307,7 +307,7 @@ void FeedParser::add_package(const Package& package)
     return;
     }
   package.driver->filter(package.fields,
-    [&](DictView const& values, bool system)
+    [&](KDictionary const& values, bool system)
     {
     KImplementation impl(
         spec.id,
@@ -317,25 +317,21 @@ void FeedParser::add_package(const Package& package)
         package.variant,
         package.values);
     impl.driver = package.driver;
-    values.foreach([&impl](const std::string& key, const std::string& val)
+    for (auto& entry : values)
       {
-      if (key == "name")
+      if (entry.first == "version")
         {
-        impl.name = val;
+        impl.version = entry.second;
         }
-      else if (key == "component")
+      else if (entry.first == "component")
         {
-        impl.component = val;
-        }
-      else if (key == "version")
-        {
-        impl.version = val;
+        impl.component = entry.second;
         }
       else
         {
-        impl.values[key] = val;
+        impl.values[entry.first] = entry.second;
         }
-      });
+      }
     if (!spec.query.evaluate(impl.version, impl.variant))
       {
       return;

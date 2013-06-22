@@ -37,11 +37,12 @@ void k_engine_free(KEngine *self)
   delete self;
   }
 
-void k_engine_add_driver(KEngine *self, KDriver *driver)
+void
+k_engine_add_driver(KEngine *self, char const *name, KDriver const *driver)
   {
+  assert(name);
   assert(driver);
-  assert(driver->name);
-  self->package_handler.add(driver, self->namespace_uri);
+  self->package_handler.add(name, self->namespace_uri, *driver);
   }
 
 void k_engine_add_request(KEngine *self, char const *url, int source)
@@ -142,7 +143,7 @@ static bool engine_run(KEngine *self)
         {
         return satisfies(impl, spec);
         });
-      impl.driver->download(impl, requested);
+      impl.driver->handle(impl, requested);
       }
     }
   return true;

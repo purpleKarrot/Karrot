@@ -36,24 +36,18 @@
 extern "C" {
 #endif
 
-typedef struct _KError KError;
 typedef struct _KDictionary KDictionary;
 typedef struct _KImplementation KImplementation;
 typedef struct _KDriver KDriver;
 typedef struct _KEngine KEngine;
 
-typedef void (*KAddFun) (char const **val, int size, int native, void *self);
-typedef void (*KDownload) (KImplementation const *impl, int requested, KError *error, void *self);
-typedef void (*KFilter) (KDictionary const *fields, KAddFun fun, void *target, void *self);
+typedef void (*KAdd) (KDictionary const *dict, int native, void *self);
 typedef void (*KPrintFun) (char const *string);
 typedef int  (*KVisit) (void *target, char const *key, char const *val);
 
 
 KARROT_API char const *
 k_version (int *major, int *minor, int *patch);
-
-KARROT_API void
-k_error_set (KError *self, char const *what);
 
 
 KARROT_API KDictionary *
@@ -90,16 +84,19 @@ k_implementation_get_variant (KImplementation const *self);
 KARROT_API KDictionary const *
 k_implementation_get_values (KImplementation const *self);
 
+
 struct _KDriver
   {
-  char const *name;
-  char const *const *fields;
-  size_t fields_length1;
-  KDownload download;
-  KFilter filter;
-  void *target;
-  void (*destroy_target) (void*);
+  void *ctx;
+  int (*fields) (void *self, KDictionary *dict);
+  int (*filter) (void *self, KDictionary const *fields, KAdd add, void *target);
+  int (*depend) (void *self, KImplementation const *impl, KImplementation const *other);
+  int (*handle) (void *self, KImplementation const *impl, int requested);
+  int (*commit) (void *self);
+  void (*finalize) (void *self);
+  char const* (*get_error_message) (void *self);
   };
+
 
 enum _KOption
   {
@@ -135,7 +132,7 @@ k_engine_new (char const *namespace_uri);
  * @param driver a `KDriver` instance
  */
 KARROT_API void
-k_engine_add_driver (KEngine *self, KDriver *driver);
+k_engine_add_driver (KEngine *self, char const *name, KDriver const *driver);
 
 /**
  * Add a Request to an Engine.

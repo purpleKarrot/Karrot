@@ -42,11 +42,10 @@ add_library(karrot
   dependencies.hpp
   dictionary.cpp
   dictionary.hpp
+  driver.cpp
   driver.hpp
   engine.cpp
   engine.hpp
-  error.cpp
-  error.hpp
   feed_parser.cpp
   feed_parser.hpp
   feed_queue.hpp
