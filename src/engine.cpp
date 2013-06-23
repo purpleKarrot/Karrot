@@ -122,6 +122,7 @@ static bool engine_run(KEngine *self)
       model);
   if (!solvable)
     {
+    self->error = "Not solvable!";
     return false;
     }
   if (!self->no_topological_order)

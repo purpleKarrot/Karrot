@@ -13,9 +13,7 @@ namespace Karrot
 {
 
 Driver::Driver(std::string const& name, std::string const& xmlns, KDriver const* impl)
-  : name_{name}
-  , xmlns_{xmlns_ + name_}
-  , driver_(impl)
+  : name_{name}, xmlns_{xmlns + name}, driver_(impl)
   {
   if (!driver_->fields)
     {

@@ -220,7 +220,6 @@ std::string XmlReader::content()
   {
   if (is_empty_element)
     {
-    is_empty_element = false;
     return std::string();
     }
   Iterator begin = cursor;
@@ -242,6 +241,7 @@ std::string XmlReader::content()
       }
     }
   while (read() && depth > 0);
+  is_empty_element = true;
   return std::string(begin, end);
   }
 

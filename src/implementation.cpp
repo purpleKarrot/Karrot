@@ -75,5 +75,6 @@ std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
     {
     os << '#' << impl.component;
     }
+  os << " (" << impl.driver->name() << ')';
   return os;
   }

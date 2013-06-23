@@ -23,7 +23,7 @@ k_dictionary_free (KDictionary *self)
 void
 k_dictionary_set (KDictionary *self, char const *key, char const *value)
   {
-  self->emplace(key, value);
+  self->emplace(key, value ? value : "");
   }
 
 char const *

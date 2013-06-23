@@ -87,7 +87,8 @@ static std::vector<Var> make_preferences(const Database& database)
 static void dependency_clauses(
     const Hash& hash,
     const Database& database,
-    Solver& solver)
+    Solver& solver,
+    KPrintFun log)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
@@ -98,6 +99,8 @@ static void dependency_clauses(
       query(hash, database, spec, clause);
       if (clause.size() == 1)
         {
+        Log(log, "Warning: No implementation satisfies '%1%'") % spec;
+        Log(log, "Warning: blacklisting '%1%'") % database[i];
         solver.addUnit(clause[0]);
         }
       else
@@ -247,7 +250,7 @@ bool solve(
     log("Warning: request is ambiguous.");
     }
 
-  dependency_clauses(hash, database, solver);
+  dependency_clauses(hash, database, solver, log);
   explicit_conflict_clauses(hash, database, solver);
   implicit_conflict_clauses(database, solver);
 
