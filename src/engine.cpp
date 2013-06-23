@@ -66,10 +66,6 @@ void k_engine_setopt(KEngine *self, KOption option, ...)
     case K_OPT_LOG_FUNCTION:
       self->log_function = va_arg(arg, KPrintFun);
       break;
-    case K_OPT_DOT_FILENAME:
-      str = va_arg(arg, const char*);
-      self->dot_filename = str ? str : "";
-      break;
     case K_OPT_FEED_CACHE:
       str = va_arg(arg, const char*);
       self->feed_cache = str ? str : ".";
@@ -129,22 +125,26 @@ static bool engine_run(KEngine *self)
     {
     model = topological_sort(model, self->database);
     }
-  if (!self->dot_filename.empty())
-    {
-    write_graphviz(self->dot_filename, model, self->database);
-    }
   for (int i : model)
     {
     const KImplementation& impl = self->database[i];
-    if (impl.driver)
+    Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
+    bool requested = std::any_of(self->requests.begin(), self->requests.end(),
+      [&impl](const Spec& spec)
       {
-      Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
-      bool requested = std::any_of(self->requests.begin(), self->requests.end(),
-        [&impl](const Spec& spec)
+      return satisfies(impl, spec);
+      });
+    impl.driver->handle(impl, requested);
+    for (auto& spec : impl.depends)
+      {
+      for (int k : model)
         {
-        return satisfies(impl, spec);
-        });
-      impl.driver->handle(impl, requested);
+        const KImplementation& other = self->database[k];
+        if (satisfies(other, spec))
+          {
+          impl.driver->depend(impl, other);
+          }
+        }
       }
     }
   return true;
