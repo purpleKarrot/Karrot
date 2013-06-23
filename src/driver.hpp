@@ -18,14 +18,7 @@ namespace Karrot
 class Driver
   {
   public:
-    Driver(std::string const& name, std::string const& xmlns, KDriver const& driver);
-    ~Driver();
-  public:
-    Driver(Driver&& other) noexcept;
-    Driver& operator=(Driver&& other) noexcept;
-  public:
-    Driver(Driver const&) = delete;
-    Driver& operator=(Driver const&) = delete;
+    Driver(std::string const& name, std::string const& xmlns, KDriver const* driver);
   public:
     std::string const& name() const
       {
@@ -59,7 +52,7 @@ class Driver
     std::string name_;
     std::string xmlns_;
     KDictionary fields_;
-    KDriver kdriver_;
+    KDriver const* driver_;
   };
 
 } // namespace Karrot

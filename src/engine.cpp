@@ -42,7 +42,7 @@ k_engine_add_driver(KEngine *self, char const *name, KDriver const *driver)
   {
   assert(name);
   assert(driver);
-  self->package_handler.add(name, self->namespace_uri, *driver);
+  self->package_handler.add(name, self->namespace_uri, driver);
   }
 
 void k_engine_add_request(KEngine *self, char const *url, int source)
@@ -174,7 +174,7 @@ int k_engine_run(KEngine *self)
   return -1;
   }
 
-char const *k_engine_error_message(KEngine *self)
+char const *k_engine_get_error(KEngine *self)
   {
   return self->error.c_str();
   }

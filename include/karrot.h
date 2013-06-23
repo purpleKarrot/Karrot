@@ -93,14 +93,12 @@ k_implementation_get_values (KImplementation const *self);
 
 struct KDriver
   {
-  void *ctx;
-  int (*fields) (void *self, KDictionary *dict);
-  int (*filter) (void *self, KDictionary const *fields, KAdd add, void *target);
-  int (*depend) (void *self, KImplementation const *impl, KImplementation const *other);
-  int (*handle) (void *self, KImplementation const *impl, int requested);
-  int (*commit) (void *self);
-  void (*finalize) (void *self);
-  char const* (*get_error_message) (void *self);
+  int (*fields) (KDriver const *self, KDictionary *dict);
+  int (*filter) (KDriver const *self, KDictionary const *fields, KAdd add, void *target);
+  int (*depend) (KDriver const *self, KImplementation const *impl, KImplementation const *other);
+  int (*handle) (KDriver const *self, KImplementation const *impl, int requested);
+  int (*commit) (KDriver const *self);
+  char const* (*get_error) (KDriver const *self);
   };
 
 
@@ -176,7 +174,7 @@ k_engine_run (KEngine *self);
  * @return the error message string
  */
 KARROT_API char const *
-k_engine_error_message (KEngine *self);
+k_engine_get_error (KEngine *self);
 
 /**
  * Engine destructor
