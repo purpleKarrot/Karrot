@@ -43,18 +43,12 @@ typedef struct KEngine KEngine;
 
 typedef void (*KAdd) (KDictionary const *dict, int native, void *self);
 typedef void (*KPrintFun) (char const *string);
-typedef int  (*KVisit) (void *target, char const *key, char const *val);
+typedef void (*KVisit) (void *target, char const *key, char const *val);
 
 
 KARROT_API char const *
 k_version (int *major, int *minor, int *patch);
 
-
-KARROT_API KDictionary *
-k_dictionary_new (void);
-
-KARROT_API void
-k_dictionary_free (KDictionary *self);
 
 KARROT_API void
 k_dictionary_set (KDictionary *self, char const *key, char const *value);

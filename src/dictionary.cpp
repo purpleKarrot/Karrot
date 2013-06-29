@@ -8,18 +8,6 @@
 
 #include "dictionary.hpp"
 
-KDictionary *
-k_dictionary_new ()
-  {
-  return new KDictionary;
-  }
-
-void
-k_dictionary_free (KDictionary *self)
-  {
-  delete self;
-  }
-
 void
 k_dictionary_set (KDictionary *self, char const *key, char const *value)
   {
@@ -38,9 +26,6 @@ k_dictionary_foreach (KDictionary const *self, KVisit visit, void *target)
   {
   for (auto& entry : *self)
     {
-    if (visit(target, entry.first.c_str(), entry.second.c_str()))
-      {
-      return;
-      }
+    visit(target, entry.first.c_str(), entry.second.c_str());
     }
   }
