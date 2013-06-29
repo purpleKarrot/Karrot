@@ -18,7 +18,9 @@ set(test_list
 if(NOT BUILD_SHARED_LIBS OR (NOT BUILD_VISIBILITY_HIDDEN AND NOT WIN32))
   list(APPEND test_list
     query
+    sat
     spec
+    unsat
     url
     variants
     vercmp
