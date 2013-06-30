@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "../src/minisat/Solver.h"
+#include "../src/minisat/solver.hpp"
 #include <iostream>
 
 int sat(int argc, char* argv[])

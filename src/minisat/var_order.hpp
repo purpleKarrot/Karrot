@@ -9,7 +9,7 @@
 #ifndef KARROT_VARORDER_H
 #define KARROT_VARORDER_H
 
-#include "SolverTypes.h"
+#include "solver_types.hpp"
 #include <vector>
 
 class VarOrder

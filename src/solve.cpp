@@ -10,7 +10,7 @@
 #include "hash.hpp"
 #include "query.hpp"
 #include "vercmp.hpp"
-#include "minisat/Solver.h"
+#include "minisat/solver.hpp"
 #include "url.hpp"
 #include "log.hpp"
 #include <algorithm>

@@ -33,11 +33,11 @@ re2c_target(
   )
 
 add_library(karrot
-  minisat/Global.h
-  minisat/Solver.cpp
-  minisat/Solver.h
-  minisat/SolverTypes.h
-  minisat/VarOrder.h
+  minisat/global.hpp
+  minisat/solver.cpp
+  minisat/solver.hpp
+  minisat/solver_types.hpp
+  minisat/var_order.hpp
   dependencies.cpp
   dependencies.hpp
   dictionary.cpp
