@@ -40,7 +40,7 @@ static void query(
     {
     if (satisfies(database[id - 1], spec))
       {
-      res.push(Lit(id - 1));
+      res.push_back(Lit(id - 1));
       }
     h = hash.next(h, hh);
     }
@@ -95,7 +95,7 @@ static void dependency_clauses(
     for (const Spec& spec : database[i].depends)
       {
       vec<Lit> clause;
-      clause.push(~Lit(i));
+      clause.push_back(~Lit(i));
       query(hash, database, spec, clause);
       if (clause.size() == 1)
         {
@@ -233,7 +233,7 @@ bool solve(
       {
       Log(log, "Exactly one implementation for '%1%':") % spec;
       Log(log, "  + %1%") % database[var(choices[0])];
-      request.push(choices[0]);
+      request.push_back(choices[0]);
       }
     else
       {

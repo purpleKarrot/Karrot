@@ -91,7 +91,7 @@ protected:
     void        analyze          (Clause* confl, vec<Lit>& out_learnt, int& out_btlevel); // (bt = backtrack)
     bool        analyze_removable(Lit p, uint min_level);                                 // (helper method for 'analyze()')
     void        analyzeFinal     (Clause* confl,  bool skip_first = false);
-    bool        enqueue          (Lit fact, GClause from = GClause_new((Clause*)NULL));
+    bool        enqueue          (Lit fact, GClause from = GClause_NULL);
     Clause*     propagate        ();
     void        reduceDB         ();
     Lit         pickBranchLit    (const SearchParams& params);
@@ -133,14 +133,13 @@ public:
              , simpDB_props     (0)
              , default_params   (SearchParams(0.95, 0.999, 0.02))
              , expensive_ccmin  (true)
-             , verbosity        (0)
              , progress_estimate(0)
              {
                 vec<Lit> dummy(2,lit_Undef);
-                propagate_tmpbin = Clause_new(false, dummy);
-                analyze_tmpbin   = Clause_new(false, dummy);
-                dummy.pop();
-                solve_tmpunit    = Clause_new(false, dummy);
+                propagate_tmpbin = Clause::create(false, dummy);
+                analyze_tmpbin   = Clause::create(false, dummy);
+                dummy.pop_back();
+                solve_tmpunit    = Clause::create(false, dummy);
                 addBinary_tmp .growTo(2);
                 addTernary_tmp.growTo(3);
              }
@@ -166,7 +165,6 @@ public:
     //
     SearchParams    default_params;     // Restart frequency etc.
     bool            expensive_ccmin;    // Controls conflict clause minimization. TRUE by default.
-    int             verbosity;          // Verbosity level. 0=silent, 1=some progress report, 2=everything
 
     // Problem specification:
     //

@@ -18,6 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 **************************************************************************************************/
 
 #include "Solver.h"
+#include <algorithm>
 #include <cmath>
 
 
@@ -31,7 +32,7 @@ bool removeWatch(vec<GClause>& ws, GClause elem)    // Pre-condition: 'elem' mus
     int j = 0;
     for (; ws[j] != elem  ; j++) assert(j < ws.size());
     for (; j < ws.size()-1; j++) ws[j] = ws[j+1];
-    ws.pop();
+    ws.pop_back();
     return true;
 }
 
@@ -65,10 +66,11 @@ void Solver::newClause(const vec<Lit>& ps_, bool learnt)
     vec<Lit>    qs;
     if (!learnt){
         assert(decisionLevel() == 0);
-        ps_.copyTo(qs);             // Make a copy of the input vector.
+        qs = ps_;             // Make a copy of the input vector.
 
         // Remove duplicates:
-        sortUnique(qs);
+        std::sort(qs.begin(), qs.end());
+        qs.shrink(qs.end() - std::unique(qs.begin(), qs.end()));
 
         // Check if clause is satisfied:
         for (int i = 0; i < qs.size()-1; i++){
@@ -97,11 +99,11 @@ void Solver::newClause(const vec<Lit>& ps_, bool learnt)
 
     }else if (ps.size() == 2){
         // Create special binary clause watch:
-        watches[index(~ps[0])].push(GClause_new(ps[1]));
-        watches[index(~ps[1])].push(GClause_new(ps[0]));
+        watches[index(~ps[0])].push_back(GClause::create(ps[1]));
+        watches[index(~ps[1])].push_back(GClause::create(ps[0]));
 
         if (learnt){
-            check(enqueue(ps[0], GClause_new(~ps[1])));
+            check(enqueue(ps[0], GClause::create(~ps[1])));
             stats.learnts_literals += ps.size();
         }else
             stats.clauses_literals += ps.size();
@@ -109,7 +111,7 @@ void Solver::newClause(const vec<Lit>& ps_, bool learnt)
 
     }else{
         // Allocate clause:
-        Clause* c   = Clause_new(learnt, ps);
+        Clause* c   = Clause::create(learnt, ps);
 
         if (learnt){
             // Put the second watch on the literal with highest decision level:
@@ -124,17 +126,17 @@ void Solver::newClause(const vec<Lit>& ps_, bool learnt)
 
             // Bump, enqueue, store clause:
             claBumpActivity(c);         // (newly learnt clauses should be considered active)
-            check(enqueue((*c)[0], GClause_new(c)));
-            learnts.push(c);
+            check(enqueue((*c)[0], GClause::create(c)));
+            learnts.push_back(c);
             stats.learnts_literals += c->size();
         }else{
             // Store clause:
-            clauses.push(c);
+            clauses.push_back(c);
             stats.clauses_literals += c->size();
         }
         // Watch clause:
-        watches[index(~(*c)[0])].push(GClause_new(c));
-        watches[index(~(*c)[1])].push(GClause_new(c));
+        watches[index(~(*c)[0])].push_back(GClause::create(c));
+        watches[index(~(*c)[1])].push_back(GClause::create(c));
     }
 }
 
@@ -145,11 +147,11 @@ void Solver::remove(Clause* c, bool just_dealloc)
 {
     if (!just_dealloc){
         if (c->size() == 2)
-            removeWatch(watches[index(~(*c)[0])], GClause_new((*c)[1])),
-            removeWatch(watches[index(~(*c)[1])], GClause_new((*c)[0]));
+            removeWatch(watches[index(~(*c)[0])], GClause::create((*c)[1])),
+            removeWatch(watches[index(~(*c)[1])], GClause::create((*c)[0]));
         else
-            removeWatch(watches[index(~(*c)[0])], GClause_new(c)),
-            removeWatch(watches[index(~(*c)[1])], GClause_new(c));
+            removeWatch(watches[index(~(*c)[0])], GClause::create(c)),
+            removeWatch(watches[index(~(*c)[1])], GClause::create(c));
     }
 
     if (c->learnt()) stats.learnts_literals -= c->size();
@@ -184,19 +186,19 @@ bool Solver::simplify(Clause* c) const
 Var Solver::newVar() {
     int     index;
     index = nVars();
-    watches     .push();          // (list for positive literal)
-    watches     .push();          // (list for negative literal)
-    reason      .push(GClause_NULL);
-    assigns     .push(toInt(l_Undef));
-    level       .push(-1);
-    activity    .push(0);
-    analyze_seen.push(0);
+    watches     .emplace_back();  // (list for positive literal)
+    watches     .emplace_back();  // (list for negative literal)
+    reason      .push_back(GClause_NULL);
+    assigns     .push_back(toInt(l_Undef));
+    level       .push_back(-1);
+    activity    .push_back(0);
+    analyze_seen.push_back(0);
     return index; }
 
 
 // Returns FALSE if immediate conflict.
 bool Solver::assume(Lit p) {
-    trail_lim.push(trail.size());
+    trail_lim.push_back(trail.size());
     return enqueue(p); }
 
 
@@ -236,14 +238,14 @@ void Solver::cancelUntil(int level) {
 |________________________________________________________________________________________________@*/
 void Solver::analyze(Clause* _confl, vec<Lit>& out_learnt, int& out_btlevel)
 {
-    GClause confl = GClause_new(_confl);
+    GClause confl = GClause::create(_confl);
     vec<char>&     seen  = analyze_seen;
     int            pathC = 0;
     Lit            p     = lit_Undef;
 
     // Generate conflict clause:
     //
-    out_learnt.push();      // (leave room for the asserting literal)
+    out_learnt.emplace_back(); // (leave room for the asserting literal)
     out_btlevel = 0;
     int index = trail.size()-1;
     do{
@@ -262,7 +264,7 @@ void Solver::analyze(Clause* _confl, vec<Lit>& out_learnt, int& out_btlevel)
                 if (level[var(q)] == decisionLevel())
                     pathC++;
                 else{
-                    out_learnt.push(q);
+                    out_learnt.push_back(q);
                     out_btlevel = std::max(out_btlevel, level[var(q)]);
                 }
             }
@@ -286,14 +288,14 @@ void Solver::analyze(Clause* _confl, vec<Lit>& out_learnt, int& out_btlevel)
         for (i = 1; i < out_learnt.size(); i++)
             min_level |= 1 << (level[var(out_learnt[i])] & 31);         // (maintain an abstraction of levels involved in conflict)
 
-        out_learnt.copyTo(analyze_toclear);
+        analyze_toclear = out_learnt;
         for (i = j = 1; i < out_learnt.size(); i++)
             if (reason[var(out_learnt[i])] == GClause_NULL || !analyze_removable(out_learnt[i], min_level))
                 out_learnt[j++] = out_learnt[i];
     }else{
         // Simplify conflict clause (a little):
         //
-        out_learnt.copyTo(analyze_toclear);
+        analyze_toclear = out_learnt;
         for (i = j = 1; i < out_learnt.size(); i++){
             GClause r = reason[var(out_learnt[i])];
             if (r == GClause_NULL)
@@ -325,11 +327,11 @@ void Solver::analyze(Clause* _confl, vec<Lit>& out_learnt, int& out_btlevel)
 bool Solver::analyze_removable(Lit p, uint min_level)
 {
     assert(reason[var(p)] != GClause_NULL);
-    analyze_stack.clear(); analyze_stack.push(p);
+    analyze_stack.clear(); analyze_stack.push_back(p);
     int top = analyze_toclear.size();
     while (analyze_stack.size() > 0){
-        assert(reason[var(analyze_stack.last())] != GClause_NULL);
-        GClause r = reason[var(analyze_stack.last())]; analyze_stack.pop();
+        assert(reason[var(analyze_stack.back())] != GClause_NULL);
+        GClause r = reason[var(analyze_stack.back())]; analyze_stack.pop_back();
         Clause& c = r.isLit() ? ((*analyze_tmpbin)[1] = r.lit(), *analyze_tmpbin)
                               : *r.clause();
         for (int i = 1; i < c.size(); i++){
@@ -337,8 +339,8 @@ bool Solver::analyze_removable(Lit p, uint min_level)
             if (!analyze_seen[var(p)] && level[var(p)] != 0){
                 if (reason[var(p)] != GClause_NULL && ((1 << (level[var(p)] & 31)) & min_level) != 0){
                     analyze_seen[var(p)] = 1;
-                    analyze_stack.push(p);
-                    analyze_toclear.push(p);
+                    analyze_stack.push_back(p);
+                    analyze_toclear.push_back(p);
                 }else{
                     for (int j = top; j < analyze_toclear.size(); j++)
                         analyze_seen[var(analyze_toclear[j])] = 0;
@@ -383,7 +385,7 @@ void Solver::analyzeFinal(Clause* confl, bool skip_first)
             GClause r = reason[x];
             if (r == GClause_NULL){
                 assert(level[x] > 0);
-                conflict.push(~trail[i]);
+                conflict.push_back(~trail[i]);
             }else{
                 if (r.isLit()){
                     Lit p = r.lit();
@@ -426,7 +428,7 @@ bool Solver::enqueue(Lit p, GClause from)
         assigns[var(p)] = toInt(lbool(!sign(p)));
         level  [var(p)] = decisionLevel();
         reason [var(p)] = from;
-        trail.push(p);
+        trail.push_back(p);
         return true;
     }
 }
@@ -452,11 +454,11 @@ Clause* Solver::propagate()
 
         Lit            p   = trail[qhead++];     // 'p' is enqueued fact to propagate.
         vec<GClause>&  ws  = watches[index(p)];
-        GClause*       i,* j, *end;
+        vec<GClause>::iterator i, j, end;
 
-        for (i = j = (GClause*)ws, end = i + ws.size();  i != end;){
+        for (i = j = ws.begin(), end = ws.end(); i != end;){
             if (i->isLit()){
-                if (!enqueue(i->lit(), GClause_new(p))){
+                if (!enqueue(i->lit(), GClause::create(p))){
                     if (decisionLevel() == 0)
                         ok = false;
                     confl = propagate_tmpbin;
@@ -483,18 +485,18 @@ Clause* Solver::propagate()
                 Lit   first = c[0];
                 lbool val   = value(first);
                 if (val == l_True){
-                    *j++ = GClause_new(&c);
+                    *j++ = GClause::create(&c);
                 }else{
                     // Look for new watch:
                     for (int k = 2; k < c.size(); k++)
                         if (value(c[k]) != l_False){
                             c[1] = c[k]; c[k] = false_lit;
-                            watches[index(~c[1])].push(GClause_new(&c));
+                            watches[index(~c[1])].push_back(GClause::create(&c));
                             goto FoundWatch; }
 
                     // Did not find watch -- clause is unit under assignment:
-                    *j++ = GClause_new(&c);
-                    if (!enqueue(first, GClause_new(&c))){
+                    *j++ = GClause::create(&c);
+                    if (!enqueue(first, GClause::create(&c))){
                         if (decisionLevel() == 0)
                             ok = false;
                         confl = &c;
@@ -528,7 +530,7 @@ void Solver::reduceDB()
     int     i, j;
     double  extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
 
-    sort(learnts, reduceDB_lt());
+    std::sort(learnts.begin(), learnts.end(), reduceDB_lt());
     for (i = j = 0; i < learnts.size() / 2; i++){
         if (learnts[i]->size() > 2 && !locked(learnts[i]))
             remove(learnts[i]);
@@ -571,10 +573,10 @@ void Solver::simplifyDB()
         vec<GClause>& ws = watches[index(~p)];
         for (int j = 0; j < ws.size(); j++)
             if (ws[j].isLit())
-                if (removeWatch(watches[index(~ws[j].lit())], GClause_new(p)))  // (remove binary GClause from "other" watcher list)
+                if (removeWatch(watches[index(~ws[j].lit())], GClause::create(p)))  // (remove binary GClause from "other" watcher list)
                     n_bin_clauses--;
-        watches[index( p)].clear(true);
-        watches[index(~p)].clear(true);
+        watches[index( p)].clear();
+        watches[index(~p)].clear();
     }
 
     // Remove satisfied clauses:
@@ -742,10 +744,10 @@ bool Solver::solve(const vec<Lit>& assumps, KPrintFun log)
                 }else
                     confl = r.clause();
                 analyzeFinal(confl, true);
-                conflict.push(~p);
+                conflict.push_back(~p);
             }else
                 conflict.clear(),
-                conflict.push(~p);
+                conflict.push_back(~p);
             cancelUntil(0);
             return false; }
         Clause* confl = propagate();
@@ -757,24 +759,11 @@ bool Solver::solve(const vec<Lit>& assumps, KPrintFun log)
     assert(root_level == decisionLevel());
 
     // Search:
-    if (verbosity >= 1){
-        log("==================================[MINISAT]===================================");
-        log("| Conflicts |     ORIGINAL     |              LEARNT              | Progress |");
-        log("|           | Clauses Literals |   Limit Clauses Literals  Lit/Cl |          |");
-        log("==============================================================================");
-    }
     while (status == l_Undef){
-        if (verbosity >= 1){
-            char buffer[80];
-            sprintf(buffer, "| %9d | %7d %8d | %7d %7d %8d %7.1f | %6.3f %% |", (int)stats.conflicts, nClauses(), (int)stats.clauses_literals, (int)nof_learnts, nLearnts(), (int)stats.learnts_literals, (double)stats.learnts_literals/nLearnts(), progress_estimate*100);
-            log(buffer);
-        }
         status = search((int)nof_conflicts, (int)nof_learnts, params);
         nof_conflicts *= 1.5;
         nof_learnts   *= 1.1;
     }
-    if (verbosity >= 1)
-        log("==============================================================================");
 
     cancelUntil(0);
     return status == l_True;

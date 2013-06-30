@@ -20,7 +20,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef Global_h
 #define Global_h
 
-#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -71,54 +70,6 @@ template<class T> static inline void xfree(T *ptr) {
 
 
 //=================================================================================================
-// Time and Memory:
-
-
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#ifdef _WIN32
-
-#include <ctime>
-
-static inline double cpuTime(void) {
-    return (double)clock() / CLOCKS_PER_SEC; }
-
-static inline int64 memUsed() {
-    return 0; }
-
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#else
-
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <unistd.h>
-
-static inline double cpuTime(void) {
-    struct rusage ru;
-    getrusage(RUSAGE_SELF, &ru);
-    return (double)ru.ru_utime.tv_sec + (double)ru.ru_utime.tv_usec / 1000000; }
-
-static inline int memReadStat(int field)
-{
-    char    name[256];
-    pid_t pid = getpid();
-    sprintf(name, "/proc/%d/statm", pid);
-    FILE*   in = fopen(name, "rb");
-    if (in == NULL) return 0;
-    int     value;
-    for (; field >= 0; field--)
-        fscanf(in, "%d", &value);
-    fclose(in);
-    return value;
-}
-
-static inline int64 memUsed() { return (int64)memReadStat(0) * (int64)getpagesize(); }
-
-//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#endif
-
-
-
-//=================================================================================================
 // 'vec' -- automatically resizable arrays (via 'push()' method):
 
 
@@ -126,53 +77,52 @@ static inline int64 memUsed() { return (int64)memReadStat(0) * (int64)getpagesiz
 
 template<class T>
 class vec {
-    T*  data;
-    int sz;
-    int cap;
+    T*  data = nullptr;
+    int sz = 0;
+    int cap = 0;
 
     void     init(int size, const T& pad);
     void     grow(int min_cap);
 
-    // Don't allow copying (error prone):
-    vec<T>&  operator = (vec<T>& other); // = delete;
-             vec        (vec<T>& other); // = delete;
-
 public:
     // Types:
-    typedef int Key;
-    typedef T   Datum;
+    using iterator = T*;
 
     // Constructors:
-    vec(void)                   : data(NULL) , sz(0)   , cap(0)    { }
-    vec(int size)               : data(NULL) , sz(0)   , cap(0)    { growTo(size); }
-    vec(int size, const T& pad) : data(NULL) , sz(0)   , cap(0)    { growTo(size, pad); }
-   ~vec(void)                                                      { clear(true); }
+    vec()                              = default;
+    vec(int size)                      { growTo(size); }
+    vec(int size, const T& pad)        { growTo(size, pad); }
+   ~vec(void)                          { clear(); }
 
-    // Ownership of underlying array:
-    operator T*       (void)           { return data; }     // (unsafe but convenient)
-    operator const T* (void) const     { return data; }
+    // Duplicatation:
+    vec(vec const& other)              { growTo(other.sz); for (int i = 0; i < sz; i++) new (&data[i]) T(other.data[i]); }
+    vec& operator=(vec other)          { swap(other); return *this; }
+
+    // Iterator access:
+    iterator const begin() const       { return data; }
+    iterator       begin()             { return data; }
+    iterator const end() const         { return data + sz; }
+    iterator       end()               { return data + sz; }
 
     // Size operations:
     int      size   (void) const       { return sz; }
     void     shrink (int nelems)       { assert(nelems <= sz); for (int i = 0; i < nelems; i++) sz--, data[sz].~T(); }
-    void     pop    (void)             { sz--, data[sz].~T(); }
+    void     pop_back()                { sz--, data[sz].~T(); }
     void     growTo (int size);
     void     growTo (int size, const T& pad);
-    void     clear  (bool dealloc = false);
-    void     capacity (int size) { grow(size); }
+    void     clear  ();
 
     // Stack interface:
-    void     push  (void)              { if (sz == cap) grow(sz+1); new (&data[sz]) T()    ; sz++; }
-    void     push  (const T& elem)     { if (sz == cap) grow(sz+1); new (&data[sz]) T(elem); sz++; }
-    const T& last  (void) const        { return data[sz-1]; }
-    T&       last  (void)              { return data[sz-1]; }
+    void     emplace_back()            { if (sz == cap) grow(sz+1); new (&data[sz]) T()    ; sz++; }
+    void     push_back(const T& elem)  { if (sz == cap) grow(sz+1); new (&data[sz]) T(elem); sz++; }
+    const T& back  (void) const        { return data[sz-1]; }
+    T&       back  (void)              { return data[sz-1]; }
 
     // Vector interface:
     const T& operator [] (int index) const  { return data[index]; }
     T&       operator [] (int index)        { return data[index]; }
 
-    // Duplicatation (preferred instead):
-    void copyTo(vec<T>& copy) const { copy.clear(); copy.growTo(sz); for (int i = 0; i < sz; i++) new (&copy[i]) T(data[i]); }
+    void swap(vec& other)              { std::swap(data, other.data); std::swap(sz, other.sz); std::swap(cap, other.cap); }
 };
 
 template<class T>
@@ -197,24 +147,11 @@ void vec<T>::growTo(int size) {
     sz = size; }
 
 template<class T>
-void vec<T>::clear(bool dealloc) {
+void vec<T>::clear() {
     if (data != NULL){
         for (int i = 0; i < sz; i++) data[i].~T();
-        sz = 0;
-        if (dealloc) xfree(data), data = NULL, cap = 0; } }
+        sz = 0; xfree(data); data = NULL; cap = 0; } }
 
-template<class T, class LessThan>
-void sort(vec<T>& v, LessThan lt) {
-    T* begin = v;
-    T* end = begin + v.size();
-    std::sort(begin, end, lt); }
-
-template<class T>
-void sortUnique(vec<T>& v) {
-    T* begin = v;
-    T* end = begin + v.size();
-    std::sort(begin, end);
-    v.shrink(end - std::unique(begin, end)); }
 
 //=================================================================================================
 // Lifted booleans:
