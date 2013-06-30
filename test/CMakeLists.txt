@@ -38,7 +38,7 @@ target_link_libraries(karrot_test_driver karrot)
 
 find_program(VALGRIND_EXECUTABLE valgrind)
 if(VALGRIND_EXECUTABLE)
-  set(launcher ${VALGRIND_EXECUTABLE} --tool=memcheck --leak-check=yes --quiet)
+  set(launcher ${VALGRIND_EXECUTABLE} --tool=memcheck --leak-check=full --show-reachable=yes --quiet)
 else()
   set(launcher)
 endif()
