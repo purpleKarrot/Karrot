@@ -17,8 +17,8 @@ env:
 before_install:
   - sudo add-apt-repository -y ppa:apokluda/boost1.53
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq --no-install-recommends g++-4.8 re2c libboost-filesystem1.53-dev
+  - sudo apt-get update
+  - sudo apt-get install --no-install-recommends g++-4.8 re2c libboost-filesystem1.53-dev
   - sudo update-alternatives --quiet --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6 --slave /usr/bin/gcov gcov /usr/bin/gcov-4.6
   - sudo update-alternatives --quiet --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8 --slave /usr/bin/gcov gcov /usr/bin/gcov-4.8
   - sudo update-alternatives --quiet --set gcc /usr/bin/gcc-4.8
@@ -29,4 +29,4 @@ script:
   - cmake -DBUILD_COVERAGE=ON -DBUILD_VISIBILITY_HIDDEN=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && make -k all test
 
 after_success:
-  - ./coveralls
+  - if [ $BUILD_TYPE = "Debug" ]; then ./coveralls; fi
