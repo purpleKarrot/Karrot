@@ -36,9 +36,16 @@ add_definitions(-DKARROT_STATIC)
 add_executable(karrot_test_driver ${test_sources})
 target_link_libraries(karrot_test_driver karrot)
 
+find_program(VALGRIND_EXECUTABLE valgrind)
+if(VALGRIND_EXECUTABLE)
+  set(launcher ${VALGRIND_EXECUTABLE} --tool=memcheck --leak-check=yes --quiet)
+else()
+  set(launcher)
+endif()
+
 foreach(test IN LISTS test_list)
   add_test(NAME karrot.${test}
-    COMMAND $<TARGET_FILE:karrot_test_driver> ${test}
+    COMMAND ${launcher} $<TARGET_FILE:karrot_test_driver> ${test}
     )
 endforeach()
 
