@@ -134,12 +134,12 @@ inline int toDimacs(Lit p)
 class Clause
   {
   public:
-    static Clause* create(bool learnt, const vec<Lit>& ps)
+    static Clause* create(std::vector<Lit> const& ps, bool learnt)
       {
       assert(sizeof(Lit) == sizeof(uint));
       assert(sizeof(float) == sizeof(uint));
       void* mem = xmalloc<char>(sizeof(Clause) - sizeof(Lit) + sizeof(uint) * (ps.size() + (int) learnt));
-      return new (mem) Clause(learnt, ps);
+      return new (mem) Clause(ps, learnt);
       }
   public:
     int size() const
@@ -150,7 +150,7 @@ class Clause
       {
       return size_learnt & 1;
       }
-    Lit operator [](int i) const
+    Lit const operator [](int i) const
       {
       return data[i];
       }
@@ -158,13 +158,17 @@ class Clause
       {
       return data[i];
       }
-    float& activity() const
+    float activity() const
+      {
+      return *((float*) &data[size()]);
+      }
+    float& activity()
       {
       return *((float*) &data[size()]);
       }
   private:
     // NOTE: This constructor cannot be used directly (doesn't allocate enough memory).
-    Clause(bool learnt, const vec<Lit>& ps)
+    Clause(std::vector<Lit> const& ps, bool learnt)
       {
       size_learnt = (ps.size() << 1) | (int) learnt;
       for (int i = 0; i < ps.size(); i++)

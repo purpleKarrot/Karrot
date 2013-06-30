@@ -15,7 +15,7 @@
 class VarOrder
   {
   public:
-    VarOrder(const vec<char>& assigns, std::vector<Var>&& preferences)
+    VarOrder(std::vector<char> const& assigns, std::vector<Var>&& preferences)
         : assigns(assigns), preferences(std::move(preferences))
       {
       }
@@ -38,7 +38,7 @@ class VarOrder
       return var_Undef;
       }
   private:
-    const vec<char>& assigns;
+    std::vector<char> const& assigns;
     std::vector<Var> preferences;
 };
 

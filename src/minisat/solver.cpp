@@ -53,7 +53,7 @@ bool removeWatch(vec<GClause>& ws, GClause elem)
 
 /*_________________________________________________________________________________________________
 |
-|  newClause : (ps : const vec<Lit>&) (learnt : bool)  ->  [void]
+|  newClause : (ps : const std::vector<Lit>&) (learnt : bool)  ->  [void]
 |  
 |  Description:
 |    Allocate and add a new clause to the SAT solvers clause database. If a conflict is detected,
@@ -69,14 +69,14 @@ bool removeWatch(vec<GClause>& ws, GClause elem)
 |  Effect:
 |    Activity heuristics are updated.
 |________________________________________________________________________________________________@*/
-void Solver::newClause(const vec<Lit>& ps_, bool learnt)
+void Solver::add_clause(std::vector<Lit> const& ps_, bool learnt)
   {
   if (!ok)
     {
     return;
     }
 
-  vec<Lit> qs;
+  std::vector<Lit> qs;
   if (!learnt)
     {
     assert(decisionLevel() == 0);
@@ -84,7 +84,7 @@ void Solver::newClause(const vec<Lit>& ps_, bool learnt)
 
     // Remove duplicates:
     std::sort(qs.begin(), qs.end());
-    qs.shrink(qs.end() - std::unique(qs.begin(), qs.end()));
+    qs.erase(std::unique(qs.begin(), qs.end()), qs.end());
 
     // Check if clause is satisfied:
     for (int i = 0; i < qs.size() - 1; i++)
@@ -103,18 +103,14 @@ void Solver::newClause(const vec<Lit>& ps_, bool learnt)
       }
 
     // Remove false literals:
-    int i, j;
-    for (i = j = 0; i < qs.size(); i++)
+    auto is_false = [&](Lit const& lit) -> bool
       {
-      if (value(qs[i]) != l_False)
-        {
-        qs[j++] = qs[i];
-        }
-      }
-    qs.shrink(i - j);
+      return (value(lit) == l_False);
+      };
+    qs.erase(std::remove_if(qs.begin(), qs.end(), is_false), qs.end());
     }
 
-  const vec<Lit>& ps = learnt ? ps_ : qs; // 'ps' is now the (possibly) reduced vector of literals.
+  const std::vector<Lit>& ps = learnt ? ps_ : qs; // 'ps' is now the (possibly) reduced vector of literals.
 
   if (ps.size() == 0)
     {
@@ -143,7 +139,7 @@ void Solver::newClause(const vec<Lit>& ps_, bool learnt)
   else
     {
     // Allocate clause:
-    Clause* c = Clause::create(learnt, ps);
+    Clause* c = Clause::create(ps, learnt);
 
     if (learnt)
       {
@@ -260,8 +256,8 @@ void Solver::cancelUntil(int level)
       reason[x] = GClause_NULL;
       order.undo(x);
       }
-    trail.shrink(trail.size() - trail_lim[level]);
-    trail_lim.shrink(trail_lim.size() - level);
+    trail.resize(trail_lim[level]);
+    trail_lim.resize(level);
     qhead = trail.size();
     }
   }
@@ -273,7 +269,7 @@ void Solver::cancelUntil(int level)
 
 /*_________________________________________________________________________________________________
 |
-|  analyze : (confl : Clause*) (out_learnt : vec<Lit>&) (out_btlevel : int&)  ->  [void]
+|  analyze : (confl : Clause*) (out_learnt : std::vector<Lit>&) (out_btlevel : int&)  ->  [void]
 |  
 |  Description:
 |    Analyze conflict and produce a reason clause.
@@ -288,10 +284,10 @@ void Solver::cancelUntil(int level)
 |  Effect:
 |    Will undo part of the trail, upto but not beyond the assumption of the current decision level.
 |________________________________________________________________________________________________@*/
-void Solver::analyze(Clause* _confl, vec<Lit>& out_learnt, int& out_btlevel)
+void Solver::analyze(Clause* _confl, std::vector<Lit>& out_learnt, int& out_btlevel)
   {
   GClause confl = GClause::create(_confl);
-  vec<char>& seen = analyze_seen;
+  std::vector<char>& seen = analyze_seen;
   int pathC = 0;
   Lit p = lit_Undef;
 
@@ -351,15 +347,12 @@ void Solver::analyze(Clause* _confl, vec<Lit>& out_learnt, int& out_btlevel)
     }
 
   analyze_toclear = out_learnt;
-  for (i = j = 1; i < out_learnt.size(); i++)
-    {
-    if (reason[var(out_learnt[i])] == GClause_NULL || !analyze_removable(out_learnt[i], min_level))
-      {
-      out_learnt[j++] = out_learnt[i];
-      }
-    }
 
-  out_learnt.shrink(i - j);
+  auto pred = [&](Lit const& lit) -> bool
+    {
+    return reason[var(lit)] != GClause_NULL && analyze_removable(lit, min_level);
+    };
+  out_learnt.erase(std::remove_if(out_learnt.begin() + 1, out_learnt.end(), pred), out_learnt.end());
 
   for (int j = 0; j < analyze_toclear.size(); j++)
     {
@@ -399,7 +392,7 @@ bool Solver::analyze_removable(Lit p, uint min_level)
             {
             analyze_seen[var(analyze_toclear[j])] = 0;
             }
-          analyze_toclear.shrink(analyze_toclear.size() - top);
+          analyze_toclear.resize(top);
           return false;
           }
         }
@@ -421,42 +414,62 @@ bool Solver::analyze_removable(Lit p, uint min_level)
 |    if conflict arose before search even started).
 |________________________________________________________________________________________________@*/
 void Solver::analyzeFinal(Clause* confl, bool skip_first)
-{
-    // -- NOTE! This code is relatively untested. Please report bugs!
-    conflict.clear();
-    if (root_level == 0) return;
-
-    vec<char>&     seen  = analyze_seen;
-    for (int i = skip_first ? 1 : 0; i < confl->size(); i++){
-        Var     x = var((*confl)[i]);
-        if (level[x] > 0)
-            seen[x] = 1;
+  {
+  // -- NOTE! This code is relatively untested. Please report bugs!
+  conflict.clear();
+  if (root_level == 0)
+    {
+    return;
     }
 
-    int     start = (root_level >= trail_lim.size()) ? trail.size()-1 : trail_lim[root_level];
-    for (int i = start; i >= trail_lim[0]; i--){
-        Var     x = var(trail[i]);
-        if (seen[x]){
-            GClause r = reason[x];
-            if (r == GClause_NULL){
-                assert(level[x] > 0);
-                conflict.push_back(~trail[i]);
-            }else{
-                if (r.isLit()){
-                    Lit p = r.lit();
-                    if (level[var(p)] > 0)
-                        seen[var(p)] = 1;
-                }else{
-                    Clause& c = *r.clause();
-                    for (int j = 1; j < c.size(); j++)
-                        if (level[var(c[j])] > 0)
-                            seen[var(c[j])] = 1;
-                }
-            }
-            seen[x] = 0;
+  std::vector<char>& seen = analyze_seen;
+  for (int i = skip_first ? 1 : 0; i < confl->size(); i++)
+    {
+    Var x = var((*confl)[i]);
+    if (level[x] > 0)
+      {
+      seen[x] = 1;
+      }
+    }
+
+  int start = (root_level >= trail_lim.size()) ? trail.size() - 1 : trail_lim[root_level];
+  for (int i = start; i >= trail_lim[0]; i--)
+    {
+    Var x = var(trail[i]);
+    if (seen[x])
+      {
+      GClause r = reason[x];
+      if (r == GClause_NULL)
+        {
+        assert(level[x] > 0);
+        conflict.push_back(~trail[i]);
         }
+      else
+        {
+        if (r.isLit())
+          {
+          Lit p = r.lit();
+          if (level[var(p)] > 0)
+            {
+            seen[var(p)] = 1;
+            }
+          }
+        else
+          {
+          Clause& c = *r.clause();
+          for (int j = 1; j < c.size(); j++)
+            {
+            if (level[var(c[j])] > 0)
+              {
+              seen[var(c[j])] = 1;
+              }
+            }
+          }
+        }
+      seen[x] = 0;
+      }
     }
-}
+  }
 
 
 /*_________________________________________________________________________________________________
@@ -736,7 +749,7 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
       // CONFLICT
 
       conflictC++;
-      vec<Lit> learnt_clause;
+      std::vector<Lit> learnt_clause;
       int backtrack_level;
       if (decisionLevel() == root_level)
         {
@@ -746,7 +759,7 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
         }
       analyze(confl, learnt_clause, backtrack_level);
       cancelUntil(std::max(backtrack_level, root_level));
-      newClause(learnt_clause, true);
+      add_clause(learnt_clause, true);
 
       // (this is ugly (but needed for 'analyzeFinal()') -- in future versions, we will backtrack past the 'root_level' and redo the assumptions)
       if (learnt_clause.size() == 1)
@@ -788,7 +801,7 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
       if (next == var_Undef)
         {
         // Model found:
-        model.growTo(nVars());
+        model.resize(nVars());
         for (int i = 0; i < nVars(); i++)
           {
           model[i] = value(i);
@@ -825,14 +838,14 @@ void Solver::claRescaleActivity()
 
 /*_________________________________________________________________________________________________
 |
-|  solve : (assumps : const vec<Lit>&)  ->  [bool]
+|  solve : (assumps : const std::vector<Lit>&)  ->  [bool]
 |  
 |  Description:
 |    Top-level solve. If using assumptions (non-empty 'assumps' vector), you must call
 |    'simplifyDB()' first to see that no top-level conflict is present (which would put the solver
 |    in an undefined state).
 |________________________________________________________________________________________________@*/
-bool Solver::solve(const vec<Lit>& assumps, KPrintFun log)
+bool Solver::solve(const std::vector<Lit>& assumps, KPrintFun log)
   {
   simplifyDB();
   if (!ok)

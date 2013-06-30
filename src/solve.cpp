@@ -31,7 +31,7 @@ static void query(
     const Hash& hash,
     const Database& database,
     const Spec& spec,
-    vec<Lit>& res)
+    std::vector<Lit>& res)
   {
   int id;
   std::size_t h = hash_artefact(spec.id) & hash.mask;
@@ -94,8 +94,7 @@ static void dependency_clauses(
     {
     for (const Spec& spec : database[i].depends)
       {
-      vec<Lit> clause;
-      clause.push_back(~Lit(i));
+      std::vector<Lit> clause{~Lit(i)};
       query(hash, database, spec, clause);
       if (clause.size() == 1)
         {
@@ -105,7 +104,7 @@ static void dependency_clauses(
         }
       else
         {
-        solver.addClause(clause);
+        solver.add_clause(clause);
         }
       }
     }
@@ -121,11 +120,11 @@ static void explicit_conflict_clauses(
     Lit lit = ~Lit(i);
     for (const Spec& spec : database[i].conflicts)
       {
-      vec<Lit> conflicts;
+      std::vector<Lit> conflicts;
       query(hash, database, spec, conflicts);
-      for (int k = 0; k < conflicts.size(); ++k)
+      for (Lit const& conflict : conflicts)
         {
-        solver.addBinary(lit, ~conflicts[k]);
+        solver.addBinary(lit, ~conflict);
         }
       }
     }
@@ -215,10 +214,10 @@ bool solve(
     solver.newVar();
     }
 
-  vec<Lit> request;
+  std::vector<Lit> request;
   for (const Spec& spec : requests)
     {
-    vec<Lit> choices;
+    std::vector<Lit> choices;
     query(hash, database, spec, choices);
     if (choices.size() == 0)
       {
@@ -242,7 +241,7 @@ bool solve(
         {
         Log(log, "  + %1%") % database[var(choices[i])];
         }
-      solver.addClause(choices);
+      solver.add_clause(choices);
       }
     }
   if (request.size() == 0)
@@ -262,10 +261,8 @@ bool solve(
   if (!solver.solve(request, log))
     {
     log("no solution exists, because of conflicts");
-    vec<Lit> const& conflict = solver.conflict;
-    for (int i = 0; i < conflict.size(); ++i)
+    for (Lit const& lit : solver.conflict)
       {
-      Lit const& lit = conflict[i];
       Log(log, "  %1% %2%") % (sign(lit) ? "-" : "+") % database[var(lit)];
       }
     return false;

@@ -41,14 +41,12 @@ class Solver
   private:
     // Temporaries (to reduce allocation overhead). Each variable is prefixed by the method in which is used:
     //
-    vec<char>           analyze_seen;
-    vec<Lit>            analyze_stack;
-    vec<Lit>            analyze_toclear;
+    std::vector<char>   analyze_seen;
+    std::vector<Lit>    analyze_stack;
+    std::vector<Lit>    analyze_toclear;
     Clause*             propagate_tmpbin;
     Clause*             analyze_tmpbin;
     Clause*             solve_tmpunit;
-    vec<Lit>            addBinary_tmp;
-    vec<Lit>            addTernary_tmp;
 
   public:
     Solver(std::vector<Var>&& preferences)
@@ -62,13 +60,11 @@ class Solver
              , simpDB_props     (0)
              , default_params   (SearchParams(0.95, 0.999, 0.02))
              {
-                vec<Lit> dummy(2,lit_Undef);
-                propagate_tmpbin = Clause::create(false, dummy);
-                analyze_tmpbin   = Clause::create(false, dummy);
+                std::vector<Lit> dummy(2,lit_Undef);
+                propagate_tmpbin = Clause::create(dummy, false);
+                analyze_tmpbin   = Clause::create(dummy, false);
                 dummy.pop_back();
-                solve_tmpunit    = Clause::create(false, dummy);
-                addBinary_tmp .growTo(2);
-                addTernary_tmp.growTo(3);
+                solve_tmpunit    = Clause::create(dummy, false);
              }
 
     ~Solver()
@@ -104,28 +100,28 @@ class Solver
     Var     newVar    ();
     int     nVars     ()                    { return assigns.size(); }
     void    addUnit   (Lit p)               { if (ok) ok = enqueue(p); }
-    void    addBinary (Lit p, Lit q)        { addBinary_tmp [0] = p; addBinary_tmp [1] = q; addClause(addBinary_tmp); }
-    void    addTernary(Lit p, Lit q, Lit r) { addTernary_tmp[0] = p; addTernary_tmp[1] = q; addTernary_tmp[2] = r; addClause(addTernary_tmp); }
-    void    addClause (const vec<Lit>& ps)  { newClause(ps); }  // (used to be a difference between internal and external method...)
+    void    addBinary (Lit p, Lit q)        { add_clause({p, q}); }
+    void    addTernary(Lit p, Lit q, Lit r) { add_clause({p, q, r}); }
+    void    add_clause(std::vector<Lit> const& ps, bool learnt = false);
 
     // Solving:
     //
     bool    okay() { return ok; }       // FALSE means solver is in an conflicting state (must never be used again!)
     void    simplifyDB();
-    bool    solve(const vec<Lit>& assumps, KPrintFun log);
-    bool    solve(KPrintFun log) { vec<Lit> tmp; return solve(tmp, log); }
+    bool    solve(const std::vector<Lit>& assumps, KPrintFun log);
+    bool    solve(KPrintFun log) { std::vector<Lit> tmp; return solve(tmp, log); }
 
-    vec<lbool>  model;              // If problem is satisfiable, this vector contains the model (if any).
-    vec<Lit>    conflict;           // If problem is unsatisfiable (possibly under assumptions), this vector represent the conflict clause expressed in the assumptions.
+    std::vector<lbool>  model;          // If problem is satisfiable, this vector contains the model (if any).
+    std::vector<Lit>    conflict;       // If problem is unsatisfiable (possibly under assumptions), this vector represent the conflict clause expressed in the assumptions.
 
   private:
     // Main internal methods:
     //
     bool        assume           (Lit p);
     void        cancelUntil      (int level);
-    void        record           (const vec<Lit>& clause);
+    void        record           (const std::vector<Lit>& clause);
 
-    void        analyze          (Clause* confl, vec<Lit>& out_learnt, int& out_btlevel); // (bt = backtrack)
+    void        analyze          (Clause* confl, std::vector<Lit>& out_learnt, int& out_btlevel); // (bt = backtrack)
     bool        analyze_removable(Lit p, uint min_level);                                 // (helper method for 'analyze()')
     void        analyzeFinal     (Clause* confl,  bool skip_first = false);
     bool        enqueue          (Lit fact, GClause from = GClause_NULL);
@@ -147,7 +143,6 @@ class Solver
 
     // Operations on clauses:
     //
-    void     newClause(const vec<Lit>& ps, bool learnt = false);
     void     claBumpActivity (Clause* c) { if ( (c->activity() += (float)cla_inc) > 1e20f ) claRescaleActivity(); }
     void     remove          (Clause* c, bool just_dealloc = false);
     bool     locked          (const Clause* c) const { GClause r = reason[var((*c)[0])]; return !r.isLit() && r.clause() == c; }
@@ -168,12 +163,12 @@ class Solver
     double              var_decay;        // INVERSE decay factor for variable activity: stores 1/decay. Use negative value for static variable order.
     VarOrder            order;            // Keeps track of the decision variable order.
 
-    vec<vec<GClause> >  watches;          // 'watches[lit]' is a list of constraints watching 'lit' (will go there if literal becomes true).
-    vec<char>           assigns;          // The current assignments (lbool:s stored as char:s).
-    vec<Lit>            trail;            // Assignment stack; stores all assigments made in the order they were made.
-    vec<int>            trail_lim;        // Separator indices for different decision levels in 'trail'.
+    vec<vec<GClause>>   watches;          // 'watches[lit]' is a list of constraints watching 'lit' (will go there if literal becomes true).
+    std::vector<char>   assigns;          // The current assignments (lbool:s stored as char:s).
+    std::vector<Lit>    trail;            // Assignment stack; stores all assigments made in the order they were made.
+    std::vector<int>    trail_lim;        // Separator indices for different decision levels in 'trail'.
     vec<GClause>        reason;           // 'reason[var]' is the clause that implied the variables current value, or 'NULL' if none.
-    vec<int>            level;            // 'level[var]' is the decision level at which assignment was made.
+    std::vector<int>    level;            // 'level[var]' is the decision level at which assignment was made.
     int                 root_level;       // Level of first proper decision.
     int                 qhead;            // Head of queue (as index into the trail -- no more explicit propagation queue in MiniSat).
     int                 simpDB_assigns;   // Number of top-level assignments since last execution of 'simplifyDB()'.
