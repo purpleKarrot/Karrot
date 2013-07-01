@@ -37,16 +37,22 @@ add_executable(karrot_test_driver ${test_sources})
 target_link_libraries(karrot_test_driver karrot)
 
 find_program(VALGRIND_EXECUTABLE valgrind)
-if(VALGRIND_EXECUTABLE)
-  set(launcher ${VALGRIND_EXECUTABLE} --tool=memcheck --leak-check=full --show-reachable=yes --quiet)
-else()
-  set(launcher)
-endif()
 
 foreach(test IN LISTS test_list)
   add_test(NAME karrot.${test}
-    COMMAND ${launcher} $<TARGET_FILE:karrot_test_driver> ${test}
+    COMMAND $<TARGET_FILE:karrot_test_driver> ${test}
     )
+  if(VALGRIND_EXECUTABLE)
+    add_test(NAME karrot.${test}.memcheck
+      COMMAND ${VALGRIND_EXECUTABLE}
+        --tool=memcheck --leak-check=full --show-reachable=yes
+        $<TARGET_FILE:karrot_test_driver> ${test}
+      )
+    set_tests_properties(karrot.${test}.memcheck PROPERTIES
+      PASS_REGULAR_EXPRESSION "No errors detected"
+      DEPENDS karrot.${test}
+      )
+  endif()
 endforeach()
 
 configure_file(coveralls.in ${CMAKE_BINARY_DIR}/coveralls @ONLY)

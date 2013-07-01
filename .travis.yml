@@ -28,7 +28,7 @@ script:
   - cd _build
   - cmake -DBUILD_COVERAGE=ON -DBUILD_VISIBILITY_HIDDEN=OFF -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
   - cmake --build . --target all
-  - ctest -V .
+  - ctest --output-on-failure .
 
 after_success:
   - if [ $BUILD_TYPE = "Debug" ]; then ./coveralls; fi
