@@ -254,7 +254,7 @@ void Solver::cancelUntil(int level)
       Var x = var(trail[c]);
       assigns[x] = toInt(l_Undef);
       reason[x] = GClause_NULL;
-      order.undo(x);
+      order.push_back(x);
       }
     trail.resize(trail_lim[level]);
     trail_lim.resize(level);
@@ -796,7 +796,20 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
         }
 
       // New variable decision:
-      Var next = order.select();
+      auto select = [&]() -> Var
+        {
+        while (!order.empty())
+          {
+          Var next = order.back();
+          order.pop_back();
+          if (toLbool(assigns[next]) == l_Undef)
+            {
+            return next;
+            }
+          }
+        return var_Undef;
+        };
+      Var next = select();
 
       if (next == var_Undef)
         {

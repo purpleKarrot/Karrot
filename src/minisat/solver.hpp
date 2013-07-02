@@ -23,7 +23,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <vector>
 #include <karrot.h>
 #include "solver_types.hpp"
-#include "var_order.hpp"
 
 //=================================================================================================
 // Solver -- the main class:
@@ -54,7 +53,7 @@ class Solver
              , cla_decay        (1)
              , var_inc          (1)
              , var_decay        (1)
-             , order            (assigns, std::move(preferences))
+             , order            {std::move(preferences)}
              , qhead            (0)
              , simpDB_assigns   (0)
              , simpDB_props     (0)
@@ -161,7 +160,7 @@ class Solver
     vec<double>         activity;         // A heuristic measurement of the activity of a variable.
     double              var_inc;          // Amount to bump next variable with.
     double              var_decay;        // INVERSE decay factor for variable activity: stores 1/decay. Use negative value for static variable order.
-    VarOrder            order;            // Keeps track of the decision variable order.
+    std::vector<Var>    order;            // Keeps track of the decision variable order.
 
     vec<vec<GClause>>   watches;          // 'watches[lit]' is a list of constraints watching 'lit' (will go there if literal becomes true).
     std::vector<char>   assigns;          // The current assignments (lbool:s stored as char:s).
