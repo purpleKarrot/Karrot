@@ -49,7 +49,7 @@ foreach(test IN LISTS test_list)
         $<TARGET_FILE:karrot_test_driver> ${test}
       )
     set_tests_properties(karrot.${test}.memcheck PROPERTIES
-      PASS_REGULAR_EXPRESSION "No errors detected"
+      PASS_REGULAR_EXPRESSION " 0 errors from 0 contexts"
       DEPENDS karrot.${test}
       )
   endif()

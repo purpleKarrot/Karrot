@@ -38,14 +38,10 @@ Solver::Solver(std::vector<Var>&& preferences)
   solve_tmpunit    = Clause::create(dummy, false);
 
   std::size_t size = order.size();
-  for (std::size_t i = 0; i < size; ++i)
-    {
-    watches.emplace_back(); // (list for positive literal)
-    watches.emplace_back(); // (list for negative literal)
-    reason.push_back(GClause_NULL);
-    assigns.push_back(toInt(l_Undef));
-    level.push_back(-1);
-    }
+  watches.resize(size * 2); // for positive and negative literals
+  reason.resize(size, GClause_NULL);
+  assigns.resize(size, toInt(l_Undef));
+  level.resize(size, -1);
   activity.resize(size, 0);
   analyze_seen.resize(size, 0);
   }

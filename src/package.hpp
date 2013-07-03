@@ -19,16 +19,12 @@ class Driver;
 class Package
   {
   public:
-    Package() : driver(nullptr)
-      {
-      }
-  public:
     std::string component;
     std::string version;
     KDictionary variant;
     KDictionary values;
     KDictionary fields;
-    Driver const *driver;
+    Driver const *driver = nullptr;
     std::string namespace_uri;
   };
 
