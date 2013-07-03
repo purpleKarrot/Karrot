@@ -19,10 +19,6 @@ int sat(int argc, char* argv[])
     }
 
   Solver solver(std::move(prefs));
-  for (int i = 0; i < vars; ++i)
-    {
-    solver.newVar();
-    }
 
   solver.addTernary( Lit{15},  Lit{16},  Lit{29});
   solver.addTernary(~Lit{16},  Lit{21},  Lit{29});

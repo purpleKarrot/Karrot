@@ -218,24 +218,6 @@ bool Solver::simplify(Clause* c) const
 // Minor methods:
 
 
-// Creates a new SAT variable in the solver. If 'decision_var' is cleared, variable will not be
-// used as a decision variable (NOTE! This has effects on the meaning of a SATISFIABLE result).
-//
-Var Solver::newVar()
-  {
-  int index;
-  index = nVars();
-  watches.emplace_back(); // (list for positive literal)
-  watches.emplace_back(); // (list for negative literal)
-  reason.push_back(GClause_NULL);
-  assigns.push_back(toInt(l_Undef));
-  level.push_back(-1);
-  activity.push_back(0);
-  analyze_seen.push_back(0);
-  return index;
-  }
-
-
 // Returns FALSE if immediate conflict.
 bool Solver::assume(Lit p)
   {

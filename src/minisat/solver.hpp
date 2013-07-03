@@ -28,11 +28,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 // Solver -- the main class:
 
 
-struct SearchParams {
-    double  var_decay, clause_decay, random_var_freq;    // (reasonable values are: 0.95, 0.999, 0.02)    
-    SearchParams(double v = 1, double c = 1, double r = 0) : var_decay(v), clause_decay(c), random_var_freq(r) { }
-};
-
+struct SearchParams
+  {
+  // (reasonable values are: 0.95, 0.999, 0.02)
+  double  var_decay, clause_decay, random_var_freq;
+  };
 
 
 class Solver
@@ -49,22 +49,27 @@ class Solver
 
   public:
     Solver(std::vector<Var>&& preferences)
-             : cla_inc          (1)
-             , cla_decay        (1)
-             , var_inc          (1)
-             , var_decay        (1)
-             , order            {std::move(preferences)}
-             , qhead            (0)
-             , simpDB_assigns   (0)
-             , simpDB_props     (0)
-             , default_params   (SearchParams(0.95, 0.999, 0.02))
-             {
-                std::vector<Lit> dummy(2,lit_Undef);
-                propagate_tmpbin = Clause::create(dummy, false);
-                analyze_tmpbin   = Clause::create(dummy, false);
-                dummy.pop_back();
-                solve_tmpunit    = Clause::create(dummy, false);
-             }
+        : order{std::move(preferences)}
+        , default_params{0.95, 0.999, 0.02}
+      {
+      std::vector<Lit> dummy(2,lit_Undef);
+      propagate_tmpbin = Clause::create(dummy, false);
+      analyze_tmpbin   = Clause::create(dummy, false);
+      dummy.pop_back();
+      solve_tmpunit    = Clause::create(dummy, false);
+
+      std::size_t size = order.size();
+      for (std::size_t i = 0; i < size; ++i)
+        {
+        watches.emplace_back(); // (list for positive literal)
+        watches.emplace_back(); // (list for negative literal)
+        reason.push_back(GClause_NULL);
+        assigns.push_back(toInt(l_Undef));
+        level.push_back(-1);
+        }
+      activity.growTo(size, 0);
+      analyze_seen.resize(size, 0);
+      }
 
     ~Solver()
       {
@@ -79,6 +84,9 @@ class Solver
           remove(clause, true);
           }
         }
+      remove(solve_tmpunit, true);
+      remove(analyze_tmpbin, true);
+      remove(propagate_tmpbin, true);
       }
 
     // Helpers: (semi-internal)
@@ -96,7 +104,6 @@ class Solver
 
     // Problem specification:
     //
-    Var     newVar    ();
     int     nVars     ()                    { return assigns.size(); }
     void    addUnit   (Lit p)               { if (ok) ok = enqueue(p); }
     void    addBinary (Lit p, Lit q)        { add_clause({p, q}); }
@@ -154,12 +161,12 @@ class Solver
     vec<Clause*>        clauses;          // List of problem clauses.
     vec<Clause*>        learnts;          // List of learnt clauses.
     int                 n_bin_clauses = 0;// Keep track of number of binary clauses "inlined" into the watcher lists (we do this primarily to get identical behavior to the version without the binary clauses trick).
-    double              cla_inc;          // Amount to bump next clause with.
-    double              cla_decay;        // INVERSE decay factor for clause activity: stores 1/decay.
+    double              cla_inc = 1;      // Amount to bump next clause with.
+    double              cla_decay = 1;    // INVERSE decay factor for clause activity: stores 1/decay.
 
     vec<double>         activity;         // A heuristic measurement of the activity of a variable.
-    double              var_inc;          // Amount to bump next variable with.
-    double              var_decay;        // INVERSE decay factor for variable activity: stores 1/decay. Use negative value for static variable order.
+    double              var_inc = 1;      // Amount to bump next variable with.
+    double              var_decay = 1;    // INVERSE decay factor for variable activity: stores 1/decay. Use negative value for static variable order.
     std::vector<Var>    order;            // Keeps track of the decision variable order.
 
     vec<vec<GClause>>   watches;          // 'watches[lit]' is a list of constraints watching 'lit' (will go there if literal becomes true).
@@ -169,9 +176,9 @@ class Solver
     vec<GClause>        reason;           // 'reason[var]' is the clause that implied the variables current value, or 'NULL' if none.
     std::vector<int>    level;            // 'level[var]' is the decision level at which assignment was made.
     int                 root_level;       // Level of first proper decision.
-    int                 qhead;            // Head of queue (as index into the trail -- no more explicit propagation queue in MiniSat).
-    int                 simpDB_assigns;   // Number of top-level assignments since last execution of 'simplifyDB()'.
-    int64               simpDB_props;     // Remaining number of propagations that must be made before next execution of 'simplifyDB()'.
+    int                 qhead = 0;        // Head of queue (as index into the trail -- no more explicit propagation queue in MiniSat).
+    int                 simpDB_assigns=0; // Number of top-level assignments since last execution of 'simplifyDB()'.
+    int64               simpDB_props = 0; // Remaining number of propagations that must be made before next execution of 'simplifyDB()'.
   };
 
 

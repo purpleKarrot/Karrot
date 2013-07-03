@@ -45,7 +45,7 @@ foreach(test IN LISTS test_list)
   if(VALGRIND_EXECUTABLE)
     add_test(NAME karrot.${test}.memcheck
       COMMAND ${VALGRIND_EXECUTABLE}
-        --tool=memcheck --leak-check=full --show-reachable=yes
+        --tool=memcheck --leak-check=full --show-reachable=yes --track-origins=yes
         $<TARGET_FILE:karrot_test_driver> ${test}
       )
     set_tests_properties(karrot.${test}.memcheck PROPERTIES

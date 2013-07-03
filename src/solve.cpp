@@ -209,10 +209,6 @@ bool solve(
     }
 
   Solver solver(make_preferences(database));
-  for (std::size_t i = 0; i < database.size(); ++i)
-    {
-    solver.newVar();
-    }
 
   std::vector<Lit> request;
   for (const Spec& spec : requests)

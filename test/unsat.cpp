@@ -19,10 +19,6 @@ int unsat(int argc, char* argv[])
     }
 
   Solver solver(std::move(prefs));
-  for (int i = 0; i < vars; ++i)
-    {
-    solver.newVar();
-    }
 
   solver.addTernary( Lit{15},  Lit{29},  Lit{94});
   solver.addTernary(~Lit{15},  Lit{29},  Lit{94});
