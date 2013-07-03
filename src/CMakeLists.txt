@@ -33,7 +33,6 @@ re2c_target(
   )
 
 add_library(karrot
-  minisat/global.hpp
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp

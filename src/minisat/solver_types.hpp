@@ -21,7 +21,38 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef SolverTypes_h
 #define SolverTypes_h
 
-#include "global.hpp"
+#include <cassert>
+#include <cstdint>
+#include <cstdlib>
+
+
+//=================================================================================================
+// Lifted booleans:
+
+
+class lbool {
+    int     value;
+    explicit lbool(int v) : value(v) { }
+
+public:
+    lbool()       : value(0) { }
+    lbool(bool x) : value((int)x*2-1) { }
+    int toInt(void) const { return value; }
+
+    bool  operator == (const lbool& other) const { return value == other.value; }
+    bool  operator != (const lbool& other) const { return value != other.value; }
+    lbool operator ~  (void)               const { return lbool(-value); }
+
+    friend int   toInt  (lbool l);
+    friend lbool toLbool(int   v);
+};
+
+inline int   toInt  (lbool l) { return l.toInt(); }
+inline lbool toLbool(int   v) { return lbool(v);  }
+
+const lbool l_True  = toLbool( 1);
+const lbool l_False = toLbool(-1);
+const lbool l_Undef = toLbool( 0);
 
 
 //=================================================================================================
@@ -138,7 +169,7 @@ class Clause
       {
       assert(sizeof(Lit) == sizeof(uint));
       assert(sizeof(float) == sizeof(uint));
-      void* mem = xmalloc<char>(sizeof(Clause) - sizeof(Lit) + sizeof(uint) * (ps.size() + (int) learnt));
+      void* mem = std::malloc(sizeof(Clause) - sizeof(Lit) + sizeof(uint) * (ps.size() + (int) learnt));
       return new (mem) Clause(ps, learnt);
       }
   public:
@@ -193,6 +224,8 @@ class Clause
 // Either a pointer to a clause or a literal.
 class GClause
   {
+    using intp = std::ptrdiff_t;
+    using uintp = unsigned intp;
   public:
     static GClause create(Lit p)
       {

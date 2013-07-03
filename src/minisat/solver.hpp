@@ -179,7 +179,7 @@ class Solver
     int                 root_level;       // Level of first proper decision.
     int                 qhead = 0;        // Head of queue (as index into the trail -- no more explicit propagation queue in MiniSat).
     int                 simpDB_assigns=0; // Number of top-level assignments since last execution of 'simplifyDB()'.
-    int64               simpDB_props = 0; // Remaining number of propagations that must be made before next execution of 'simplifyDB()'.
+    std::int64_t        simpDB_props = 0; // Remaining number of propagations that must be made before next execution of 'simplifyDB()'.
   };
 
 

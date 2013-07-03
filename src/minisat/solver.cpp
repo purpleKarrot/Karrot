@@ -192,7 +192,7 @@ void Solver::remove(Clause* c, bool just_dealloc)
       }
     }
 
-  xfree(c);
+  std::free(c);
   }
 
 
