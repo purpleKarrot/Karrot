@@ -30,25 +30,53 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 // Lifted booleans:
 
 
-class lbool {
-    int     value;
-    explicit lbool(int v) : value(v) { }
+class lbool
+  {
+  public:
+    lbool()
+        : value(0)
+      {
+      }
+    lbool(bool x)
+        : value((int) x * 2 - 1)
+      {
+      }
+    int toInt(void) const
+      {
+      return value;
+      }
+    bool operator==(const lbool& other) const
+      {
+      return value == other.value;
+      }
+    bool operator!=(const lbool& other) const
+      {
+      return value != other.value;
+      }
+    lbool operator~() const
+      {
+      return lbool(-value);
+      }
+  private:
+    explicit lbool(int v)
+        : value(v)
+      {
+      }
+    friend int toInt(lbool l);
+    friend lbool toLbool(int v);
+  private:
+    int value;
+  };
 
-public:
-    lbool()       : value(0) { }
-    lbool(bool x) : value((int)x*2-1) { }
-    int toInt(void) const { return value; }
+inline int toInt(lbool l)
+  {
+  return l.toInt();
+  }
 
-    bool  operator == (const lbool& other) const { return value == other.value; }
-    bool  operator != (const lbool& other) const { return value != other.value; }
-    lbool operator ~  (void)               const { return lbool(-value); }
-
-    friend int   toInt  (lbool l);
-    friend lbool toLbool(int   v);
-};
-
-inline int   toInt  (lbool l) { return l.toInt(); }
-inline lbool toLbool(int   v) { return lbool(v);  }
+inline lbool toLbool(int v)
+  {
+  return lbool(v);
+  }
 
 const lbool l_True  = toLbool( 1);
 const lbool l_False = toLbool(-1);

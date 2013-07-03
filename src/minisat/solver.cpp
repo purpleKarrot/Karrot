@@ -22,6 +22,52 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <cmath>
 
 
+Solver::Solver(std::vector<Var>&& preferences)
+    : order{std::move(preferences)}
+    , default_params{0.95, 0.999, 0.02}
+  {
+  assert(std::all_of(std::begin(order), std::end(order), [&](Var v)
+    {
+    return v < order.size();
+    }));
+
+  std::vector<Lit> dummy(2,lit_Undef);
+  propagate_tmpbin = Clause::create(dummy, false);
+  analyze_tmpbin   = Clause::create(dummy, false);
+  dummy.pop_back();
+  solve_tmpunit    = Clause::create(dummy, false);
+
+  std::size_t size = order.size();
+  for (std::size_t i = 0; i < size; ++i)
+    {
+    watches.emplace_back(); // (list for positive literal)
+    watches.emplace_back(); // (list for negative literal)
+    reason.push_back(GClause_NULL);
+    assigns.push_back(toInt(l_Undef));
+    level.push_back(-1);
+    }
+  activity.resize(size, 0);
+  analyze_seen.resize(size, 0);
+  }
+
+Solver::~Solver()
+  {
+  for (Clause* clause : learnts)
+    {
+    remove(clause, true);
+    }
+  for (Clause* clause : clauses)
+    {
+    if (clause != NULL)
+      {
+      remove(clause, true);
+      }
+    }
+  remove(solve_tmpunit, true);
+  remove(analyze_tmpbin, true);
+  remove(propagate_tmpbin, true);
+  }
+
 //=================================================================================================
 // Helper functions:
 
@@ -29,21 +75,20 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 // Pre-condition: 'elem' must exists in 'ws' OR 'ws' must be empty.
 bool removeWatch(std::vector<GClause>& ws, GClause elem)
   {
-  if (ws.size() == 0)
+  if (ws.empty())
     {
     return false; // (skip lists that are already cleared)
     }
-  int j = 0;
-  for (; ws[j] != elem; j++)
-    {
-    assert(j < ws.size());
-    }
-  for (; j < ws.size() - 1; j++)
-    {
-    ws[j] = ws[j + 1];
-    }
-  ws.pop_back();
+  auto found = std::find(std::begin(ws), std::end(ws), elem);
+  assert(found != std::end(ws));
+  ws.erase(found);
   return true;
+  }
+
+// Just like 'assert()' but expression will be evaluated in the release version as well.
+inline void check(bool expr)
+  {
+  assert(expr);
   }
 
 
@@ -87,16 +132,16 @@ void Solver::add_clause(std::vector<Lit> const& ps_, bool learnt)
     qs.erase(std::unique(qs.begin(), qs.end()), qs.end());
 
     // Check if clause is satisfied:
-    for (int i = 0; i < qs.size() - 1; i++)
+    for (int i = 0; i < qs.size() - 1; ++i)
       {
       if (qs[i] == ~qs[i + 1])
         {
         return;
         }
       }
-    for (int i = 0; i < qs.size(); i++)
+    for (Lit const& lit : qs)
       {
-      if (value(qs[i]) == l_True)
+      if (value(lit) == l_True)
         {
         return;
         }
@@ -604,27 +649,39 @@ Clause* Solver::propagate()
 |    Remove half of the learnt clauses, minus the clauses locked by the current assignment. Locked
 |    clauses are clauses that are reason to some assignment. Binary clauses are never removed.
 |________________________________________________________________________________________________@*/
-struct reduceDB_lt { bool operator () (Clause* x, Clause* y) { return x->size() > 2 && (y->size() == 2 || x->activity() < y->activity()); } };
 void Solver::reduceDB()
-{
-    int     i, j;
-    double  extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
+  {
+  int i, j;
+  double extra_lim = cla_inc / learnts.size(); // Remove any clause below this activity
 
-    std::sort(learnts.begin(), learnts.end(), reduceDB_lt());
-    for (i = j = 0; i < learnts.size() / 2; i++){
-        if (learnts[i]->size() > 2 && !locked(learnts[i]))
-            remove(learnts[i]);
-        else
-            learnts[j++] = learnts[i];
+  std::sort(learnts.begin(), learnts.end(), [](Clause* x, Clause* y)
+    {
+    return x->size() > 2 && (y->size() == 2 || x->activity() < y->activity());
+    });
+  for (i = j = 0; i < learnts.size() / 2; i++)
+    {
+    if (learnts[i]->size() > 2 && !locked(learnts[i]))
+      {
+      remove(learnts[i]);
+      }
+    else
+      {
+      learnts[j++] = learnts[i];
+      }
     }
-    for (; i < learnts.size(); i++){
-        if (learnts[i]->size() > 2 && !locked(learnts[i]) && learnts[i]->activity() < extra_lim)
-            remove(learnts[i]);
-        else
-            learnts[j++] = learnts[i];
+  for (; i < learnts.size(); i++)
+    {
+    if (learnts[i]->size() > 2 && !locked(learnts[i]) && learnts[i]->activity() < extra_lim)
+      {
+      remove(learnts[i]);
+      }
+    else
+      {
+      learnts[j++] = learnts[i];
+      }
     }
-    learnts.resize(learnts.size() - (i - j));
-}
+  learnts.resize(learnts.size() - (i - j));
+  }
 
 
 /*_________________________________________________________________________________________________

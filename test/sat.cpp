@@ -15,7 +15,7 @@ int sat(int argc, char* argv[])
   std::vector<Var> prefs(vars);
   for (int i = 0; i < vars; ++i)
     {
-    prefs[i] = i + 1;
+    prefs[i] = i;
     }
 
   Solver solver(std::move(prefs));

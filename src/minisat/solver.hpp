@@ -48,46 +48,8 @@ class Solver
     Clause*             solve_tmpunit;
 
   public:
-    Solver(std::vector<Var>&& preferences)
-        : order{std::move(preferences)}
-        , default_params{0.95, 0.999, 0.02}
-      {
-      std::vector<Lit> dummy(2,lit_Undef);
-      propagate_tmpbin = Clause::create(dummy, false);
-      analyze_tmpbin   = Clause::create(dummy, false);
-      dummy.pop_back();
-      solve_tmpunit    = Clause::create(dummy, false);
-
-      std::size_t size = order.size();
-      for (std::size_t i = 0; i < size; ++i)
-        {
-        watches.emplace_back(); // (list for positive literal)
-        watches.emplace_back(); // (list for negative literal)
-        reason.push_back(GClause_NULL);
-        assigns.push_back(toInt(l_Undef));
-        level.push_back(-1);
-        }
-      activity.resize(size, 0);
-      analyze_seen.resize(size, 0);
-      }
-
-    ~Solver()
-      {
-      for (Clause* clause : learnts)
-        {
-        remove(clause, true);
-        }
-      for (Clause* clause : clauses)
-        {
-        if (clause != NULL)
-          {
-          remove(clause, true);
-          }
-        }
-      remove(solve_tmpunit, true);
-      remove(analyze_tmpbin, true);
-      remove(propagate_tmpbin, true);
-      }
+    Solver(std::vector<Var>&& preferences);
+    ~Solver();
 
     // Helpers: (semi-internal)
     //
@@ -181,17 +143,6 @@ class Solver
     int                 simpDB_assigns=0; // Number of top-level assignments since last execution of 'simplifyDB()'.
     std::int64_t        simpDB_props = 0; // Remaining number of propagations that must be made before next execution of 'simplifyDB()'.
   };
-
-
-//=================================================================================================
-// Debug:
-
-
-#define L_LIT    "%sx%d"
-#define L_lit(p) sign(p)?"~":"", var(p)
-
-// Just like 'assert()' but expression will be evaluated in the release version as well.
-inline void check(bool expr) { assert(expr); }
 
 
 //=================================================================================================
