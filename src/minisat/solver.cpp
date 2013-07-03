@@ -27,7 +27,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 
 // Pre-condition: 'elem' must exists in 'ws' OR 'ws' must be empty.
-bool removeWatch(vec<GClause>& ws, GClause elem)
+bool removeWatch(std::vector<GClause>& ws, GClause elem)
   {
   if (ws.size() == 0)
     {
@@ -504,8 +504,8 @@ Clause* Solver::propagate()
     simpDB_props--;
 
     Lit p = trail[qhead++]; // 'p' is enqueued fact to propagate.
-    vec<GClause>& ws = watches[index(p)];
-    vec<GClause>::iterator i, j, end;
+    std::vector<GClause>& ws = watches[index(p)];
+    std::vector<GClause>::iterator i, j, end;
 
     for (i = j = ws.begin(), end = ws.end(); i != end;)
       {
@@ -588,7 +588,8 @@ Clause* Solver::propagate()
           }
         }
       }
-    ws.shrink(i - j);
+    auto n = i - j;
+    ws.erase(ws.end() - n, ws.end());
     }
 
   return confl;
@@ -622,7 +623,7 @@ void Solver::reduceDB()
         else
             learnts[j++] = learnts[i];
     }
-    learnts.shrink(i - j);
+    learnts.resize(learnts.size() - (i - j));
 }
 
 
@@ -657,7 +658,7 @@ void Solver::simplifyDB()
   for (int i = simpDB_assigns; i < nAssigns(); i++)
     {
     Lit p = trail[i];
-    vec<GClause>& ws = watches[index(~p)];
+    std::vector<GClause>& ws = watches[index(~p)];
     for (int j = 0; j < ws.size(); j++)
       {
       if (ws[j].isLit())
@@ -675,7 +676,7 @@ void Solver::simplifyDB()
   // Remove satisfied clauses:
   for (int type = 0; type < 2; type++)
     {
-    vec<Clause*>& cs = type ? learnts : clauses;
+    std::vector<Clause*>& cs = type ? learnts : clauses;
     int j = 0;
     for (int i = 0; i < cs.size(); i++)
       {
@@ -688,7 +689,7 @@ void Solver::simplifyDB()
         cs[j++] = cs[i];
         }
       }
-    cs.shrink(cs.size() - j);
+    cs.resize(j);
     }
 
   simpDB_assigns = nAssigns();

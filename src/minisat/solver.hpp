@@ -67,7 +67,7 @@ class Solver
         assigns.push_back(toInt(l_Undef));
         level.push_back(-1);
         }
-      activity.growTo(size, 0);
+      activity.resize(size, 0);
       analyze_seen.resize(size, 0);
       }
 
@@ -158,22 +158,23 @@ class Solver
 
   private:
     bool                ok = true;        // If FALSE, the constraints are already unsatisfiable. No part of the solver state may be used!
-    vec<Clause*>        clauses;          // List of problem clauses.
-    vec<Clause*>        learnts;          // List of learnt clauses.
+    std::vector<Clause*>clauses;          // List of problem clauses.
+    std::vector<Clause*>learnts;          // List of learnt clauses.
     int                 n_bin_clauses = 0;// Keep track of number of binary clauses "inlined" into the watcher lists (we do this primarily to get identical behavior to the version without the binary clauses trick).
     double              cla_inc = 1;      // Amount to bump next clause with.
     double              cla_decay = 1;    // INVERSE decay factor for clause activity: stores 1/decay.
 
-    vec<double>         activity;         // A heuristic measurement of the activity of a variable.
+    std::vector<double> activity;         // A heuristic measurement of the activity of a variable.
     double              var_inc = 1;      // Amount to bump next variable with.
     double              var_decay = 1;    // INVERSE decay factor for variable activity: stores 1/decay. Use negative value for static variable order.
     std::vector<Var>    order;            // Keeps track of the decision variable order.
 
-    vec<vec<GClause>>   watches;          // 'watches[lit]' is a list of constraints watching 'lit' (will go there if literal becomes true).
+    std::vector<std::vector<GClause>>
+                        watches;          // 'watches[lit]' is a list of constraints watching 'lit' (will go there if literal becomes true).
     std::vector<char>   assigns;          // The current assignments (lbool:s stored as char:s).
     std::vector<Lit>    trail;            // Assignment stack; stores all assigments made in the order they were made.
     std::vector<int>    trail_lim;        // Separator indices for different decision levels in 'trail'.
-    vec<GClause>        reason;           // 'reason[var]' is the clause that implied the variables current value, or 'NULL' if none.
+    std::vector<GClause>reason;           // 'reason[var]' is the clause that implied the variables current value, or 'NULL' if none.
     std::vector<int>    level;            // 'level[var]' is the decision level at which assignment was made.
     int                 root_level;       // Level of first proper decision.
     int                 qhead = 0;        // Head of queue (as index into the trail -- no more explicit propagation queue in MiniSat).
