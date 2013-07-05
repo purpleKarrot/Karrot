@@ -175,11 +175,6 @@ inline bool operator <(Lit p, Lit q)
 const Lit lit_Undef(var_Undef, false);  // }- Useful special constants.
 const Lit lit_Error(var_Undef, true );  // }
 
-inline int toDimacs(Lit p)
-  {
-  return sign(p) ? -var(p) - 1 : var(p) + 1;
-  }
-
 
 //=================================================================================================
 // Clause -- a simple class for representing a clause:
@@ -198,14 +193,14 @@ class GClause
     using intp = std::ptrdiff_t;
     using uintp = unsigned intp;
   public:
-    static GClause create(Lit p)
+    explicit GClause(Lit const& p)
+        : data{(void*) (((intp) index(p) << 1) + 1)}
       {
-      return GClause((void*) (((intp) index(p) << 1) + 1));
       }
-    static GClause create(Clause* c)
+    explicit GClause(Clause* c)
+        : data{(void*) c}
       {
       assert(((uintp) c & 1) == 0);
-      return GClause((void*) c);
       }
     bool isLit() const
       {
@@ -228,13 +223,9 @@ class GClause
       return data != c.data;
       }
   private:
-    GClause(void* d)
-        : data(d)
-      {
-      }
     void* data;
   };
 
-static GClause GClause_NULL = GClause::create(nullptr);
+static GClause GClause_NULL{nullptr};
 
 #endif

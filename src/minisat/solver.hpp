@@ -36,9 +36,9 @@ class Solver
     std::vector<char>   analyze_seen;
     std::vector<Lit>    analyze_stack;
     std::vector<Lit>    analyze_toclear;
-    Clause*             propagate_tmpbin;
-    Clause*             analyze_tmpbin;
-    Clause*             solve_tmpunit;
+    Clause              propagate_tmpbin;
+    Clause              analyze_tmpbin;
+    Clause              solve_tmpunit;
 
   public:
     Solver(std::vector<Var>&& preferences);
@@ -87,11 +87,9 @@ class Solver
 
     // Operations on clauses:
     //
-    void     remove          (Clause* c, bool just_dealloc = false);
+    void     remove          (Clause* c);
     bool     locked          (const Clause* c) const { GClause r = reason[var((*c)[0])]; return !r.isLit() && r.clause() == c; }
     bool     simplify        (Clause* c) const;
-
-    int      decisionLevel() const { return trail_lim.size(); }
 
   private:
     bool                ok = true;        // If FALSE, the constraints are already unsatisfiable. No part of the solver state may be used!
