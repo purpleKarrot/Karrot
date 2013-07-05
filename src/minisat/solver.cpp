@@ -24,7 +24,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 Solver::Solver(std::vector<Var>&& preferences)
     : order{std::move(preferences)}
-    , default_params{0.95, 0.999, 0.02}
   {
   assert(std::all_of(std::begin(order), std::end(order), [&](Var v)
     {
@@ -32,17 +31,16 @@ Solver::Solver(std::vector<Var>&& preferences)
     }));
 
   std::vector<Lit> dummy(2,lit_Undef);
-  propagate_tmpbin = Clause::create(dummy, false);
-  analyze_tmpbin   = Clause::create(dummy, false);
+  propagate_tmpbin = new Clause(dummy);
+  analyze_tmpbin   = new Clause(dummy);
   dummy.pop_back();
-  solve_tmpunit    = Clause::create(dummy, false);
+  solve_tmpunit    = new Clause(dummy);
 
   std::size_t size = order.size();
   watches.resize(size * 2); // for positive and negative literals
   reason.resize(size, GClause_NULL);
   assigns.resize(size, toInt(l_Undef));
   level.resize(size, -1);
-  activity.resize(size, 0);
   analyze_seen.resize(size, 0);
   }
 
@@ -180,7 +178,7 @@ void Solver::add_clause(std::vector<Lit> const& ps_, bool learnt)
   else
     {
     // Allocate clause:
-    Clause* c = Clause::create(ps, learnt);
+    Clause* c = new Clause(ps);
 
     if (learnt)
       {
@@ -199,7 +197,6 @@ void Solver::add_clause(std::vector<Lit> const& ps_, bool learnt)
       (*c)[max_i] = ps[1];
 
       // Bump, enqueue, store clause:
-      claBumpActivity(c); // (newly learnt clauses should be considered active)
       check(enqueue((*c)[0], GClause::create(c)));
       learnts.push_back(c);
       }
@@ -233,7 +230,7 @@ void Solver::remove(Clause* c, bool just_dealloc)
       }
     }
 
-  std::free(c);
+  delete c;
   }
 
 
@@ -324,17 +321,12 @@ void Solver::analyze(Clause* _confl, std::vector<Lit>& out_learnt, int& out_btle
     assert(confl != GClause_NULL); // (otherwise should be UIP)
 
     Clause& c = confl.isLit() ? ((*analyze_tmpbin)[1] = confl.lit(), *analyze_tmpbin) : *confl.clause();
-    if (c.learnt())
-      {
-      claBumpActivity(&c);
-      }
 
     for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++)
       {
       Lit q = c[j];
       if (!seen[var(q)] && level[var(q)] > 0)
         {
-        varBumpActivity(q);
         seen[var(q)] = 1;
         if (level[var(q)] == decisionLevel())
           {
@@ -386,7 +378,7 @@ void Solver::analyze(Clause* _confl, std::vector<Lit>& out_learnt, int& out_btle
 
 // Check if 'p' can be removed. 'min_level' is used to abort early if visiting literals at a level that cannot be removed.
 //
-bool Solver::analyze_removable(Lit p, uint min_level)
+bool Solver::analyze_removable(Lit p, std::size_t min_level)
   {
   assert(reason[var(p)] != GClause_NULL);
   analyze_stack.clear();
@@ -639,49 +631,6 @@ Clause* Solver::propagate()
 
 /*_________________________________________________________________________________________________
 |
-|  reduceDB : ()  ->  [void]
-|  
-|  Description:
-|    Remove half of the learnt clauses, minus the clauses locked by the current assignment. Locked
-|    clauses are clauses that are reason to some assignment. Binary clauses are never removed.
-|________________________________________________________________________________________________@*/
-void Solver::reduceDB()
-  {
-  int i, j;
-  double extra_lim = cla_inc / learnts.size(); // Remove any clause below this activity
-
-  std::sort(learnts.begin(), learnts.end(), [](Clause* x, Clause* y)
-    {
-    return x->size() > 2 && (y->size() == 2 || x->activity() < y->activity());
-    });
-  for (i = j = 0; i < learnts.size() / 2; i++)
-    {
-    if (learnts[i]->size() > 2 && !locked(learnts[i]))
-      {
-      remove(learnts[i]);
-      }
-    else
-      {
-      learnts[j++] = learnts[i];
-      }
-    }
-  for (; i < learnts.size(); i++)
-    {
-    if (learnts[i]->size() > 2 && !locked(learnts[i]) && learnts[i]->activity() < extra_lim)
-      {
-      remove(learnts[i]);
-      }
-    else
-      {
-      learnts[j++] = learnts[i];
-      }
-    }
-  learnts.resize(learnts.size() - (i - j));
-  }
-
-
-/*_________________________________________________________________________________________________
-|
 |  simplifyDB : [void]  ->  [bool]
 |  
 |  Description:
@@ -764,7 +713,7 @@ void Solver::simplifyDB()
 |    all variables are decision variables, this means that the clause set is satisfiable. 'l_False'
 |    if the clause set is unsatisfiable. 'l_Undef' if the bound on number of conflicts is reached.
 |________________________________________________________________________________________________@*/
-lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& params)
+lbool Solver::search(int nof_conflicts, int nof_learnts)
   {
   if (!ok)
     {
@@ -773,8 +722,6 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
   assert(root_level == decisionLevel());
 
   int conflictC = 0;
-  var_decay = 1 / params.var_decay;
-  cla_decay = 1 / params.clause_decay;
   model.clear();
 
   for (;;)
@@ -802,10 +749,6 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
         {
         level[var(learnt_clause[0])] = 0;
         }
-
-      varDecayActivity();
-      claDecayActivity();
-
       }
     else
       {
@@ -823,12 +766,6 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
         // Simplify the set of problem clauses:
         simplifyDB();
         assert(ok);
-        }
-
-      if (nof_learnts >= 0 && learnts.size() - nAssigns() >= nof_learnts)
-        {
-        // Reduce the set of learnt clauses:
-        reduceDB();
         }
 
       // New variable decision:
@@ -865,26 +802,6 @@ lbool Solver::search(int nof_conflicts, int nof_learnts, const SearchParams& par
   }
 
 
-// Divide all variable activities by 1e100.
-//
-void Solver::varRescaleActivity()
-{
-    for (int i = 0; i < nVars(); i++)
-        activity[i] *= 1e-100;
-    var_inc *= 1e-100;
-}
-
-
-// Divide all constraint activities by 1e100.
-//
-void Solver::claRescaleActivity()
-{
-    for (int i = 0; i < learnts.size(); i++)
-        learnts[i]->activity() *= 1e-20f;
-    cla_inc *= 1e-20;
-}
-
-
 /*_________________________________________________________________________________________________
 |
 |  solve : (assumps : const std::vector<Lit>&)  ->  [bool]
@@ -902,7 +819,6 @@ bool Solver::solve(const std::vector<Lit>& assumps, KPrintFun log)
     return false;
     }
 
-  SearchParams params(default_params);
   double nof_conflicts = 100;
   double nof_learnts = nClauses() / 3;
   lbool status = l_Undef;
@@ -954,7 +870,7 @@ bool Solver::solve(const std::vector<Lit>& assumps, KPrintFun log)
   // Search:
   while (status == l_Undef)
     {
-    status = search((int) nof_conflicts, (int) nof_learnts, params);
+    status = search((int) nof_conflicts, (int) nof_learnts);
     nof_conflicts *= 1.5;
     nof_learnts *= 1.1;
     }

@@ -23,7 +23,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 #include <cassert>
 #include <cstdint>
-#include <cstdlib>
 
 
 //=================================================================================================
@@ -111,10 +110,6 @@ class Lit
       q.x = x ^ 1;
       return q;
       }
-    uint hash() const
-      {
-      return (uint) x;
-      }
   private:
     friend bool sign  (Lit p);
     friend int  var   (Lit p);
@@ -190,59 +185,7 @@ inline int toDimacs(Lit p)
 // Clause -- a simple class for representing a clause:
 
 
-class Clause
-  {
-  public:
-    static Clause* create(std::vector<Lit> const& ps, bool learnt)
-      {
-      assert(sizeof(Lit) == sizeof(uint));
-      assert(sizeof(float) == sizeof(uint));
-      void* mem = std::malloc(sizeof(Clause) - sizeof(Lit) + sizeof(uint) * (ps.size() + (int) learnt));
-      return new (mem) Clause(ps, learnt);
-      }
-  public:
-    int size() const
-      {
-      return size_learnt >> 1;
-      }
-    bool learnt() const
-      {
-      return size_learnt & 1;
-      }
-    Lit const operator [](int i) const
-      {
-      return data[i];
-      }
-    Lit& operator [](int i)
-      {
-      return data[i];
-      }
-    float activity() const
-      {
-      return *((float*) &data[size()]);
-      }
-    float& activity()
-      {
-      return *((float*) &data[size()]);
-      }
-  private:
-    // NOTE: This constructor cannot be used directly (doesn't allocate enough memory).
-    Clause(std::vector<Lit> const& ps, bool learnt)
-      {
-      size_learnt = (ps.size() << 1) | (int) learnt;
-      for (int i = 0; i < ps.size(); i++)
-        {
-        data[i] = ps[i];
-        }
-      if (learnt)
-        {
-        activity() = 0;
-        }
-      }
-  private:
-    uint size_learnt;
-    Lit data[1];
-  };
+using Clause = std::vector<Lit>;
 
 
 //=================================================================================================

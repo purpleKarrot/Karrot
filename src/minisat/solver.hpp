@@ -28,13 +28,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 // Solver -- the main class:
 
 
-struct SearchParams
-  {
-  // (reasonable values are: 0.95, 0.999, 0.02)
-  double  var_decay, clause_decay, random_var_freq;
-  };
-
-
 class Solver
   {
   private:
@@ -59,10 +52,6 @@ class Solver
     int     nAssigns() { return trail.size(); }
     int     nClauses() { return clauses.size() + n_bin_clauses; }   // (minor difference from MiniSat without the GClause trick: learnt binary clauses will be counted as original clauses)
     int     nLearnts() { return learnts.size(); }
-
-    // Mode of operation:
-    //
-    SearchParams    default_params;     // Restart frequency etc.
 
     // Problem specification:
     //
@@ -90,28 +79,14 @@ class Solver
     void        record           (const std::vector<Lit>& clause);
 
     void        analyze          (Clause* confl, std::vector<Lit>& out_learnt, int& out_btlevel); // (bt = backtrack)
-    bool        analyze_removable(Lit p, uint min_level);                                 // (helper method for 'analyze()')
+    bool        analyze_removable(Lit p, std::size_t min_level);                                 // (helper method for 'analyze()')
     void        analyzeFinal     (Clause* confl,  bool skip_first = false);
     bool        enqueue          (Lit fact, GClause from = GClause_NULL);
     Clause*     propagate        ();
-    void        reduceDB         ();
-    Lit         pickBranchLit    (const SearchParams& params);
-    lbool       search           (int nof_conflicts, int nof_learnts, const SearchParams& params);
-
-    // Activity:
-    //
-    void     varBumpActivity(Lit p) {
-        if (var_decay < 0) return;     // (negative decay means static variable order -- don't bump)
-        if ( (activity[var(p)] += var_inc) > 1e100 ) varRescaleActivity();
-        /*order.update(var(p));*/ }
-    void     varDecayActivity  () { if (var_decay >= 0) var_inc *= var_decay; }
-    void     varRescaleActivity();
-    void     claDecayActivity  () { cla_inc *= cla_decay; }
-    void     claRescaleActivity();
+    lbool       search           (int nof_conflicts, int nof_learnts);
 
     // Operations on clauses:
     //
-    void     claBumpActivity (Clause* c) { if ( (c->activity() += (float)cla_inc) > 1e20f ) claRescaleActivity(); }
     void     remove          (Clause* c, bool just_dealloc = false);
     bool     locked          (const Clause* c) const { GClause r = reason[var((*c)[0])]; return !r.isLit() && r.clause() == c; }
     bool     simplify        (Clause* c) const;
@@ -123,12 +98,7 @@ class Solver
     std::vector<Clause*>clauses;          // List of problem clauses.
     std::vector<Clause*>learnts;          // List of learnt clauses.
     int                 n_bin_clauses = 0;// Keep track of number of binary clauses "inlined" into the watcher lists (we do this primarily to get identical behavior to the version without the binary clauses trick).
-    double              cla_inc = 1;      // Amount to bump next clause with.
-    double              cla_decay = 1;    // INVERSE decay factor for clause activity: stores 1/decay.
 
-    std::vector<double> activity;         // A heuristic measurement of the activity of a variable.
-    double              var_inc = 1;      // Amount to bump next variable with.
-    double              var_decay = 1;    // INVERSE decay factor for variable activity: stores 1/decay. Use negative value for static variable order.
     std::vector<Var>    order;            // Keeps track of the decision variable order.
 
     std::vector<std::vector<GClause>>
