@@ -34,10 +34,22 @@ k_implementation_get_version(KImplementation const *self)
   return c_str(self->version);
   }
 
+void
+k_implementation_set_version(KImplementation *self, char const *value)
+  {
+  self->version = value;
+  }
+
 char const *
 k_implementation_get_component(KImplementation const *self)
   {
   return c_str(self->component);
+  }
+
+void
+k_implementation_set_component(KImplementation *self, char const *value)
+  {
+  self->component = value;
   }
 
 char const *
@@ -46,28 +58,40 @@ k_implementation_get_driver (KImplementation const *self)
   self->driver->name().c_str();
   }
 
-KDictionary const *
-k_implementation_get_meta(KImplementation const *self)
+char const *
+k_implementation_get_meta(KImplementation const *self, char const *key)
   {
-  return &*self->meta;
+  return k_dictionary_get(&*self->meta, key);
   }
 
-KDictionary const *
-k_implementation_get_variant(KImplementation const *self)
+char const *
+k_implementation_get_variant(KImplementation const *self, char const *key)
   {
-  return &self->variant;
+  return k_dictionary_get(&self->variant, key);
   }
 
-KDictionary const *
-k_implementation_get_values(KImplementation const *self)
+void
+k_implementation_foreach_variant(KImplementation const *self, KVisit visit, void *target)
   {
-  return &self->values;
+  k_dictionary_foreach(&self->variant, visit, target);
   }
 
-KDictionary const *
-k_implementation_get_globals(KImplementation const *self)
+char const *
+k_implementation_get_value(KImplementation const *self, char const *key)
   {
-  return self->globals;
+  return k_dictionary_get(&self->values, key);
+  }
+
+void
+k_implementation_set_value(KImplementation *self, char const *key, char const *value)
+  {
+  k_dictionary_set(&self->values, key, value);
+  }
+
+char const *
+k_implementation_get_global(KImplementation const *self, char const *key)
+  {
+  return k_dictionary_get(self->globals, key);
   }
 
 std::ostream& operator<<(std::ostream &os, KImplementation const& impl)

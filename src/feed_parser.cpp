@@ -161,11 +161,17 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     }
   Dependencies depends(this->queue, "*");
   parse_depends(xml, depends);
-  KImplementation impl{spec.id, String{this->name}, String{}, SOURCE};
+  KImplementation impl
+    {
+    spec.id,
+    String{this->name},
+    String{},
+    SOURCE,
+    driver
+    };
   impl.values["href"] = href;
   impl.meta = this->meta;
   impl.globals = &engine.globals;
-  impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
     impl.version = releases[i].version();
@@ -320,40 +326,26 @@ void FeedParser::add_package(const Package& package)
     {
     return;
     }
-  package.driver->filter(package.fields,
-    [&](KDictionary const& values, bool system)
+  KImplementation impl
     {
-    KImplementation impl
-      {
-      spec.id,
-      String{this->name},
-      String{package.version},
-      String{package.component},
-      package.variant,
-      package.values,
-      this->meta,
-      &engine.globals
-      };
-    impl.driver = package.driver;
-    for (auto& entry : values)
-      {
-      if (entry.first == "version")
-        {
-        impl.version = entry.second;
-        }
-      else if (entry.first == "component")
-        {
-        impl.component = entry.second;
-        }
-      else
-        {
-        impl.values[entry.first] = entry.second;
-        }
-      }
+    spec.id,
+    String{this->name},
+    String{package.version},
+    String{package.component},
+    package.driver,
+    package.variant,
+    package.values,
+    this->meta,
+    &engine.globals
+    };
+  package.driver->filter(impl, [&](KImplementation& impl, bool system)
+    {
     if (!spec.query.evaluate(impl.version, impl.variant))
       {
       return;
       }
+    impl.depends.clear();
+    impl.conflicts.clear();
     if (!system)
       {
       bool supported = std::any_of(begin(releases), end(releases),

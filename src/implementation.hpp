@@ -26,13 +26,13 @@ struct KImplementation
   Karrot::String name;
   Karrot::String version;
   Karrot::String component;
+  Karrot::Driver const *driver;
   KDictionary variant;
   KDictionary values;
   std::shared_ptr<KDictionary> meta;
-  KDictionary* globals;
+  KDictionary const* globals;
   std::vector<Karrot::Spec> depends;
   std::vector<Karrot::Spec> conflicts;
-  Karrot::Driver const *driver;
   };
 
 std::ostream& operator<<(std::ostream &os, KImplementation const& impl);

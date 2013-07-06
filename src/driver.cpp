@@ -29,14 +29,14 @@ Driver::Driver(std::string const& name, std::string const& xmlns, KDriver const*
     }
   }
 
-void Driver::filter(KDictionary const& fields, KAdd add, void *add_target) const
+void Driver::filter(KImplementation& impl, KAdd add, void *add_target) const
   {
   if (!driver_->filter)
     {
-    add(&fields, 0, add_target);
+    add(&impl, 0, add_target);
     return;
     }
-  if (driver_->filter(driver_, &fields, add, add_target) != 0)
+  if (driver_->filter(driver_, &impl, add, add_target) != 0)
     {
     throw_error();
     }

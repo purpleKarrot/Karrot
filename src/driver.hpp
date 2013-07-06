@@ -33,20 +33,20 @@ class Driver
       return fields_;
       }
     template<typename Add>
-    void filter (KDictionary const& fields, Add add) const
+    void filter (KImplementation& impl, Add add) const
       {
-      KAdd add_fn = [](KDictionary const *dict, int native, void *self)
+      KAdd add_fn = [](KImplementation *impl, int native, void *self)
         {
         auto add = *reinterpret_cast<Add*>(self);
-        add(*dict, native != 0);
+        add(*impl, native != 0);
         };
-      filter(fields, add_fn, &add);
+      filter(impl, add_fn, &add);
       }
     void depend (KImplementation const& impl, KImplementation const& other) const;
     void handle (KImplementation const& impl, bool requested) const;
     void commit() const;
   private:
-    void filter (KDictionary const& fields, KAdd add, void *add_target) const;
+    void filter (KImplementation& impl, KAdd add, void *add_target) const;
     void throw_error() const;
   private:
     std::string name_;

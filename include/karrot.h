@@ -41,7 +41,7 @@ typedef struct KImplementation KImplementation;
 typedef struct KDriver KDriver;
 typedef struct KEngine KEngine;
 
-typedef void (*KAdd) (KDictionary const *dict, int native, void *self);
+typedef void (*KAdd) (KImplementation *impl, int native, void *self);
 typedef void (*KPrintFun) (char const *string);
 typedef void (*KVisit) (void *target, char const *key, char const *val);
 
@@ -69,29 +69,41 @@ k_implementation_get_name (KImplementation const *self);
 KARROT_API char const *
 k_implementation_get_version (KImplementation const *self);
 
+KARROT_API void
+k_implementation_set_version (KImplementation *self, char const *value);
+
 KARROT_API char const *
 k_implementation_get_component (KImplementation const *self);
+
+KARROT_API void
+k_implementation_set_component (KImplementation *self, char const *value);
 
 KARROT_API char const *
 k_implementation_get_driver (KImplementation const *self);
 
-KARROT_API KDictionary const *
-k_implementation_get_meta (KImplementation const *self);
+KARROT_API char const *
+k_implementation_get_meta (KImplementation const *self, char const *key);
 
-KARROT_API KDictionary const *
-k_implementation_get_variant (KImplementation const *self);
+KARROT_API char const *
+k_implementation_get_variant (KImplementation const *self, char const *key);
 
-KARROT_API KDictionary const *
-k_implementation_get_values (KImplementation const *self);
+KARROT_API void
+k_implementation_foreach_variant (KImplementation const *self, KVisit visit, void *target);
 
-KARROT_API KDictionary const *
-k_implementation_get_globals (KImplementation const *self);
+KARROT_API char const *
+k_implementation_get_value (KImplementation const *self, char const *key);
+
+KARROT_API void
+k_implementation_set_value (KImplementation *self, char const *key, char const *value);
+
+KARROT_API char const *
+k_implementation_get_global (KImplementation const *self, char const *key);
 
 
 struct KDriver
   {
   int (*fields) (KDriver const *self, KDictionary *dict);
-  int (*filter) (KDriver const *self, KDictionary const *fields, KAdd add, void *target);
+  int (*filter) (KDriver const *self, KImplementation *impl, KAdd add, void *target);
   int (*depend) (KDriver const *self, KImplementation const *impl, KImplementation const *other);
   int (*handle) (KDriver const *self, KImplementation const *impl, int requested);
   int (*commit) (KDriver const *self);
