@@ -316,7 +316,7 @@ std::string download(std::string const& url, std::string const& feed_cache, bool
     std::error_code error(GetLastError(), std::system_category());
     BOOST_THROW_EXCEPTION(std::system_error(error));
     }
-  if (FAILED(PathAppendA(filepath, url_to_filename(url).c_str())))
+  if (FAILED(PathAppendA(filepath, url_encode(url).c_str())))
     {
     std::error_code error(GetLastError(), std::system_category());
     BOOST_THROW_EXCEPTION(std::system_error(error));

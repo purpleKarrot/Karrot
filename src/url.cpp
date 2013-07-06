@@ -17,15 +17,44 @@
 namespace Karrot
 {
 
-std::string url_to_filename(std::string url)
+std::string url_encode(std::string const& input)
   {
-  std::size_t scheme = url.find("://");
-  if (scheme != std::string::npos)
+  std::string result;
+  for (char c : input)
     {
-    url.erase(0, scheme + 3);
+    if (('0' <= c && c <= '9')
+     || ('A' <= c && c <= 'Z')
+     || ('a' <= c && c <= 'z')
+     || (c == '~' || c == '-' || c == '_' || c == '.'))
+      {
+      result.push_back(c);
+      }
+    else
+      {
+      char dig1 = (c & 0xF0) >> 4;
+      char dig2 = (c & 0x0F);
+      if (0 <= dig1 && dig1 <= 9)
+        {
+        dig1 += 48;
+        }
+      if (10 <= dig1 && dig1 <= 15)
+        {
+        dig1 += 65 - 10;
+        }
+      if (0 <= dig2 && dig2 <= 9)
+        {
+        dig2 += 48;
+        }
+      if (10 <= dig2 && dig2 <= 15)
+        {
+        dig2 += 65 - 10;
+        }
+      result.push_back('%');
+      result.push_back(dig1);
+      result.push_back(dig2);
+      }
     }
-  replace(begin(url), end(url), '/', '-');
-  return url;
+  return result;
   }
 
 std::string resolve_uri(std::string const& base, std::string const& relative)

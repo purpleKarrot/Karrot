@@ -59,7 +59,7 @@ namespace Karrot
 std::string download(std::string const& url, std::string const& feed_cache, bool force)
   {
   namespace fs = boost::filesystem;
-  fs::path filepath = fs::path(feed_cache) / url_to_filename(url);
+  fs::path filepath = fs::path(feed_cache) / url_encode(url);
   if (force || !exists(filepath))
     {
     static Downloader downloader;
