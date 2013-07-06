@@ -17,6 +17,11 @@
 namespace Karrot
 {
 
+static int hex_char(unsigned int c)
+  {
+  return "0123456789abcdef"[c & 0xF];
+  }
+
 std::string url_encode(std::string const& input)
   {
   std::string result;
@@ -31,27 +36,9 @@ std::string url_encode(std::string const& input)
       }
     else
       {
-      char dig1 = (c & 0xF0) >> 4;
-      char dig2 = (c & 0x0F);
-      if (0 <= dig1 && dig1 <= 9)
-        {
-        dig1 += 48;
-        }
-      if (10 <= dig1 && dig1 <= 15)
-        {
-        dig1 += 65 - 10;
-        }
-      if (0 <= dig2 && dig2 <= 9)
-        {
-        dig2 += 48;
-        }
-      if (10 <= dig2 && dig2 <= 15)
-        {
-        dig2 += 65 - 10;
-        }
       result.push_back('%');
-      result.push_back(dig1);
-      result.push_back(dig2);
+      result.push_back(hex_char(c >> 4));
+      result.push_back(hex_char(c));
       }
     }
   return result;

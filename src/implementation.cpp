@@ -64,6 +64,12 @@ k_implementation_get_values(KImplementation const *self)
   return &self->values;
   }
 
+KDictionary const *
+k_implementation_get_globals(KImplementation const *self)
+  {
+  return self->globals;
+  }
+
 std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
   {
   os << impl.id;

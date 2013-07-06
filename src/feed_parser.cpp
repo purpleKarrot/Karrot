@@ -164,6 +164,7 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
   KImplementation impl{spec.id, String{this->name}, String{}, SOURCE};
   impl.values["href"] = href;
   impl.meta = this->meta;
+  impl.globals = &engine.globals;
   impl.driver = driver;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
@@ -331,6 +332,7 @@ void FeedParser::add_package(const Package& package)
       package.variant,
       package.values,
       this->meta,
+      &engine.globals
       };
     impl.driver = package.driver;
     for (auto& entry : values)

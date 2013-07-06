@@ -44,6 +44,7 @@ struct KEngine
     Karrot::PackageHandler package_handler;
     Karrot::Requests requests;
     Karrot::Database database;
+    KDictionary globals;
     std::string feed_cache = ".";
     bool reload_feeds = false;
     bool ignore_source_conflicts = false;

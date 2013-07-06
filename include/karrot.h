@@ -84,6 +84,9 @@ k_implementation_get_variant (KImplementation const *self);
 KARROT_API KDictionary const *
 k_implementation_get_values (KImplementation const *self);
 
+KARROT_API KDictionary const *
+k_implementation_get_globals (KImplementation const *self);
+
 
 struct KDriver
   {
@@ -121,6 +124,9 @@ typedef enum _KOption KOption;
  */
 KARROT_API KEngine *
 k_engine_new (char const *namespace_uri);
+
+KARROT_API void
+k_engine_set_global (KEngine *self, char const *key, char const *value);
 
 /**
  * Add a Driver to an Engine.

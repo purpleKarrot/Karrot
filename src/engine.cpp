@@ -37,6 +37,11 @@ void k_engine_free(KEngine *self)
   delete self;
   }
 
+void k_engine_set_global(KEngine *self, char const *key, char const *value)
+  {
+  k_dictionary_set(&self->globals, key, value);
+  }
+
 void
 k_engine_add_driver(KEngine *self, char const *name, KDriver const *driver)
   {
