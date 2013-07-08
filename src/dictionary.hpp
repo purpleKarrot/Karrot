@@ -10,21 +10,33 @@
 #define KARROT_DICTIONARY_HPP
 
 #include <map>
-#include <string>
+#include "string.hpp"
 
-using KDictionary = std::map<std::string, std::string>;
+namespace Karrot
+{
+
+using Dictionary = std::map<String, String>;
 
 inline void
-k_dictionary_set (KDictionary *self, char const *key, char const *value)
+set (Dictionary& self, char const *key, char const *value)
   {
-  self->emplace(key, value ? value : "");
+  if (value)
+    {
+    self.emplace(String{key}, String{value});
+    }
+  else
+    {
+    self.erase(String{key});
+    }
   }
 
 inline char const *
-k_dictionary_get (KDictionary const *self, char const *key)
+get (Dictionary const& self, char const *key)
   {
-  auto it = self->find(key);
-  return it != self->end() ? it->second.c_str() : nullptr;
+  auto it = self.find(String{key});
+  return it != self.end() ? it->second.get().c_str() : nullptr;
   }
+
+} // namespace Karrot
 
 #endif /* KARROT_DICTIONARY_HPP */

@@ -60,8 +60,8 @@ class FeedParser
   private:
     Spec spec;
     std::string name;
-    std::shared_ptr<KDictionary> meta = std::make_shared<KDictionary>();
-    KDictionary variants;
+    std::shared_ptr<Dictionary> meta = std::make_shared<Dictionary>();
+    Dictionary variants;
     std::vector<Release> releases;
     std::vector<Dependencies> components;
     FeedPreQueue queue;

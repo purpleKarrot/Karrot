@@ -67,7 +67,7 @@ class Query
       {
       return implementation.get_key().empty();
       }
-    bool evaluate(std::string const& version, const KDictionary& variants) const;
+    bool evaluate(std::string const& version, const Dictionary& variants) const;
   private:
     friend std::ostream& operator<<(std::ostream &os, Query const& query)
       {

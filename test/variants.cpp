@@ -11,6 +11,6 @@
 
 int variants(int argc, char* argv[])
   {
-  KDictionary dict = Karrot::parse_variant("xx=foo;yy=bar");
+  Karrot::Dictionary dict = Karrot::parse_variant("xx=foo;yy=bar");
   return boost::report_errors();
   }

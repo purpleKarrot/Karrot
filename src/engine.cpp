@@ -39,7 +39,7 @@ void k_engine_free(KEngine *self)
 
 void k_engine_set_global(KEngine *self, char const *key, char const *value)
   {
-  k_dictionary_set(&self->globals, key, value);
+  Karrot::set(self->globals, key, value);
   }
 
 void

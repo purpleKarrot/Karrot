@@ -17,7 +17,9 @@
 namespace Karrot
 {
 
-static const String SOURCE{"SOURCE"};
+static const String SOURCE {"SOURCE"};
+static const String HREF   {"href"};
+static const String TAG {"tag"};
 
 FeedParser::FeedParser(Spec const& spec, KEngine& engine) :
     spec(spec),
@@ -119,9 +121,9 @@ void FeedParser::parse_meta(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    auto name = xml.name();
-    auto value = xml.content();
-    meta->emplace(std::move(name), std::move(value));
+    String name {xml.name()};
+    String value {xml.content()};
+    meta->emplace(name, value);
     xml.skip();
     }
   }
@@ -130,10 +132,9 @@ void FeedParser::parse_variants(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    auto name = xml.attribute("name", project_ns);
-    auto values = xml.attribute("values", project_ns);
-    //variants.emplace(std::move(name), std::move(values));
-    variants.insert(std::make_pair(std::move(name), std::move(values)));
+    String name {xml.attribute("name", project_ns)};
+    String values {xml.attribute("values", project_ns)};
+    variants.emplace(name, values);
     xml.skip();
     }
   }
@@ -169,14 +170,14 @@ void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std:
     SOURCE,
     driver
     };
-  impl.values["href"] = href;
+  impl.values[String{"href"}] = href;
   impl.meta = this->meta;
   impl.globals = &engine.globals;
   for (std::size_t i = 0; i < releases.size(); ++i)
     {
     impl.version = releases[i].version();
-    impl.values["tag"] = releases[i].tag();
-    foreach_variant(variants, [&](KDictionary variant)
+    impl.values[String{"tag"}] = releases[i].tag();
+    foreach_variant(variants, [&](Dictionary variant)
       {
       if (!spec.query.evaluate(impl.version, variant))
         {
@@ -295,7 +296,7 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
       {
       if (attr.name.namespace_uri == group.driver->xmlns())
         {
-        group.fields[attr.name.local] = attr.value;
+        group.fields[String{attr.name.local}] = attr.value;
         }
       }
     }

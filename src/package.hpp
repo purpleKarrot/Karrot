@@ -19,13 +19,12 @@ class Driver;
 class Package
   {
   public:
-    std::string component;
-    std::string version;
-    KDictionary variant;
-    KDictionary values;
-    KDictionary fields;
+    String component;
+    String version;
+    Dictionary variant;
+    Dictionary values;
+    Dictionary fields;
     Driver const *driver = nullptr;
-    std::string namespace_uri;
   };
 
 } // namespace Karrot

@@ -16,10 +16,10 @@
 namespace Karrot
 {
 
-KDictionary parse_variant(const std::string& quark);
+Dictionary parse_variant(const std::string& quark);
 
-void foreach_variant(const KDictionary& variants,
-    const std::function<void(KDictionary)>& function);
+void foreach_variant(const Dictionary& variants,
+    const std::function<void(Dictionary)>& function);
 
 } // namespace Karrot
 

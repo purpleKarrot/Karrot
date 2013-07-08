@@ -68,7 +68,7 @@ static inline bool is_ident(Query::Token::Id id)
   }
 
 static inline String
-get_variant(const KDictionary& variants, String const& key)
+get_variant(const Dictionary& variants, String const& key)
   {
   auto it = variants.find(key);
   if (it != variants.end())
@@ -187,7 +187,7 @@ Query::Implementation::Implementation(const std::string& string)
   }
 
 
-bool Query::evaluate(const std::string& version, const KDictionary& variants) const
+bool Query::evaluate(const std::string& version, const Dictionary& variants) const
   {
   auto& compiled = implementation.get().compiled;
   if (compiled.empty())

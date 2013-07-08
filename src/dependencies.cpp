@@ -16,7 +16,7 @@ namespace Karrot
 void Dependencies::replay(
     const std::string& component,
     const std::string& version,
-    const KDictionary& values,
+    const Dictionary& values,
     std::vector<Spec>& depends,
     std::vector<Spec>& conflicts) const
   {

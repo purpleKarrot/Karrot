@@ -21,7 +21,7 @@ namespace Karrot
 namespace qi = boost::spirit::qi;
 
 template<typename Iterator>
-struct DictionaryGrammar: qi::grammar<Iterator, KDictionary()>
+struct DictionaryGrammar: qi::grammar<Iterator, Dictionary()>
   {
   DictionaryGrammar() : DictionaryGrammar::base_type(dict)
     {
@@ -30,14 +30,14 @@ struct DictionaryGrammar: qi::grammar<Iterator, KDictionary()>
     key = qi::char_("a-zA-Z") >> *qi::char_("a-zA-Z_0-9");
     value = +qi::char_("a-zA-Z_0-9");
     }
-  qi::rule<Iterator, KDictionary()> dict;
-  qi::rule<Iterator, std::pair<std::string, std::string>()> entry;
+  qi::rule<Iterator, Dictionary()> dict;
+  qi::rule<Iterator, std::pair<String, String>()> entry;
   qi::rule<Iterator, std::string()> key, value;
   };
 
-KDictionary parse_variant(const std::string& string)
+Dictionary parse_variant(const std::string& string)
   {
-  KDictionary result;
+  Dictionary result;
   auto begin = string.begin();
   DictionaryGrammar<decltype(begin)> grammar;
   if (!qi::parse(begin, string.end(), grammar, result))
@@ -48,18 +48,18 @@ KDictionary parse_variant(const std::string& string)
   }
 
 static void r_variants_recurse(
-    const KDictionary::const_iterator& cur,
-    const KDictionary::const_iterator& end,
-    const KDictionary& dict,
-    const std::function<void(KDictionary)>& func)
+    const Dictionary::const_iterator& cur,
+    const Dictionary::const_iterator& end,
+    const Dictionary& dict,
+    const std::function<void(Dictionary)>& func)
   {
   assert(cur != end);
-  std::vector<std::string> values;
-  split(values, cur->second, boost::is_any_of(";"), boost::token_compress_on);
-  for (const std::string& val : values)
+  std::vector<String> values;
+  split(values, cur->second.get(), boost::is_any_of(";"), boost::token_compress_on);
+  for (String const& val : values)
     {
-    KDictionary copy(dict);
-    copy.insert(std::make_pair(cur->first, val));
+    Dictionary copy(dict);
+    copy.emplace(cur->first, val);
     if (std::next(cur) == end)
       {
       func(copy);
@@ -72,16 +72,16 @@ static void r_variants_recurse(
   }
 
 void foreach_variant(
-    const KDictionary& variants,
-    const std::function<void(KDictionary)>& func)
+    const Dictionary& variants,
+    const std::function<void(Dictionary)>& func)
   {
   if (variants.empty())
     {
-    func(KDictionary());
+    func(Dictionary());
     }
   else
     {
-    r_variants_recurse(variants.begin(), variants.end(), KDictionary(), func);
+    r_variants_recurse(variants.begin(), variants.end(), Dictionary(), func);
     }
   }
 

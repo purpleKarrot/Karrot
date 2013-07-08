@@ -27,10 +27,10 @@ struct KImplementation
   Karrot::String version;
   Karrot::String component;
   Karrot::Driver const *driver;
-  KDictionary variant;
-  KDictionary values;
-  std::shared_ptr<KDictionary> meta;
-  KDictionary const* globals;
+  Karrot::Dictionary variant;
+  Karrot::Dictionary values;
+  std::shared_ptr<Karrot::Dictionary> meta;
+  Karrot::Dictionary const* globals;
   std::vector<Karrot::Spec> depends;
   std::vector<Karrot::Spec> conflicts;
   };
