@@ -286,46 +286,23 @@ void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
     group.driver = this->engine.package_handler.get(*attr);
     if (group.driver)
       {
-      group.fields = group.driver->fields();
+      group.fields.clear();
       }
     }
   if (group.driver)
     {
-    auto& xmlns = group.driver->xmlns();
-    for (auto& entry : group.fields)
+    for (auto& attr : xml.attributes())
       {
-      if (auto attr = xml.optional_attribute(entry.first, xmlns))
+      if (attr.name.namespace_uri == group.driver->xmlns())
         {
-        entry.second = std::move(*attr);
+        group.fields[attr.name.local] = attr.value;
         }
       }
     }
   }
 
-static bool package_is_valid(const Package& package)
-  {
-  if (!package.driver)
-    {
-    return false;
-    }
-  bool valid = true;
-  for (const auto& entry : package.fields)
-    {
-    if (entry.second.empty())
-      {
-      std::cerr << "required attribute not set: " << entry.first << std::endl;
-      valid = false;
-      }
-    }
-  return valid;
-  }
-
 void FeedParser::add_package(const Package& package)
   {
-  if (!package_is_valid(package))
-    {
-    return;
-    }
   KImplementation impl
     {
     spec.id,

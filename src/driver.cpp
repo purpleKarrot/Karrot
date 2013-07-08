@@ -13,27 +13,16 @@ namespace Karrot
 {
 
 Driver::Driver(std::string const& name, std::string const& xmlns, KDriver const* impl)
-  : name_{name}, xmlns_{xmlns + name}, driver_(impl)
+    : name_{name}
+    , xmlns_{xmlns}
+    , driver_(impl)
   {
-  if (!driver_->fields)
-    {
-    return;
-    }
-  if (driver_->fields(driver_, &fields_))
-    {
-    }
-  auto found = fields_.find(":xmlns");
-  if (found != fields_.end())
-    {
-    xmlns_ = found->second;
-    }
   }
 
 void Driver::filter(KImplementation& impl, KAdd add, void *add_target) const
   {
   if (!driver_->filter)
     {
-    add(&impl, 0, add_target);
     return;
     }
   if (driver_->filter(driver_, &impl, add, add_target) != 0)

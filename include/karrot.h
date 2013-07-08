@@ -36,7 +36,6 @@
 extern "C" {
 #endif
 
-typedef struct KDictionary KDictionary;
 typedef struct KImplementation KImplementation;
 typedef struct KDriver KDriver;
 typedef struct KEngine KEngine;
@@ -48,16 +47,6 @@ typedef void (*KVisit) (void *target, char const *key, char const *val);
 
 KARROT_API char const *
 k_version (int *major, int *minor, int *patch);
-
-
-KARROT_API void
-k_dictionary_set (KDictionary *self, char const *key, char const *value);
-
-KARROT_API char const *
-k_dictionary_get (KDictionary const *self, char const *key);
-
-KARROT_API void
-k_dictionary_foreach (KDictionary const *self, KVisit visit, void *target);
 
 
 KARROT_API char const *
@@ -102,7 +91,6 @@ k_implementation_get_global (KImplementation const *self, char const *key);
 
 struct KDriver
   {
-  int (*fields) (KDriver const *self, KDictionary *dict);
   int (*filter) (KDriver const *self, KImplementation *impl, KAdd add, void *target);
   int (*depend) (KDriver const *self, KImplementation const *impl, KImplementation const *other);
   int (*handle) (KDriver const *self, KImplementation const *impl, int requested);
@@ -147,7 +135,7 @@ k_engine_set_global (KEngine *self, char const *key, char const *value);
  * @param driver a `KDriver` instance
  */
 KARROT_API void
-k_engine_add_driver (KEngine *self, char const *name, KDriver const *driver);
+k_engine_add_driver (KEngine *self, char const *name, char const *xmlns, KDriver const *driver);
 
 /**
  * Add a Request to an Engine.

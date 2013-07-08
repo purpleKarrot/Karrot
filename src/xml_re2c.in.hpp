@@ -94,7 +94,7 @@ void XmlReader::parse_attribute(Attribute& attribute)
 void XmlReader::parse_pi()
   {
   parse_name(current_name);
-  attributes.clear();
+  attributes_.clear();
   token_ = token_pi;
 instruction:
   /*!re2c
@@ -106,7 +106,7 @@ instruction:
     {
     Attribute attr;
     parse_attribute(attr);
-    attributes.push_back(attr);
+    attributes_.push_back(attr);
     goto instruction;
     }
   else
@@ -136,7 +136,7 @@ void XmlReader::parse_element()
   {
   parse_name(current_name);
   token_ = token_element;
-  attributes.clear();
+  attributes_.clear();
 attribute:
   /*!re2c
   space* "/>"
@@ -155,7 +155,7 @@ attribute:
     {
     Attribute attr;
     parse_attribute(attr);
-    attributes.push_back(attr);
+    attributes_.push_back(attr);
     goto attribute;
     }
   else

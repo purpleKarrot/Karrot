@@ -46,6 +46,18 @@ enum XmlToken
 class XmlReader
   {
   public:
+    struct Name
+      {
+      std::string prefix;
+      std::string local;
+      std::string namespace_uri;
+      };
+    struct Attribute
+      {
+      Name name;
+      std::string value;
+      };
+  public:
     XmlReader(std::string const& filepath);
     bool read();
     XmlToken token() const;
@@ -57,6 +69,10 @@ class XmlReader
     boost::optional<std::string> optional_attribute(
       const std::string& name,
       const std::string& namespace_uri) const;
+    std::vector<Attribute> const& attributes() const
+      {
+      return attributes_;
+      }
     void skip();
     bool start_element();
     std::string content();
@@ -64,21 +80,10 @@ class XmlReader
     XmlReader(XmlReader const&) = delete;
     XmlReader& operator=(XmlReader const&) = delete;
   private:
-    struct Name
-      {
-      std::string prefix;
-      std::string local;
-      std::string namespace_uri;
-      };
     struct Tag
       {
       Name name;
       std::size_t previous_mappings;
-      };
-    struct Attribute
-      {
-      Name name;
-      std::string value;
       };
     struct Mapping
       {
@@ -108,7 +113,7 @@ class XmlReader
     Iterator marker;
     XmlToken token_;
     Name current_name;
-    std::vector<Attribute> attributes;
+    std::vector<Attribute> attributes_;
     std::vector<Mapping> ns_mappings;
     std::vector<Tag> open_tags;
     bool is_empty_element;

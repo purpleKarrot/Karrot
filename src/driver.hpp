@@ -28,10 +28,6 @@ class Driver
       {
       return xmlns_;
       }
-    KDictionary fields() const
-      {
-      return fields_;
-      }
     template<typename Add>
     void filter (KImplementation& impl, Add add) const
       {
@@ -51,7 +47,6 @@ class Driver
   private:
     std::string name_;
     std::string xmlns_;
-    KDictionary fields_;
     KDriver const* driver_;
   };
 

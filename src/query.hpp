@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include "string.hpp"
+#include "dictionary.hpp"
 #include <boost/flyweight/key_value.hpp>
 
 namespace Karrot

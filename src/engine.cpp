@@ -43,11 +43,12 @@ void k_engine_set_global(KEngine *self, char const *key, char const *value)
   }
 
 void
-k_engine_add_driver(KEngine *self, char const *name, KDriver const *driver)
+k_engine_add_driver(KEngine *self, char const *name, char const *xmlns, KDriver const *driver)
   {
   assert(name);
+  assert(xmlns);
   assert(driver);
-  self->package_handler.add(name, self->namespace_uri, driver);
+  self->package_handler.add(name, xmlns, driver);
   }
 
 void k_engine_add_request(KEngine *self, char const *url, int source)

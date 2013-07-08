@@ -34,7 +34,7 @@ std::size_t XmlReader::push_namespaces()
   {
   Mapping mapping;
   std::size_t previous_mappings = ns_mappings.size();
-  for (const Attribute& attr : attributes)
+  for (const Attribute& attr : attributes_)
     {
     if (attr.name.prefix.empty() && attr.name.local == "xmlns")
       {
@@ -50,7 +50,7 @@ std::size_t XmlReader::push_namespaces()
       }
     }
   lookup_namespace(current_name);
-  for (Attribute& attr : attributes)
+  for (Attribute& attr : attributes_)
     {
     lookup_namespace(attr.name);
     }
@@ -165,7 +165,7 @@ boost::optional<std::string> XmlReader::optional_attribute(
     const std::string& name,
     const std::string& namespace_uri) const
   {
-  for (auto& attr : attributes)
+  for (auto& attr : attributes())
     {
     if (attr.name.local == name && attr.name.namespace_uri == namespace_uri)
       {

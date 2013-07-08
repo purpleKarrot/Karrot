@@ -38,7 +38,6 @@ add_library(karrot
   minisat/solver_types.hpp
   dependencies.cpp
   dependencies.hpp
-  dictionary.cpp
   dictionary.hpp
   driver.cpp
   driver.hpp
