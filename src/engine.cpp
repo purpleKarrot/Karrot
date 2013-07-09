@@ -9,7 +9,6 @@
 #include "engine.hpp"
 
 #include <cstring>
-#include <cstdarg>
 #include <fstream>
 #include <algorithm>
 #include <stdexcept>
@@ -26,10 +25,9 @@
 #include "xml_reader.hpp"
 
 KEngine *
-k_engine_new(char const *namespace_base)
+k_engine_new()
   {
-  assert(namespace_base);
-  return new KEngine(namespace_base);
+  return new KEngine;
   }
 
 void k_engine_free(KEngine *self)
@@ -39,7 +37,30 @@ void k_engine_free(KEngine *self)
 
 void k_engine_set_global(KEngine *self, char const *key, char const *value)
   {
-  Karrot::set(self->globals, key, value);
+  if (std::strcmp(key, ":xmlns") == 0)
+    {
+    self->xmlns = value;
+    }
+  else if (std::strcmp(key, ":feed-cache") == 0)
+    {
+    self->feed_cache = value ? value : ".";
+    }
+  else if (std::strcmp(key, ":reload-feeds") == 0)
+    {
+    self->reload_feeds = value != nullptr;
+    }
+  else if (std::strcmp(key, ":ignore-source-conflicts") == 0)
+    {
+    self->ignore_source_conflicts = value != nullptr;
+    }
+  else if (std::strcmp(key, ":no-topological-order") == 0)
+    {
+    self->no_topological_order = value != nullptr;
+    }
+  else
+    {
+    Karrot::set(self->globals, key, value);
+    }
   }
 
 void
@@ -60,35 +81,6 @@ void k_engine_add_request(KEngine *self, char const *url, int source)
     }
   self->feed_queue.push(spec);
   self->requests.push_back(spec);
-  }
-
-void k_engine_setopt(KEngine *self, KOption option, ...)
-  {
-  va_list arg;
-  va_start(arg, option);
-  const char* str;
-  switch (option)
-    {
-    case K_OPT_LOG_FUNCTION:
-      self->log_function = va_arg(arg, KPrintFun);
-      break;
-    case K_OPT_FEED_CACHE:
-      str = va_arg(arg, const char*);
-      self->feed_cache = str ? str : ".";
-      break;
-    case K_OPT_RELOAD_FEEDS:
-      self->reload_feeds = va_arg(arg, int);
-      break;
-    case K_OPT_IGNORE_SOURCE_CONFLICTS:
-      self->ignore_source_conflicts = va_arg(arg, int);
-      break;
-    case K_OPT_NO_TOPOLOGICAL_ORDER:
-      self->no_topological_order = va_arg(arg, int);
-      break;
-    default:
-      break;
-    }
-  va_end(arg);
   }
 
 static bool engine_run(KEngine *self)

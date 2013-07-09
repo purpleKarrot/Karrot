@@ -29,17 +29,8 @@ using Database = std::vector<KImplementation>;
 struct KEngine
   {
   public:
-    KEngine(char const *namespace_uri)
-      : namespace_uri{namespace_uri}
-      {
-      if (this->namespace_uri.back() != '/')
-        {
-        this->namespace_uri += '/';
-        }
-      }
-  public:
     std::string error;
-    std::string namespace_uri;
+    std::string xmlns = "http://purplekarrot.net/2013/project";
     Karrot::FeedQueue feed_queue;
     Karrot::PackageHandler package_handler;
     Karrot::Requests requests;

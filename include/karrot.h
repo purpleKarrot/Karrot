@@ -99,17 +99,6 @@ struct KDriver
   };
 
 
-enum _KOption
-  {
-  K_OPT_LOG_FUNCTION            = (1u << 0),
-  K_OPT_FEED_CACHE              = (1u << 2),
-  K_OPT_RELOAD_FEEDS            = (1u << 3),
-  K_OPT_IGNORE_SOURCE_CONFLICTS = (1u << 4),
-  K_OPT_NO_TOPOLOGICAL_ORDER    = (1u << 5),
-  };
-
-typedef enum _KOption KOption;
-
 /**
  * @defgroup Engine class
  * @ingroup Karrot
@@ -119,11 +108,10 @@ typedef enum _KOption KOption;
 /**
  * Create a new Engine.
  *
- * @param namespace_uri The base url for the feed namespace.
  * @return a `KEngine` instance
  */
 KARROT_API KEngine *
-k_engine_new (char const *namespace_uri);
+k_engine_new (void);
 
 KARROT_API void
 k_engine_set_global (KEngine *self, char const *key, char const *value);
@@ -146,16 +134,6 @@ k_engine_add_driver (KEngine *self, char const *name, char const *xmlns, KDriver
  */
 KARROT_API void
 k_engine_add_request (KEngine *self, char const *url, int source);
-
-/**
- * Configure options of the Engine.
- *
- * @param self a `KEngine` instance
- * @param option the `KOption` to set
- * @param ... the value to be set
- */
-KARROT_API void
-k_engine_setopt (KEngine *self, KOption option, ...);
 
 /**
  * Run the Engine.

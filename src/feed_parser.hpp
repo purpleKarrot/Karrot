@@ -66,7 +66,6 @@ class FeedParser
     std::vector<Dependencies> components;
     FeedPreQueue queue;
     KEngine& engine;
-    std::string project_ns;
   };
 
 } // namespace Karrot
