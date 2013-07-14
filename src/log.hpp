@@ -9,7 +9,7 @@
 #ifndef KARROT_LOG_HPP
 #define KARROT_LOG_HPP
 
-#include <karrot.h>
+#include <functional>
 #include <boost/format.hpp>
 
 namespace Karrot
@@ -18,13 +18,15 @@ namespace Karrot
 class Log
   {
   public:
-    Log(KPrintFun fun, const char* format)
+    using Function = std::function<void(std::string const&)>;
+  public:
+    Log(Function& fun, const char* format)
         : fun(fun), format(format)
       {
       }
     ~Log()
       {
-      fun(format.str().c_str());
+      fun(format.str());
       }
     template<typename Arg>
     Log& operator%(Arg&& arg)
@@ -33,7 +35,7 @@ class Log
       return *this;
       }
   private:
-    KPrintFun fun;
+    Function& fun;
     boost::format format;
   };
 

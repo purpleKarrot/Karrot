@@ -65,8 +65,8 @@ class Solver
     //
     bool    okay() { return ok; }       // FALSE means solver is in an conflicting state (must never be used again!)
     void    simplifyDB();
-    bool    solve(const std::vector<Lit>& assumps, KPrintFun log);
-    bool    solve(KPrintFun log) { std::vector<Lit> tmp; return solve(tmp, log); }
+    bool    solve(const std::vector<Lit>& assumps);
+    bool    solve() { std::vector<Lit> tmp; return solve(tmp); }
 
     std::vector<lbool>  model;          // If problem is satisfiable, this vector contains the model (if any).
     std::vector<Lit>    conflict;       // If problem is unsatisfiable (possibly under assumptions), this vector represent the conflict clause expressed in the assumptions.

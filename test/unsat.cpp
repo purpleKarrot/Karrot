@@ -8,15 +8,13 @@
 
 #include "../src/minisat/solver.hpp"
 #include <iostream>
+#include <numeric>
 
 int unsat(int argc, char* argv[])
   {
   int vars = 100;
   std::vector<Var> prefs(vars);
-  for (int i = 0; i < vars; ++i)
-    {
-    prefs[i] = i;
-    }
+  std::iota(begin(prefs), end(prefs), 0);
 
   Solver solver(std::move(prefs));
 
@@ -181,10 +179,5 @@ int unsat(int argc, char* argv[])
   solver.addTernary( Lit{33}, ~Lit{44}, ~Lit{68});
   solver.addTernary( Lit{62}, ~Lit{85}, ~Lit{97});
 
-  auto print = [](char const *string)
-    {
-    std::cout << string << std::endl;
-    };
-
-  return solver.solve(print) ? -1 : 0;
+  return solver.solve() ? -1 : 0;
   }

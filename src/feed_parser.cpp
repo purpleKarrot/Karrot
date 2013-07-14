@@ -28,7 +28,7 @@ FeedParser::FeedParser(Spec const& spec, KEngine& engine) :
   {
   }
 
-std::string FeedParser::next_element(XmlReader& xml, KPrintFun log) const
+std::string FeedParser::next_element(XmlReader& xml, LogFunct& log) const
   {
   while (xml.start_element())
     {
@@ -42,7 +42,7 @@ std::string FeedParser::next_element(XmlReader& xml, KPrintFun log) const
   return std::string();
   }
 
-void FeedParser::parse(XmlReader& xml, KPrintFun log)
+void FeedParser::parse(XmlReader& xml, LogFunct& log)
   {
   if (xml.name() != "project" || xml.namespace_uri() != engine.xmlns)
     {

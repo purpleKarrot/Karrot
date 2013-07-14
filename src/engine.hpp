@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "feed_queue.hpp"
 #include "package_handler.hpp"
@@ -23,6 +24,7 @@ namespace Karrot
 class Spec;
 using Requests = std::vector<Spec>;
 using Database = std::vector<KImplementation>;
+using LogFunct = std::function<void(std::string const&)>;
 
 } // namespace Karrot
 
@@ -40,7 +42,7 @@ struct KEngine
     bool reload_feeds = false;
     bool ignore_source_conflicts = false;
     bool no_topological_order = false;
-    KPrintFun log_function = [](char const*){};
+    Karrot::LogFunct log_function = [](std::string const&){};
   };
 
 #endif /* KARROT_ENGINE_HPP */

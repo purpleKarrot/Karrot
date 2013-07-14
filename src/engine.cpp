@@ -64,6 +64,15 @@ void k_engine_set_global(KEngine *self, char const *key, char const *value)
   }
 
 void
+k_engine_set_logger (KEngine *self, KPrint print, void *target)
+  {
+  self->log_function = [print,target](std::string const& message)
+    {
+    print(target, 0, message.c_str());
+    };
+  }
+
+void
 k_engine_add_driver(KEngine *self, char const *name, char const *xmlns, KDriver const *driver)
   {
   assert(name);

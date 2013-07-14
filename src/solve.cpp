@@ -88,7 +88,7 @@ static void dependency_clauses(
     const Hash& hash,
     const Database& database,
     Solver& solver,
-    KPrintFun log)
+    LogFunct& log)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
@@ -190,7 +190,7 @@ bool solve(
     const Database& database,
     const Requests& requests,
     bool ignore_source_conflicts,
-    KPrintFun log,
+    LogFunct& log,
     std::vector<int>& model)
   {
   Hash hash;
@@ -254,7 +254,7 @@ bool solve(
     source_conflict_clauses(database, solver);
     }
 
-  if (!solver.solve(request, log))
+  if (!solver.solve(request))
     {
     log("no solution exists, because of conflicts");
     for (Lit const& lit : solver.conflict)

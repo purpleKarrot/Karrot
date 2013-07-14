@@ -798,7 +798,7 @@ lbool Solver::search(int nof_conflicts, int nof_learnts)
 |    'simplifyDB()' first to see that no top-level conflict is present (which would put the solver
 |    in an undefined state).
 |________________________________________________________________________________________________@*/
-bool Solver::solve(const std::vector<Lit>& assumps, KPrintFun log)
+bool Solver::solve(const std::vector<Lit>& assumps)
   {
   simplifyDB();
   if (!ok)

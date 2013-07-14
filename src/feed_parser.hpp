@@ -44,9 +44,9 @@ class FeedParser
       };
   public:
     FeedParser(Spec const& spec, KEngine& engine);
-    void parse(XmlReader& xml, KPrintFun log);
+    void parse(XmlReader& xml, LogFunct& log);
   private:
-    std::string next_element(XmlReader& xml, KPrintFun log) const;
+    std::string next_element(XmlReader& xml, LogFunct& log) const;
     void parse_meta(XmlReader& xml);
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
