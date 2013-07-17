@@ -58,12 +58,7 @@ class Dependencies
       {
       deps.emplace_back(CONFLICTS, spec);
       }
-    void replay(
-        const std::string& component,
-        const std::string& version,
-        const Dictionary& values,
-        std::vector<Spec>& depends,
-        std::vector<Spec>& conflicts) const;
+    void replay(KImplementation& impl) const;
   private:
     enum Code
       {

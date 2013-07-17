@@ -23,25 +23,6 @@ class XmlReader;
 
 class FeedParser
   {
-  private:
-    class Release
-      {
-      public:
-        Release(const std::string& version, const std::string& tag)
-            : version_(version), tag_(tag)
-          {
-          }
-        const std::string& version() const
-          {
-          return version_;
-          }
-        const std::string& tag() const
-          {
-          return tag_.empty() ? version_ : tag_;
-          }
-      private:
-        std::string version_, tag_;
-      };
   public:
     FeedParser(Spec const& spec, KEngine& engine);
     void parse(XmlReader& xml, LogFunct& log);
@@ -50,22 +31,23 @@ class FeedParser
     void parse_meta(XmlReader& xml);
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
-    void parse_build(XmlReader& xml, const std::string& type, const std::string& href);
-    void parse_runtime(XmlReader& xml);
     void parse_components(XmlReader& xml);
     void parse_depends(XmlReader& xml, Dependencies& depends);
     void parse_packages(XmlReader& xml, Package group);
     void parse_package_fields(XmlReader& xml, Package& group);
     void add_package(const Package& package);
+    void add_src_package(std::string const& version, boost::optional<std::string> const& tag);
   private:
     Spec spec;
+    KEngine& engine;
+    FeedPreQueue queue;
     std::string name;
     std::shared_ptr<Dictionary> meta = std::make_shared<Dictionary>();
     Dictionary variants;
-    std::vector<Release> releases;
+    std::vector<std::string> releases;
     std::vector<Dependencies> components;
-    FeedPreQueue queue;
-    KEngine& engine;
+    std::string vcs_type;
+    std::string vcs_href;
   };
 
 } // namespace Karrot

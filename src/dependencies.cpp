@@ -7,20 +7,28 @@
  */
 
 #include "dependencies.hpp"
+#include "implementation.hpp"
 #include "feed_queue.hpp"
 #include <boost/logic/tribool.hpp>
 
 namespace Karrot
 {
 
-void Dependencies::replay(
-    const std::string& component,
-    const std::string& version,
-    const Dictionary& values,
-    std::vector<Spec>& depends,
-    std::vector<Spec>& conflicts) const
+void Dependencies::replay(KImplementation& impl) const
   {
-  if (component != name && component != "*")
+  auto ignore = [&]
+    {
+    if (impl.component == name || impl.component == "SOURCE")
+      {
+      return false;
+      }
+    if (impl.component == "*" && name != "SOURCE")
+      {
+      return false;
+      }
+    return true;
+    };
+  if (ignore())
     {
     return;
     }
@@ -32,7 +40,7 @@ void Dependencies::replay(
       case IF:
         if (stack.back() == true)
           {
-          stack.push_back(entry.second.query.evaluate(version, values));
+          stack.push_back(entry.second.query.evaluate(impl.version, impl.values));
           }
         else
           {
@@ -56,7 +64,7 @@ void Dependencies::replay(
           }
         else if (stack.back() == false)
           {
-          stack.back() = entry.second.query.evaluate(version, values);
+          stack.back() = entry.second.query.evaluate(impl.version, impl.values);
           }
         break;
       case ENDIF:
@@ -66,13 +74,13 @@ void Dependencies::replay(
         if (stack.back())
           {
           feed_queue->push(entry.second);
-          depends.push_back(entry.second);
+          impl.depends.push_back(entry.second);
           }
         break;
       case CONFLICTS:
         if (stack.back())
           {
-          conflicts.push_back(entry.second);
+          impl.conflicts.push_back(entry.second);
           }
         break;
       }

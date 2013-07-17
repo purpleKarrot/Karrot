@@ -23,8 +23,8 @@ static const String TAG {"tag"};
 
 FeedParser::FeedParser(Spec const& spec, KEngine& engine) :
     spec(spec),
-    queue(engine.feed_queue),
-    engine(engine)
+    engine(engine),
+    queue(engine.feed_queue)
   {
   }
 
@@ -62,6 +62,13 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
     xml.skip();
     tag = next_element(xml, log);
     }
+  if (tag == "vcs")
+    {
+    vcs_type = xml.attribute("type", engine.xmlns);
+    vcs_href = xml.attribute("href", engine.xmlns);
+    xml.skip();
+    tag = next_element(xml, log);
+    }
   if (tag == "variants")
     {
     parse_variants(xml);
@@ -74,24 +81,7 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
     xml.skip();
     tag = next_element(xml, log);
     }
-  if (tag == "build")
-    {
-    std::string vcs = xml.attribute("vcs", engine.xmlns);
-    std::string href = xml.attribute("href", engine.xmlns);
-    parse_build(xml, vcs, href);
-    xml.skip();
-    tag = next_element(xml, log);
-    }
-  if (tag == "runtime")
-    {
-    if (spec.component != SOURCE)
-      {
-      parse_runtime(xml);
-      }
-    xml.skip();
-    tag = next_element(xml, log);
-    }
-  else if (tag == "components")
+  if (tag == "components")
     {
     if (spec.component != SOURCE)
       {
@@ -146,55 +136,50 @@ void FeedParser::parse_releases(XmlReader& xml)
       {
       auto version = xml.attribute("version", engine.xmlns);
       auto tag = xml.optional_attribute("tag", engine.xmlns);
-      releases.emplace_back(std::move(version), tag ? *tag : std::string());
+      add_src_package(version, tag);
+      releases.push_back(version);
       }
     xml.skip();
     }
   }
 
-void FeedParser::parse_build(XmlReader& xml, const std::string& type, const std::string& href)
+void FeedParser::add_src_package(std::string const& version, boost::optional<std::string> const& tag)
   {
-  Driver const *driver = this->engine.package_handler.get(type);
+  Driver const *driver = this->engine.package_handler.get(vcs_type);
   if (!driver)
     {
     return;
     }
-  Dependencies depends(this->queue, "*");
-  parse_depends(xml, depends);
   KImplementation impl
     {
     spec.id,
     String{this->name},
-    String{},
+    String{version},
     SOURCE,
     driver
     };
-  impl.values[String{"href"}] = href;
+  impl.values[String{"href"}] = vcs_href;
   impl.meta = this->meta;
   impl.globals = &engine.globals;
-  for (std::size_t i = 0; i < releases.size(); ++i)
+  if(tag)
     {
-    impl.version = releases[i].version();
-    impl.values[String{"tag"}] = releases[i].tag();
-    foreach_variant(variants, [&](Dictionary variant)
-      {
-      if (!spec.query.evaluate(impl.version, variant))
-        {
-        return;
-        }
-      impl.variant = variant;
-      impl.depends.clear();
-      impl.conflicts.clear();
-      depends.replay("*", impl.version, variant, impl.depends, impl.conflicts);
-      this->engine.database.push_back(impl);
-      });
+    impl.values[String{"tag"}] = *tag;
     }
-  }
-
-void FeedParser::parse_runtime(XmlReader& xml)
-  {
-  components.emplace_back(this->queue);
-  parse_depends(xml, components.back());
+  foreach_variant(variants, [&](Dictionary variant)
+    {
+    if (!spec.query.evaluate(impl.version, variant))
+      {
+      return;
+      }
+    impl.variant = variant;
+    impl.depends.clear();
+    impl.conflicts.clear();
+    for (const Dependencies& component : components)
+      {
+      component.replay(impl);
+      }
+    this->engine.database.push_back(impl);
+    });
   }
 
 void FeedParser::parse_components(XmlReader& xml)
@@ -325,23 +310,13 @@ void FeedParser::add_package(const Package& package)
     impl.conflicts.clear();
     if (!system)
       {
-      bool supported = std::any_of(begin(releases), end(releases),
-        [&impl](const Release& release)
-        {
-        return impl.version == release.version();
-        });
-      if (!supported)
+      if (std::find(begin(releases), end(releases), package.version) == end(releases))
         {
         return;
         }
       for (const Dependencies& component : components)
         {
-        component.replay(
-            impl.component,
-            impl.version,
-            impl.variant,
-            impl.depends,
-            impl.conflicts);
+        component.replay(impl);
         }
       }
     this->engine.database.push_back(impl);
