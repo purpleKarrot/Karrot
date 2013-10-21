@@ -33,9 +33,8 @@ class FeedParser
     void parse_releases(XmlReader& xml);
     void parse_components(XmlReader& xml);
     void parse_depends(XmlReader& xml, Dependencies& depends);
-    void parse_packages(XmlReader& xml, Package group);
-    void parse_package_fields(XmlReader& xml, Package& group);
-    void add_package(const Package& package);
+    void parse_packages(XmlReader& xml);
+    void parse_package(XmlReader& xml);
     void add_src_package(std::string const& version, boost::optional<std::string> const& tag);
   private:
     Spec spec;

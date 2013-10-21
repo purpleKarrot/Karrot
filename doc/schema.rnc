@@ -15,11 +15,11 @@ start =
     attribute name { xsd:string },
     attribute href { xsd:anyURI },
     meta,
+    vcs?,
     variants?,
     releases?,
-    build?,
-    (element runtime { dependency+ } | components)?,
-    element packages { (package | packagegroup)+ }?
+    components?,
+    element packages { package+ }?
   }
 
 meta =
@@ -28,6 +28,12 @@ meta =
     element summary { xsd:string },
     element description { xsd:token },
     element homepage { xsd:string }
+  }
+
+vcs =
+  element vcs {
+    attribute type { "archive" | "git" | "subversion" },
+    attribute href { xsd:anyURI }
   }
 
 variants =
@@ -61,13 +67,6 @@ changelog =
     element item { xsd:token }*
   }
 
-build =
-  element build {
-    attribute vcs { "archive" | "git" | "subversion" },
-    attribute href { xsd:anyURI },
-    dependency*
-  }
-
 components =
   element components {
     element component {
@@ -98,14 +97,3 @@ package =
     attribute pk:name { xsd:string }?
   }
 
-packagegroup =
-  element group {
-    attribute type { xsd:string }?,
-    attribute component { xsd:string }?,
-    attribute version { xsd:string }?,
-    attribute variant { xsd:string }?,
-    attribute ar:sysname { xsd:string }?,
-    attribute ar:machine { xsd:string }?,
-    attribute pk:distro { xsd:string }?,
-    (package | packagegroup)+
-  }

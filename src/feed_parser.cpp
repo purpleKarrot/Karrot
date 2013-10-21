@@ -83,10 +83,7 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
     }
   if (tag == "components")
     {
-    if (spec.component != SOURCE)
-      {
-      parse_components(xml);
-      }
+    parse_components(xml);
     xml.skip();
     tag = next_element(xml, log);
     }
@@ -94,8 +91,7 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
     {
     if (spec.component != SOURCE)
       {
-      Package group;
-      parse_packages(xml, group);
+      parse_packages(xml);
       }
     xml.skip();
     tag = next_element(xml, log);
@@ -232,75 +228,38 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
     }
   }
 
-void FeedParser::parse_packages(XmlReader& xml, Package group)
+void FeedParser::parse_packages(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    std::string name = xml.name();
-    std::string namespace_uri = xml.namespace_uri();
-    if (name == "group" && namespace_uri == engine.xmlns)
+    if (xml.name() == "package" && xml.namespace_uri() == engine.xmlns)
       {
-      parse_package_fields(xml, group);
-      parse_packages(xml, group);
-      }
-    else if (name == "package" && namespace_uri == engine.xmlns)
-      {
-      parse_package_fields(xml, group);
-      add_package(group);
+      parse_package(xml);
       }
     xml.skip();
     }
   }
 
-void FeedParser::parse_package_fields(XmlReader& xml, Package& group)
+void FeedParser::parse_package(XmlReader& xml)
   {
-  if (auto attr = xml.optional_attribute("component", engine.xmlns))
-    {
-    group.component = std::move(*attr);
-    }
-  if (auto attr = xml.optional_attribute("version", engine.xmlns))
-    {
-    group.version = std::move(*attr);
-    }
+  KImplementation impl{this->spec.id, String{this->name}};
+  impl.meta = this->meta;
+  impl.globals = &engine.globals;
+  impl.version = xml.attribute("version", engine.xmlns);
+  impl.component = xml.attribute("component", engine.xmlns);
+  impl.driver = engine.package_handler.get(xml.attribute("type", engine.xmlns));
   if (auto attr = xml.optional_attribute("variant", engine.xmlns))
     {
-    group.variant = parse_variant(*attr);
+    impl.variant = parse_variant(*attr);
     }
-  if (auto attr = xml.optional_attribute("type", engine.xmlns))
+  for (auto& attr : xml.attributes())
     {
-    group.driver = this->engine.package_handler.get(*attr);
-    if (group.driver)
+    if (attr.name.namespace_uri == impl.driver->xmlns())
       {
-      group.fields.clear();
+      impl.values[String{attr.name.local}] = attr.value;
       }
     }
-  if (group.driver)
-    {
-    for (auto& attr : xml.attributes())
-      {
-      if (attr.name.namespace_uri == group.driver->xmlns())
-        {
-        group.fields[String{attr.name.local}] = attr.value;
-        }
-      }
-    }
-  }
-
-void FeedParser::add_package(const Package& package)
-  {
-  KImplementation impl
-    {
-    spec.id,
-    String{this->name},
-    String{package.version},
-    String{package.component},
-    package.driver,
-    package.variant,
-    package.values,
-    this->meta,
-    &engine.globals
-    };
-  package.driver->filter(impl, [&](KImplementation& impl, bool system)
+  impl.driver->filter(impl, [&](KImplementation& impl, bool system)
     {
     if (!spec.query.evaluate(impl.version, impl.variant))
       {
@@ -310,7 +269,7 @@ void FeedParser::add_package(const Package& package)
     impl.conflicts.clear();
     if (!system)
       {
-      if (std::find(begin(releases), end(releases), package.version) == end(releases))
+      if (std::find(begin(releases), end(releases), impl.version) == end(releases))
         {
         return;
         }
