@@ -342,7 +342,7 @@ void Solver::analyze(Clause* _confl, std::vector<Lit>& out_learnt, int& out_btle
 
   int i, j;
   // Simplify conflict clause
-  uint min_level = 0;
+  std::size_t min_level = 0;
   for (i = 1; i < out_learnt.size(); i++)
     {
     min_level |= 1 << (level[var(out_learnt[i])] & 31); // (maintain an abstraction of levels involved in conflict)

@@ -166,7 +166,7 @@ int k_engine_run(KEngine *self)
   catch (Karrot::XmlParseError& error)
     {
     std::stringstream stream;
-     stream
+    stream
       << error.what()
       << " in '" << error.filename << "' at line " << error.line << ".\n"
       << error.current_line << '\n'
