@@ -62,5 +62,6 @@ if(BUILD_VISIBILITY_HIDDEN AND NOT WIN32)
 endif()
 
 add_subdirectory(doc)
+add_subdirectory(libs/xml)
 add_subdirectory(src)
 add_subdirectory(test)

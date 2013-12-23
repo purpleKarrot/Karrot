@@ -27,11 +27,6 @@ re2c_target(
   ${CMAKE_CURRENT_BINARY_DIR}/query_re2c.hpp -s
   )
 
-re2c_target(
-  ${CMAKE_CURRENT_SOURCE_DIR}/xml_re2c.in.hpp
-  ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
-  )
-
 add_library(karrot
   minisat/solver.cpp
   minisat/solver.hpp
@@ -69,10 +64,6 @@ add_library(karrot
   vercmp.cpp
   vercmp.hpp
   version.cpp
-  xml_re2c.hpp
-  xml_re2c.in.hpp
-  xml_reader.cpp
-  xml_reader.hpp
   karrot.rc
   )
 
@@ -100,6 +91,10 @@ if(WIN32)
       )
   endif()
 endif()
+
+target_link_libraries(karrot PRIVATE
+  xml
+  )
 
 if(WIN32)
   target_link_libraries(karrot LINK_PRIVATE
