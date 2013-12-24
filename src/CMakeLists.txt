@@ -27,7 +27,7 @@ re2c_target(
   ${CMAKE_CURRENT_BINARY_DIR}/query_re2c.hpp -s
   )
 
-add_library(karrot
+add_library(karrot STATIC
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
@@ -64,97 +64,21 @@ add_library(karrot
   vercmp.cpp
   vercmp.hpp
   version.cpp
-  karrot.rc
   )
 
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
-
-set_property(TARGET karrot APPEND PROPERTY
-  COMPILE_DEFINITIONS "KARROT_BUILD=1"
-  )
-
-if(NOT BUILD_SHARED_LIBS)
-  set_property(TARGET karrot APPEND PROPERTY
-    COMPILE_DEFINITIONS "KARROT_STATIC=1"
-    )
-endif()
-
-if(WIN32)
-  if(BUILD_SHARED_LIBS)
-    set_target_properties(karrot PROPERTIES
-      IMPORT_PREFIX ""
-      PREFIX ""
-      )
-  else()
-    set_target_properties(karrot PROPERTIES
-      PREFIX "lib"
-      )
-  endif()
-endif()
 
 target_link_libraries(karrot PRIVATE
   xml
   )
 
 if(WIN32)
-  target_link_libraries(karrot LINK_PRIVATE
+  target_link_libraries(karrot PRIVATE
     shlwapi
     )
 else()
-  target_link_libraries(karrot LINK_PRIVATE
+  target_link_libraries(karrot PRIVATE
     ${Boost_LIBRARIES}
     ${CURL_LIBRARIES}
     )
 endif()
-
-install(TARGETS karrot EXPORT karrot_export
-  ARCHIVE
-    DESTINATION lib
-    COMPONENT   dev
-    #CONFIGURATIONS "Release"
-  LIBRARY
-    DESTINATION lib
-    COMPONENT   bin
-    #CONFIGURATIONS "Release"
-  RUNTIME
-    DESTINATION bin
-    COMPONENT   bin
-    #CONFIGURATIONS "Release"
-  )
-
-install(EXPORT karrot_export
-  DESTINATION cmake
-  FILE KarrotTargets.cmake
-  )
-
-set(cfg_file "${CMAKE_CURRENT_BINARY_DIR}/KarrotConfig.cmake")
-set(ver_file "${CMAKE_CURRENT_BINARY_DIR}/KarrotConfigVersion.cmake")
-
-file(WRITE "${cfg_file}" "
-GET_FILENAME_COMPONENT(_DIR \"\${CMAKE_CURRENT_LIST_FILE}\" PATH)
-INCLUDE(\"\${_DIR}/KarrotTargets.cmake\")
-SET(Karrot_INCLUDE_DIRS \"\${_DIR}/include\")
-SET(Karrot_LIBRARIES karrot)
-")
-
-install(FILES "${cfg_file}"
-  COMPONENT dev
-  DESTINATION cmake
-  )
-
-if(NOT CMAKE_VERSION VERSION_LESS "2.8.8")
-  include(CMakePackageConfigHelpers)
-  write_basic_package_version_file("${ver_file}"
-    VERSION "0.1.0"
-    COMPATIBILITY SameMajorVersion
-    )
-  install(FILES "${ver_file}"
-    COMPONENT dev
-    DESTINATION cmake
-    )
-endif()
-
-install(FILES "${Karrot_SOURCE_DIR}/include/karrot.h"
-  COMPONENT dev
-  DESTINATION include
-  )

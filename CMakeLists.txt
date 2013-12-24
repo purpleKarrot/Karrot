@@ -14,11 +14,6 @@ list(APPEND CMAKE_MODULE_PATH "${Karrot_SOURCE_DIR}/CMake")
 enable_testing()
 include_directories(include)
 
-option(BUILD_SHARED_LIBS "build shared libraries" ON)
-if(BUILD_SHARED_LIBS)
-  add_definitions(-DKARROT_DYN_LINK)
-endif()
-
 if(MSVC)
   add_definitions(
     -DBOOST_ALL_NO_LIB # no autolinking please
@@ -42,23 +37,6 @@ if(BUILD_COVERAGE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG
     "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage"
     )
-endif()
-
-option(BUILD_VISIBILITY_HIDDEN "build with gcov support" ON)
-if(BUILD_VISIBILITY_HIDDEN AND NOT WIN32)
-  include(CheckCXXCompilerFlag)
-  check_cxx_compiler_flag(-fvisibility=hidden VISIBILITY_HIDDEN)
-  if(VISIBILITY_HIDDEN)
-    set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility=hidden"
-      )
-  endif()
-  check_cxx_compiler_flag(-fvisibility-inlines-hidden VISIBILITY_INLINES_HIDDEN)
-  if(VISIBILITY_INLINES_HIDDEN)
-    set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility-inlines-hidden"
-      )
-  endif()
 endif()
 
 add_subdirectory(doc)

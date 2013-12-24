@@ -21,6 +21,4 @@ add_library(xml STATIC
   xml_re2c.hpp
   )
 
-set_property(TARGET xml PROPERTY POSITION_INDEPENDENT_CODE ON)
-
 target_include_directories(xml PUBLIC include)

@@ -16,22 +16,6 @@
 #define KARROT_VER_PATCH 0
 #define KARROT_VERSION "1.0.0"
 
-#if defined(_WIN32)
-#  define KARROT_IMPORT __declspec(dllimport)
-#  define KARROT_EXPORT __declspec(dllexport)
-#else
-#  define KARROT_IMPORT __attribute__ ((visibility("default")))
-#  define KARROT_EXPORT __attribute__ ((visibility("default")))
-#endif
-
-#if defined(KARROT_STATIC)
-#  define KARROT_API
-#elif defined(KARROT_BUILD)
-#  define KARROT_API KARROT_EXPORT
-#else
-#  define KARROT_API KARROT_IMPORT
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,47 +29,47 @@ typedef void (*KPrint) (void *target, int level, char const *string);
 typedef void (*KVisit) (void *target, char const *key, char const *val);
 
 
-KARROT_API char const *
+char const *
 k_version (int *major, int *minor, int *patch);
 
 
-KARROT_API char const *
+char const *
 k_implementation_get_id (KImplementation const *self);
 
-KARROT_API char const *
+char const *
 k_implementation_get_name (KImplementation const *self);
 
-KARROT_API char const *
+char const *
 k_implementation_get_version (KImplementation const *self);
 
-KARROT_API void
+void
 k_implementation_set_version (KImplementation *self, char const *value);
 
-KARROT_API char const *
+char const *
 k_implementation_get_component (KImplementation const *self);
 
-KARROT_API void
+void
 k_implementation_set_component (KImplementation *self, char const *value);
 
-KARROT_API char const *
+char const *
 k_implementation_get_driver (KImplementation const *self);
 
-KARROT_API char const *
+char const *
 k_implementation_get_meta (KImplementation const *self, char const *key);
 
-KARROT_API char const *
+char const *
 k_implementation_get_variant (KImplementation const *self, char const *key);
 
-KARROT_API void
+void
 k_implementation_foreach_variant (KImplementation const *self, KVisit visit, void *target);
 
-KARROT_API char const *
+char const *
 k_implementation_get_value (KImplementation const *self, char const *key);
 
-KARROT_API void
+void
 k_implementation_set_value (KImplementation *self, char const *key, char const *value);
 
-KARROT_API char const *
+char const *
 k_implementation_get_global (KImplementation const *self, char const *key);
 
 
@@ -110,13 +94,13 @@ struct KDriver
  *
  * @return a `KEngine` instance
  */
-KARROT_API KEngine *
+KEngine *
 k_engine_new (void);
 
-KARROT_API void
+void
 k_engine_set_global (KEngine *self, char const *key, char const *value);
 
-KARROT_API void
+void
 k_engine_set_logger (KEngine *self, KPrint print, void *target);
 
 /**
@@ -125,7 +109,7 @@ k_engine_set_logger (KEngine *self, KPrint print, void *target);
  * @param self a `KEngine` instance
  * @param driver a `KDriver` instance
  */
-KARROT_API void
+void
 k_engine_add_driver (KEngine *self, char const *name, char const *xmlns, KDriver const *driver);
 
 /**
@@ -135,7 +119,7 @@ k_engine_add_driver (KEngine *self, char const *name, char const *xmlns, KDriver
  * @param url the url of the requested feed
  * @param source limit the request to source implementations
  */
-KARROT_API void
+void
 k_engine_add_request (KEngine *self, char const *url, int source);
 
 /**
@@ -144,7 +128,7 @@ k_engine_add_request (KEngine *self, char const *url, int source);
  * @param self a `KEngine` instance
  * @return zero indicates success
  */
-KARROT_API int
+int
 k_engine_run (KEngine *self);
 
 /**
@@ -153,7 +137,7 @@ k_engine_run (KEngine *self);
  * @param self a `KEngine` instance
  * @return the error message string
  */
-KARROT_API char const *
+char const *
 k_engine_get_error (KEngine *self);
 
 /**
@@ -161,7 +145,7 @@ k_engine_get_error (KEngine *self);
  *
  * @param self a `KEngine` instance
  */
-KARROT_API void
+void
 k_engine_free (KEngine *self);
 
 /** @} */
