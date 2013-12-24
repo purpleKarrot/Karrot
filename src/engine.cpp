@@ -73,12 +73,9 @@ k_engine_set_logger (KEngine *self, KPrint print, void *target)
   }
 
 void
-k_engine_add_driver(KEngine *self, char const *name, char const *xmlns, KDriver const *driver)
+k_engine_add_driver(KEngine *self, std::unique_ptr<Karrot::Driver> driver)
   {
-  assert(name);
-  assert(xmlns);
-  assert(driver);
-  self->package_handler.add(name, xmlns, driver);
+  self->package_handler.add(std::move(driver));
   }
 
 void k_engine_add_request(KEngine *self, char const *url, int source)

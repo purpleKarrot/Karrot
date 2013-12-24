@@ -7,7 +7,7 @@
  */
 
 #include "implementation.hpp"
-#include "driver.hpp"
+#include <karrot/driver.hpp>
 #include "spec.hpp"
 
 static inline const char *

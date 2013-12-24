@@ -34,8 +34,6 @@ add_library(karrot STATIC
   dependencies.cpp
   dependencies.hpp
   dictionary.hpp
-  driver.cpp
-  driver.hpp
   engine.cpp
   engine.hpp
   feed_parser.cpp

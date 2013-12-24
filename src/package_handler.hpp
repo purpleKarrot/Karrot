@@ -11,7 +11,8 @@
 
 #include <vector>
 #include <algorithm>
-#include "driver.hpp"
+#include <memory>
+#include <karrot/driver.hpp>
 
 namespace Karrot
 {
@@ -19,25 +20,25 @@ namespace Karrot
 class PackageHandler
   {
   public:
-    void add(std::string const& name, std::string const& xmlns, KDriver const* driver)
+    void add(std::unique_ptr<Driver> driver)
       {
-      handlers.emplace_back(name, xmlns, driver);
+      handlers.push_back(std::move(driver));
       }
     Driver const * get(const std::string& name) const
       {
       auto it = std::find_if(begin(handlers), end(handlers),
-        [&name](Driver const& driver) -> bool
+        [&name](std::unique_ptr<Driver> const& driver) -> bool
         {
-        return name == driver.name();
+        return name == driver->name();
         });
       if (it != handlers.end())
         {
-        return &*it;
+        return it->get();
         }
       return nullptr;
       }
   private:
-    std::vector<Driver> handlers;
+    std::vector<std::unique_ptr<Driver>> handlers;
   };
 
 } // namespace Karrot

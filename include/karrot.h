@@ -10,21 +10,17 @@
 #define KARROT_H_INCLUDED
 
 #include <stddef.h>
+#include <memory>
+#include <karrot/driver.hpp>
 
 #define KARROT_VER_MAJOR 1
 #define KARROT_VER_MINOR 0
 #define KARROT_VER_PATCH 0
 #define KARROT_VERSION "1.0.0"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct KImplementation KImplementation;
-typedef struct KDriver KDriver;
 typedef struct KEngine KEngine;
 
-typedef void (*KAdd) (KImplementation *impl, int native, void *self);
 typedef void (*KPrint) (void *target, int level, char const *string);
 typedef void (*KVisit) (void *target, char const *key, char const *val);
 
@@ -73,16 +69,6 @@ char const *
 k_implementation_get_global (KImplementation const *self, char const *key);
 
 
-struct KDriver
-  {
-  int (*filter) (KDriver const *self, KImplementation *impl, KAdd add, void *target);
-  int (*depend) (KDriver const *self, KImplementation const *impl, KImplementation const *other);
-  int (*handle) (KDriver const *self, KImplementation const *impl, int requested);
-  int (*commit) (KDriver const *self);
-  char const* (*get_error) (KDriver const *self);
-  };
-
-
 /**
  * @defgroup Engine class
  * @ingroup Karrot
@@ -110,7 +96,7 @@ k_engine_set_logger (KEngine *self, KPrint print, void *target);
  * @param driver a `KDriver` instance
  */
 void
-k_engine_add_driver (KEngine *self, char const *name, char const *xmlns, KDriver const *driver);
+k_engine_add_driver (KEngine *self, std::unique_ptr<Karrot::Driver> driver);
 
 /**
  * Add a Request to an Engine.
@@ -149,9 +135,5 @@ void
 k_engine_free (KEngine *self);
 
 /** @} */
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 #endif /* KARROT_H_INCLUDED */
