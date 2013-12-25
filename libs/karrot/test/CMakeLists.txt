@@ -46,5 +46,3 @@ foreach(test IN LISTS test_list)
       )
   endif()
 endforeach()
-
-configure_file(coveralls.in ${CMAKE_BINARY_DIR}/coveralls @ONLY)

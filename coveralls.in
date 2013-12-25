@@ -15,7 +15,7 @@ cat >coverage.json <<EOF
   "source_files": [
 EOF
 
-for file in $(find * -iname '*.gcov' -print | egrep '^(src|include)')
+for file in $(find * -iname '*.gcov' -print | grep -v '/test/')
 do
   cat >>coverage.json <<EOF
     {

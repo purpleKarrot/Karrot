@@ -64,6 +64,8 @@ add_library(karrot STATIC
 
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 
+target_include_directories(karrot PUBLIC ../include)
+
 target_link_libraries(karrot PRIVATE
   xml
   )

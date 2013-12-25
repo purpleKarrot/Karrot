@@ -12,7 +12,6 @@ project(Karrot CXX)
 list(APPEND CMAKE_MODULE_PATH "${Karrot_SOURCE_DIR}/CMake")
 
 enable_testing()
-include_directories(include)
 
 if(MSVC)
   add_definitions(
@@ -40,7 +39,8 @@ if(BUILD_COVERAGE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
 endif()
 
 add_subdirectory(doc)
+add_subdirectory(libs/karrot)
 add_subdirectory(libs/xml)
-add_subdirectory(src)
 add_subdirectory(tools)
-add_subdirectory(test)
+
+configure_file(coveralls.in coveralls @ONLY)
