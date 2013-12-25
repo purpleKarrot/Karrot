@@ -35,6 +35,8 @@ static void set_uname(std::string& sysname, std::string& machine)
 static void run(std::string& sysname, std::string& machine,
 		std::vector<std::string> const& request_urls)
 {
+	using namespace Karrot;
+
 	KPrint print = [](void *target, int level, char const *string)
 	{
 		std::cout << string << std::endl;
@@ -42,17 +44,14 @@ static void run(std::string& sysname, std::string& machine,
 
 	KEngine *engine = k_engine_new();
 
-	k_engine_set_global(engine, "sysname", sysname.c_str());
-	k_engine_set_global(engine, "machine", machine.c_str());
-
 	k_engine_set_logger(engine, print, nullptr);
 
 	k_engine_add_driver(engine,
-			std::unique_ptr<Karrot::Driver>(new Karrot::Archive));
+			std::unique_ptr<Driver>(new Archive(machine, sysname)));
 	k_engine_add_driver(engine,
-			std::unique_ptr<Karrot::Driver>(new Karrot::Git));
+			std::unique_ptr<Driver>(new Git));
 	k_engine_add_driver(engine,
-			std::unique_ptr<Karrot::Driver>(new Karrot::Subversion));
+			std::unique_ptr<Driver>(new Subversion));
 
 	for (const auto& url : request_urls)
 	{
@@ -62,7 +61,7 @@ static void run(std::string& sysname, std::string& machine,
 	int result = k_engine_run(engine);
 	if (result != 0)
 	{
-		std::cerr << k_engine_get_error(engine) << std::endl;
+		std::cerr << "Not solvable!" << std::endl;
 	}
 
 	k_engine_free(engine);

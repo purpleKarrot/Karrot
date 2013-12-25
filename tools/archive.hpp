@@ -19,7 +19,7 @@ namespace Karrot
 class Archive: public Driver
 {
 public:
-	Archive();
+	Archive(std::string machine, std::string sysname);
 	~Archive();
 
 private:
@@ -28,6 +28,9 @@ private:
 	void download(const char* path, const char* url, const char* checksum) const;
 
 private:
+	std::string machine;
+	std::string sysname;
+
 	CURL* curl;
 	pxProxyFactory* proxy_factory;
 };

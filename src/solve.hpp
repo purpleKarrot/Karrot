@@ -32,7 +32,6 @@ inline bool satisfies(const KImplementation& impl, const Spec& spec)
 bool solve(
     Database const& database,
     Requests const& requests,
-    bool ignore_source_conflicts,
     LogFunct& log,
     std::vector<int>& model);
 

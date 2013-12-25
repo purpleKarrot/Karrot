@@ -275,8 +275,9 @@ static bool check_checksum(FILE *file, const char *sum)
 	return true;
 }
 
-Archive::Archive() :
-		Driver("archive", "http://purplekarrot.net/2013/archive")
+Archive::Archive(std::string machine, std::string sysname) :
+		Driver("archive", "http://purplekarrot.net/2013/archive"),
+		machine(std::move(machine)), sysname(std::move(sysname))
 {
 	this->curl = curl_easy_init();
 	this->proxy_factory = px_proxy_factory_new();
@@ -294,19 +295,16 @@ Archive::~Archive()
 
 void Archive::do_filter(KImplementation& impl, Add add) const
 {
-	char const* pack;
-	char const* glob;
+	char const* value;
 
-	pack = k_implementation_get_value(&impl, "sysname");
-	glob = k_implementation_get_global(&impl, "sysname");
-	if (std::strcmp(pack, "*") != 0 && std::strcmp(pack, glob) != 0)
+	value = k_implementation_get_value(&impl, "sysname");
+	if (std::strcmp(value, "*") != 0 && value != this->sysname)
 	{
 		return;
 	}
 
-	pack = k_implementation_get_value(&impl, "machine");
-	glob = k_implementation_get_global(&impl, "machine");
-	if (std::strcmp(pack, "*") != 0 && std::strcmp(pack, glob) != 0)
+	value = k_implementation_get_value(&impl, "machine");
+	if (std::strcmp(value, "*") != 0 && value != this->machine)
 	{
 		return;
 	}
@@ -319,7 +317,7 @@ void Archive::do_handle(KImplementation const& impl, bool requested) const
 	char const *name = k_implementation_get_name(&impl);
 	char const *href = k_implementation_get_value(&impl, "href");
 	char const *checksum = k_implementation_get_value(&impl, "checksum");
-	char const *cache = k_implementation_get_global(&impl, "pkgcache");
+	char const *cache = ".";
 
 	fs::path archive = fs::path(cache) / urlencode(href);
 	this->download(archive.c_str(), href, checksum);

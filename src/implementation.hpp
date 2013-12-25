@@ -30,7 +30,6 @@ struct KImplementation
   Karrot::Dictionary variant;
   Karrot::Dictionary values;
   std::shared_ptr<Karrot::Dictionary> meta;
-  Karrot::Dictionary const* globals;
   std::vector<Karrot::Spec> depends;
   std::vector<Karrot::Spec> conflicts;
   };

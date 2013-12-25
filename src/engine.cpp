@@ -35,34 +35,6 @@ void k_engine_free(KEngine *self)
   delete self;
   }
 
-void k_engine_set_global(KEngine *self, char const *key, char const *value)
-  {
-  if (std::strcmp(key, ":xmlns") == 0)
-    {
-    self->xmlns = value;
-    }
-  else if (std::strcmp(key, ":feed-cache") == 0)
-    {
-    self->feed_cache = value ? value : ".";
-    }
-  else if (std::strcmp(key, ":reload-feeds") == 0)
-    {
-    self->reload_feeds = value != nullptr;
-    }
-  else if (std::strcmp(key, ":ignore-source-conflicts") == 0)
-    {
-    self->ignore_source_conflicts = value != nullptr;
-    }
-  else if (std::strcmp(key, ":no-topological-order") == 0)
-    {
-    self->no_topological_order = value != nullptr;
-    }
-  else
-    {
-    Karrot::set(self->globals, key, value);
-    }
-  }
-
 void
 k_engine_set_logger (KEngine *self, KPrint print, void *target)
   {
@@ -117,12 +89,10 @@ static bool engine_run(KEngine *self)
   bool solvable = solve(
       self->database,
       self->requests,
-      self->ignore_source_conflicts,
       self->log_function,
       model);
   if (!solvable)
     {
-    self->error = "Not solvable!";
     return false;
     }
   if (!self->no_topological_order)
@@ -170,16 +140,7 @@ int k_engine_run(KEngine *self)
       << std::string(error.column, ' ') << "^\n"
       << error.message << '\n'
       ;
-    self->error = stream.str();
-    }
-  catch (...)
-    {
-    self->error = boost::current_exception_diagnostic_information();
+    throw std::runtime_error(stream.str());
     }
   return -1;
-  }
-
-char const *k_engine_get_error(KEngine *self)
-  {
-  return self->error.c_str();
   }

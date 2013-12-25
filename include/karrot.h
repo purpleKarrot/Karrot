@@ -65,9 +65,6 @@ k_implementation_get_value (KImplementation const *self, char const *key);
 void
 k_implementation_set_value (KImplementation *self, char const *key, char const *value);
 
-char const *
-k_implementation_get_global (KImplementation const *self, char const *key);
-
 
 /**
  * @defgroup Engine class
@@ -82,9 +79,6 @@ k_implementation_get_global (KImplementation const *self, char const *key);
  */
 KEngine *
 k_engine_new (void);
-
-void
-k_engine_set_global (KEngine *self, char const *key, char const *value);
 
 void
 k_engine_set_logger (KEngine *self, KPrint print, void *target);
@@ -116,15 +110,6 @@ k_engine_add_request (KEngine *self, char const *url, int source);
  */
 int
 k_engine_run (KEngine *self);
-
-/**
- * Get the error message of the Engine.
- *
- * @param self a `KEngine` instance
- * @return the error message string
- */
-char const *
-k_engine_get_error (KEngine *self);
 
 /**
  * Engine destructor

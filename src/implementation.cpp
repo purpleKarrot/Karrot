@@ -91,12 +91,6 @@ k_implementation_set_value(KImplementation *self, char const *key, char const *v
   Karrot::set(self->values, key, value);
   }
 
-char const *
-k_implementation_get_global(KImplementation const *self, char const *key)
-  {
-  return Karrot::get(*self->globals, key);
-  }
-
 std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
   {
   os << impl.id;

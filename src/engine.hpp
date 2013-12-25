@@ -31,16 +31,12 @@ using LogFunct = std::function<void(std::string const&)>;
 struct KEngine
   {
   public:
-    std::string error;
-    std::string xmlns = "http://purplekarrot.net/2013/project";
     Karrot::FeedQueue feed_queue;
     Karrot::PackageHandler package_handler;
     Karrot::Requests requests;
     Karrot::Database database;
-    Karrot::Dictionary globals;
     std::string feed_cache = ".";
     bool reload_feeds = false;
-    bool ignore_source_conflicts = false;
     bool no_topological_order = false;
     Karrot::LogFunct log_function = [](std::string const&){};
   };
