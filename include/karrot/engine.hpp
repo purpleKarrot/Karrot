@@ -10,12 +10,12 @@
 #define KARROT_ENGINE_HPP
 
 #include <memory>
-
-typedef void (*KPrint) (void *target, int level, char const *string);
+#include <vector>
 
 namespace Karrot
 {
 class Driver;
+class Implementation;
 
 class Engine
 {
@@ -26,17 +26,25 @@ public:
 	Engine(Engine const&) = delete;
 	Engine& operator=(Engine const&) = delete;
 
-	void set_logger(KPrint print, void *target);
-
-	void add_driver(std::unique_ptr<Karrot::Driver> driver);
+	void add_driver(std::unique_ptr<Driver> driver);
+	Driver* get_driver(std::string const& name) const;
 
 	void add_request(char const *url, int source);
 
-	bool run();
+	void load(std::string const& cache, bool force);
+	bool solve();
+
+	std::size_t num_modules() const;
+
+	Implementation const& get_module(std::size_t index) const;
+
+	std::vector<int> get_depends(Implementation const& module) const;
+
+	bool is_requested(Implementation const& module) const;
 
 private:
-	struct Implementation;
-	Implementation* self;
+	struct Private;
+	Private* self;
 };
 
 } // namespace Karrot

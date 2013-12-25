@@ -29,7 +29,6 @@ struct XmlParseError: std::exception
   std::size_t line, column;
   std::string current_line;
   std::string message;
-  std::string filename;
   };
 
 enum XmlToken

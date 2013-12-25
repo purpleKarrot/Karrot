@@ -38,15 +38,11 @@ add_library(karrot STATIC
   dependencies.cpp
   dependencies.hpp
   engine.cpp
-  engine.hpp
   feed_parser.cpp
   feed_parser.hpp
   feed_queue.hpp
-  graph.cpp
-  graph.hpp
   hash.hpp
   implementation.cpp
-  package_handler.hpp
   package.hpp
   query_re2c.hpp
   query_re2c.in.hpp
@@ -55,6 +51,7 @@ add_library(karrot STATIC
   solve.cpp
   solve.hpp
   spec.hpp
+  types.hpp
   url.cpp
   url.hpp
   url_curl.cpp

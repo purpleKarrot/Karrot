@@ -7,6 +7,7 @@
  */
 
 #include <karrot/engine.hpp>
+#include <karrot/implementation.hpp>
 
 #include "archive.hpp"
 #include "git.hpp"
@@ -32,35 +33,40 @@ static void set_uname(std::string& sysname, std::string& machine)
 #endif
 }
 
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
 static void run(std::string& sysname, std::string& machine,
 		std::vector<std::string> const& request_urls)
 {
 	using namespace Karrot;
 
-	KPrint print = [](void *target, int level, char const *string)
-	{
-		std::cout << string << std::endl;
-	};
+	Engine engine;
 
-	Karrot::Engine engine;
-
-	engine.set_logger(print, nullptr);
-
-	engine.add_driver(
-			std::unique_ptr<Driver>(new Archive(machine, sysname)));
-	engine.add_driver(
-			std::unique_ptr<Driver>(new Git));
-	engine.add_driver(
-			std::unique_ptr<Driver>(new Subversion));
+	engine.add_driver(make_unique<Archive>(machine, sysname));
+	engine.add_driver(make_unique<Git>());
+	engine.add_driver(make_unique<Subversion>());
 
 	for (const auto& url : request_urls)
 	{
 		engine.add_request(url.c_str(), true);
 	}
 
-	if (!engine.run())
+	engine.load(".", false);
+	if (!engine.solve())
 	{
 		std::cerr << "Not solvable!" << std::endl;
+		return;
+	}
+
+	for (std::size_t i = 0; i < engine.num_modules(); ++i)
+	{
+		auto const& module = engine.get_module(i);
+		bool requested = engine.is_requested(module);
+		module.driver->handle(module, requested);
 	}
 }
 

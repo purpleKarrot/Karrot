@@ -6,19 +6,21 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef KARROT_GRAPH_HPP
-#define KARROT_GRAPH_HPP
+#ifndef KARROT_TYPES_HPP
+#define KARROT_TYPES_HPP
 
-#include "engine.hpp"
+#include <vector>
 
 namespace Karrot
 {
 
-std::vector<int>
-topological_sort(
-    std::vector<int> const& model,
-    Database const& database);
+class Spec;
+class Implementation;
+
+using Requests = std::vector<Spec>;
+using Database = std::vector<Implementation>;
+using Solution = std::vector<int>;
 
 } // namespace Karrot
 
-#endif /* KARROT_GRAPH_HPP */
+#endif /* KARROT_TYPES_HPP */

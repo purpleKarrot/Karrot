@@ -7,32 +7,33 @@
  */
 
 #include <karrot/engine.hpp>
-#include "engine.hpp"
+#include <karrot/driver.hpp>
 
 #include <cstring>
 #include <fstream>
 #include <algorithm>
 #include <stdexcept>
-#include <boost/throw_exception.hpp>
-#include <boost/exception/diagnostic_information.hpp>
 
-#include "log.hpp"
 #include "url.hpp"
-#include "graph.hpp"
 #include "solve.hpp"
+#include "types.hpp"
 #include "feed_queue.hpp"
 #include "feed_parser.hpp"
-#include "package_handler.hpp"
 #include "xml_reader.hpp"
 
 namespace Karrot
 {
 
-struct Engine::Implementation: KEngine
+struct Engine::Private
   {
+  FeedQueue feed_queue;
+  std::vector<std::unique_ptr<Driver>> drivers;
+  Requests requests;
+  Database database;
+  Solution solution;
   };
 
-Engine::Engine() : self(new Implementation)
+Engine::Engine() : self(new Private)
   {
   }
 
@@ -41,17 +42,23 @@ Engine::~Engine()
   delete self;
   }
 
-void Engine::set_logger(KPrint print, void *target)
-  {
-  self->log_function = [print,target](std::string const& message)
-    {
-    print(target, 0, message.c_str());
-    };
-  }
-
 void Engine::add_driver(std::unique_ptr<Karrot::Driver> driver)
   {
-  self->package_handler.add(std::move(driver));
+  self->drivers.push_back(std::move(driver));
+  }
+
+Driver* Engine::get_driver(std::string const& name) const
+  {
+  auto it = std::find_if(std::begin(self->drivers), std::end(self->drivers),
+    [&name](std::unique_ptr<Driver> const& driver) -> bool
+    {
+    return name == driver->name();
+    });
+  if (it != std::end(self->drivers))
+    {
+    return it->get();
+    }
+  return nullptr;
   }
 
 void Engine::add_request(char const *url, int source)
@@ -65,87 +72,77 @@ void Engine::add_request(char const *url, int source)
   self->requests.push_back(spec);
   }
 
-static bool engine_run(KEngine *self)
+void Engine::load(std::string const& cache, bool force)
   {
-  using namespace Karrot;
   while (auto spec = self->feed_queue.get_next())
     {
-    Log(self->log_function, "Reading feed '%1%'") % spec->id;
-    std::string local_path = download(spec->id, self->feed_cache, self->reload_feeds);
+    std::clog << "Reading feed '" << spec->id << "'\n";
+    auto const local_path = download(spec->id, cache, force);
     XmlReader xml(local_path);
     if (!xml.start_element())
       {
-      BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + local_path));
+      throw std::runtime_error("failed to read feed: " + local_path);
       }
-    FeedParser parser{*spec, *self};
+    FeedParser parser{*spec, *this, self->database, self->feed_queue};
     try
       {
-      parser.parse(xml, self->log_function);
+      parser.parse(xml);
       }
     catch (XmlParseError& error)
       {
-      error.filename = local_path;
-      throw;
+      std::stringstream stream;
+      stream
+        << error.what()
+        << " in '" << local_path << "' at line " << error.line << ".\n"
+        << error.current_line << '\n'
+        << std::string(error.column, ' ') << "^\n"
+        << error.message << '\n'
+        ;
+      throw std::runtime_error(stream.str());
       }
     }
-  std::vector<int> model;
-  Log(self->log_function, "Solving SAT with %1% variables") % self->database.size();
-  bool solvable = solve(
-      self->database,
-      self->requests,
-      self->log_function,
-      model);
-  if (!solvable)
+  }
+
+bool Engine::solve()
+  {
+  self->solution.clear();
+  std::clog << "Solving SAT with " << self->database.size() << " variables.\n";
+  return Karrot::solve(self->database, self->requests, self->solution);
+  }
+
+std::size_t Engine::num_modules() const
+  {
+  return self->solution.size();
+  }
+
+Implementation const& Engine::get_module(std::size_t index) const
+  {
+  return self->database[self->solution[index]];
+  }
+
+std::vector<int> Engine::get_depends(Implementation const& module) const
+  {
+  std::set<int> result;
+  for (auto& spec : module.depends)
     {
-    return false;
-    }
-  if (!self->no_topological_order)
-    {
-    model = topological_sort(model, self->database);
-    }
-  for (int i : model)
-    {
-    Implementation const& impl = self->database[i];
-    Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
-    bool requested = std::any_of(self->requests.begin(), self->requests.end(),
-      [&impl](const Spec& spec)
+    for (std::size_t i = 0; i < num_modules(); ++i)
       {
-      return satisfies(impl, spec);
-      });
-    impl.driver->handle(impl, requested);
-    for (auto& spec : impl.depends)
-      {
-      for (int k : model)
+      if (satisfies(get_module(i), spec))
         {
-        Implementation const& other = self->database[k];
-        if (satisfies(other, spec))
-          {
-          impl.driver->depend(impl, other);
-          }
+        result.insert(i);
         }
       }
     }
-  return true;
+  return std::vector<int>(result.begin(), result.end());
   }
 
-bool Engine::run()
+bool Engine::is_requested(Implementation const& module) const
   {
-  try
+  return std::any_of(self->requests.begin(), self->requests.end(),
+    [&module](const Spec& spec)
     {
-    return engine_run(self);
-    }
-  catch (Karrot::XmlParseError& error)
-    {
-    std::stringstream stream;
-    stream
-      << error.what()
-      << " in '" << error.filename << "' at line " << error.line << ".\n"
-      << error.current_line << '\n'
-      << std::string(error.column, ' ') << "^\n"
-      << error.message << '\n'
-      ;
-    throw std::runtime_error(stream.str());
-    }
+    return satisfies(module, spec);
+    });
   }
 
 } // namespace Karrot

@@ -9,8 +9,9 @@
 #ifndef KARROT_SOLVE_HPP
 #define KARROT_SOLVE_HPP
 
-#include "engine.hpp"
+#include <karrot/engine.hpp>
 #include <karrot/implementation.hpp>
+#include "types.hpp"
 #include "spec.hpp"
 
 namespace Karrot
@@ -32,8 +33,7 @@ inline bool satisfies(const Implementation& impl, const Spec& spec)
 bool solve(
     Database const& database,
     Requests const& requests,
-    LogFunct& log,
-    std::vector<int>& model);
+    Solution& model);
 
 } // namespace Karrot
 

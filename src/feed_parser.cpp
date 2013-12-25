@@ -7,11 +7,10 @@
  */
 
 #include "feed_parser.hpp"
-#include "engine.hpp"
+#include <karrot/driver.hpp>
 #include <karrot/implementation.hpp>
 #include "xml_reader.hpp"
 #include "variants.hpp"
-#include "log.hpp"
 #include "url.hpp"
 
 namespace Karrot
@@ -23,14 +22,15 @@ static const String SOURCE {"SOURCE"};
 static const String HREF   {"href"};
 static const String TAG {"tag"};
 
-FeedParser::FeedParser(Spec const& spec, KEngine& engine) :
+FeedParser::FeedParser(Spec const& spec, Engine& engine, Database& database, FeedQueue& queue) :
     spec(spec),
     engine(engine),
-    queue(engine.feed_queue)
+    database(database),
+    queue(queue)
   {
   }
 
-std::string FeedParser::next_element(XmlReader& xml, LogFunct& log) const
+std::string FeedParser::next_element(XmlReader& xml) const
   {
   while (xml.start_element())
     {
@@ -38,13 +38,12 @@ std::string FeedParser::next_element(XmlReader& xml, LogFunct& log) const
       {
       return xml.name();
       }
-    Log(log, "skipping '{%1%}:%2%'.") % xml.namespace_uri() % xml.name();
     xml.skip();
     }
   return std::string();
   }
 
-void FeedParser::parse(XmlReader& xml, LogFunct& log)
+void FeedParser::parse(XmlReader& xml)
   {
   if (xml.name() != "project" || xml.namespace_uri() != xmlns)
     {
@@ -57,37 +56,37 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
     queue.current_id(id);
     }
   name = xml.attribute("name", xmlns);
-  std::string tag = next_element(xml, log);
+  std::string tag = next_element(xml);
   if (tag == "meta")
     {
     parse_meta(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "vcs")
     {
     vcs_type = xml.attribute("type", xmlns);
     vcs_href = xml.attribute("href", xmlns);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "variants")
     {
     parse_variants(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "releases")
     {
     parse_releases(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "components")
     {
     parse_components(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "packages")
     {
@@ -96,11 +95,11 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
       parse_packages(xml);
       }
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (!tag.empty())
     {
-    Log(log, "element '%1%' not expected!!") % tag;
+    std::clog << "element '" << tag << "' not expected!\n";
     }
   }
 
@@ -143,7 +142,7 @@ void FeedParser::parse_releases(XmlReader& xml)
 
 void FeedParser::add_src_package(std::string const& version, boost::optional<std::string> const& tag)
   {
-  Driver const *driver = this->engine.package_handler.get(vcs_type);
+  Driver const *driver = this->engine.get_driver(vcs_type);
   if (!driver)
     {
     return;
@@ -175,7 +174,7 @@ void FeedParser::add_src_package(std::string const& version, boost::optional<std
       {
       component.replay(impl);
       }
-    this->engine.database.push_back(impl);
+    this->database.push_back(impl);
     });
   }
 
@@ -247,7 +246,7 @@ void FeedParser::parse_package(XmlReader& xml)
   impl.meta = this->meta;
   impl.version = xml.attribute("version", xmlns);
   impl.component = xml.attribute("component", xmlns);
-  impl.driver = engine.package_handler.get(xml.attribute("type", xmlns));
+  impl.driver = engine.get_driver(xml.attribute("type", xmlns));
   if (auto attr = xml.optional_attribute("variant", xmlns))
     {
     impl.variant = parse_variant(*attr);
@@ -278,7 +277,7 @@ void FeedParser::parse_package(XmlReader& xml)
         component.replay(impl);
         }
       }
-    this->engine.database.push_back(impl);
+    this->database.push_back(impl);
     });
   }
 

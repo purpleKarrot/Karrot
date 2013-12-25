@@ -10,11 +10,11 @@
 #define KARROT_FEED_PARSER_HPP
 
 #include <vector>
-#include "engine.hpp"
+#include <karrot/engine.hpp>
 #include "dependencies.hpp"
 #include "feed_queue.hpp"
-#include "package_handler.hpp"
 #include "package.hpp"
+#include "types.hpp"
 
 namespace Karrot
 {
@@ -24,10 +24,10 @@ class XmlReader;
 class FeedParser
   {
   public:
-    FeedParser(Spec const& spec, KEngine& engine);
-    void parse(XmlReader& xml, LogFunct& log);
+    FeedParser(Spec const& spec, Engine& engine, Database& database, FeedQueue& feed_queue);
+    void parse(XmlReader& xml);
   private:
-    std::string next_element(XmlReader& xml, LogFunct& log) const;
+    std::string next_element(XmlReader& xml) const;
     void parse_meta(XmlReader& xml);
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);
@@ -38,7 +38,8 @@ class FeedParser
     void add_src_package(std::string const& version, boost::optional<std::string> const& tag);
   private:
     Spec spec;
-    KEngine& engine;
+    Engine& engine;
+    Database& database;
     FeedPreQueue queue;
     std::string name;
     std::shared_ptr<Dictionary> meta = std::make_shared<Dictionary>();
