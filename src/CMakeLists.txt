@@ -28,12 +28,14 @@ re2c_target(
   )
 
 add_library(karrot STATIC
+  ../include/karrot/dictionary.hpp
+  ../include/karrot/driver.hpp
+  ../include/karrot/string.hpp
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
   dependencies.cpp
   dependencies.hpp
-  dictionary.hpp
   engine.cpp
   engine.hpp
   feed_parser.cpp

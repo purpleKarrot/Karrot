@@ -10,7 +10,7 @@
 #define KARROT_DICTIONARY_HPP
 
 #include <map>
-#include "string.hpp"
+#include <karrot/string.hpp>
 
 namespace Karrot
 {

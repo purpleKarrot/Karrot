@@ -7,7 +7,7 @@
  */
 
 #include "query.hpp"
-#include "string.hpp"
+#include <karrot/string.hpp>
 
 #include "query_re2c.hpp"
 #include "vercmp.hpp"

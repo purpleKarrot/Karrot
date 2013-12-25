@@ -10,7 +10,7 @@
 #define KARROT_SPEC_HPP
 
 #include "query.hpp"
-#include "string.hpp"
+#include <karrot/string.hpp>
 #include <iostream>
 #include <cstring>
 

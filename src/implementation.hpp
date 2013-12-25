@@ -10,8 +10,8 @@
 #define KARROT_IMPLEMENTATION_HPP
 
 #include <karrot.h>
-#include "dictionary.hpp"
-#include "string.hpp"
+#include <karrot/dictionary.hpp>
+#include <karrot/string.hpp>
 #include <iosfwd>
 
 namespace Karrot
