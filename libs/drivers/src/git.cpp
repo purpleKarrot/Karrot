@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "git.hpp"
+#include <karrot/git.hpp>
 #include <git2.h>
 #include <cstring>
 #include <cstdio>

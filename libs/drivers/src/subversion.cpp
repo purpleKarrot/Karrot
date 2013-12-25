@@ -6,10 +6,11 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "subversion.hpp"
+#include <karrot/subversion.hpp>
 #include <karrot/dictionary.hpp>
 #include <karrot/implementation.hpp>
 
+#include <svn_client.h>
 #include <svn_cmdline.h>
 #include <svn_path.h>
 #include <svn_pools.h>

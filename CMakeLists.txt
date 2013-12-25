@@ -39,6 +39,7 @@ if(BUILD_COVERAGE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
 endif()
 
 add_subdirectory(doc)
+add_subdirectory(libs/drivers)
 add_subdirectory(libs/karrot)
 add_subdirectory(libs/xml)
 add_subdirectory(tools)

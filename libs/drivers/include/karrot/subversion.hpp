@@ -10,7 +10,9 @@
 #define KARROT_SUBVERSION_HPP
 
 #include <karrot/driver.hpp>
-#include <svn_client.h>
+
+struct apr_pool_t;
+struct svn_client_ctx_t;
 
 namespace Karrot
 {

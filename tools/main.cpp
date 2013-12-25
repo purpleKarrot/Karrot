@@ -9,9 +9,9 @@
 #include <karrot/engine.hpp>
 #include <karrot/implementation.hpp>
 
-#include "archive.hpp"
-#include "git.hpp"
-#include "subversion.hpp"
+#include <karrot/archive.hpp>
+#include <karrot/git.hpp>
+#include <karrot/subversion.hpp>
 
 #include <boost/program_options.hpp>
 #include <iostream>
