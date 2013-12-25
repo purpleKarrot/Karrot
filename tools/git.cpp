@@ -10,6 +10,8 @@
 #include <git2.h>
 #include <cstring>
 #include <cstdio>
+#include <karrot/dictionary.hpp>
+#include <karrot/implementation.hpp>
 
 namespace Karrot
 {
@@ -53,11 +55,11 @@ Git::Git() :
 {
 }
 
-void Git::do_handle(KImplementation const& impl, bool requested) const
+void Git::do_handle(Implementation const& impl, bool requested) const
 {
-	char const *url = k_implementation_get_value(&impl, "href");
-	char const *tag = k_implementation_get_value(&impl, "tag");
-	char const *path = k_implementation_get_meta(&impl, "name");
+	char const *url = Karrot::get(impl.values, "href");
+	char const *tag = Karrot::get(impl.values, "tag");
+	char const *path = Karrot::get(*impl.meta, "name");
 
 	git_repository* repo = NULL;
 	git_remote* origin = NULL;

@@ -31,6 +31,7 @@ add_library(karrot STATIC
   ../include/karrot/dictionary.hpp
   ../include/karrot/driver.hpp
   ../include/karrot/string.hpp
+  ../include/karrot/implementation.hpp
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
@@ -45,7 +46,6 @@ add_library(karrot STATIC
   graph.hpp
   hash.hpp
   implementation.cpp
-  implementation.hpp
   package_handler.hpp
   package.hpp
   query_re2c.hpp
@@ -63,7 +63,6 @@ add_library(karrot STATIC
   variants.hpp
   vercmp.cpp
   vercmp.hpp
-  version.cpp
   )
 
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")

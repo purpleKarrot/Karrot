@@ -9,7 +9,7 @@
 #ifndef KARROT_GIT_HPP
 #define KARROT_GIT_HPP
 
-#include <karrot.h>
+#include <karrot/driver.hpp>
 
 namespace Karrot
 {
@@ -20,7 +20,7 @@ public:
 	Git();
 
 private:
-	void do_handle(KImplementation const& impl, bool requested) const override;
+	void do_handle(Implementation const& impl, bool requested) const override;
 };
 
 } // namespace Karrot

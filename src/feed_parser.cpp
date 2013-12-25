@@ -8,7 +8,7 @@
 
 #include "feed_parser.hpp"
 #include "engine.hpp"
-#include "implementation.hpp"
+#include <karrot/implementation.hpp>
 #include "xml_reader.hpp"
 #include "variants.hpp"
 #include "log.hpp"
@@ -148,7 +148,7 @@ void FeedParser::add_src_package(std::string const& version, boost::optional<std
     {
     return;
     }
-  KImplementation impl
+  Implementation impl
     {
     spec.id,
     String{this->name},
@@ -243,7 +243,7 @@ void FeedParser::parse_packages(XmlReader& xml)
 
 void FeedParser::parse_package(XmlReader& xml)
   {
-  KImplementation impl{this->spec.id, String{this->name}};
+  Implementation impl{this->spec.id, String{this->name}};
   impl.meta = this->meta;
   impl.version = xml.attribute("version", xmlns);
   impl.component = xml.attribute("component", xmlns);
@@ -259,7 +259,7 @@ void FeedParser::parse_package(XmlReader& xml)
       impl.values[String{attr.name.local}] = attr.value;
       }
     }
-  impl.driver->filter(impl, [&](KImplementation& impl, bool system)
+  impl.driver->filter(impl, [&](Implementation& impl, bool system)
     {
     if (!spec.query.evaluate(impl.version, impl.variant))
       {

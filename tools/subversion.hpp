@@ -9,7 +9,7 @@
 #ifndef KARROT_SUBVERSION_HPP
 #define KARROT_SUBVERSION_HPP
 
-#include <karrot.h>
+#include <karrot/driver.hpp>
 #include <svn_client.h>
 
 namespace Karrot
@@ -22,7 +22,7 @@ public:
 	~Subversion();
 
 private:
-	void do_handle(KImplementation const& impl, bool requested) const override;
+	void do_handle(Implementation const& impl, bool requested) const override;
 
 private:
 	apr_pool_t *pool;

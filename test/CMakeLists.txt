@@ -18,7 +18,6 @@ set(test_list
   url
   variants
   vercmp
-  version
   )
 
 create_test_sourcelist(test_sources

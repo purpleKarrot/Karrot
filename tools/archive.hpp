@@ -9,7 +9,7 @@
 #ifndef KARROT_ARCHIVE_HPP
 #define KARROT_ARCHIVE_HPP
 
-#include <karrot.h>
+#include <karrot/driver.hpp>
 #include <curl/curl.h>
 #include <proxy.h>
 
@@ -23,8 +23,8 @@ public:
 	~Archive();
 
 private:
-	void do_filter(KImplementation& impl, Add add) const override;
-	void do_handle(KImplementation const& impl, bool requested) const override;
+	void do_filter(Implementation& impl, Add add) const override;
+	void do_handle(Implementation const& impl, bool requested) const override;
 	void download(const char* path, const char* url, const char* checksum) const;
 
 private:

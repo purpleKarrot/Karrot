@@ -10,13 +10,13 @@
 #define KARROT_SOLVE_HPP
 
 #include "engine.hpp"
-#include "implementation.hpp"
+#include <karrot/implementation.hpp>
 #include "spec.hpp"
 
 namespace Karrot
 {
 
-inline bool satisfies(const KImplementation& impl, const Spec& spec)
+inline bool satisfies(const Implementation& impl, const Spec& spec)
   {
   if (impl.id != spec.id)
     {

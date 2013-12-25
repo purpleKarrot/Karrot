@@ -6,6 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
+#include <karrot/engine.hpp>
 #include "engine.hpp"
 
 #include <cstring>
@@ -24,19 +25,23 @@
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
 
-KEngine *
-k_engine_new()
+namespace Karrot
+{
+
+struct Engine::Implementation: KEngine
   {
-  return new KEngine;
+  };
+
+Engine::Engine() : self(new Implementation)
+  {
   }
 
-void k_engine_free(KEngine *self)
+Engine::~Engine()
   {
   delete self;
   }
 
-void
-k_engine_set_logger (KEngine *self, KPrint print, void *target)
+void Engine::set_logger(KPrint print, void *target)
   {
   self->log_function = [print,target](std::string const& message)
     {
@@ -44,13 +49,12 @@ k_engine_set_logger (KEngine *self, KPrint print, void *target)
     };
   }
 
-void
-k_engine_add_driver(KEngine *self, std::unique_ptr<Karrot::Driver> driver)
+void Engine::add_driver(std::unique_ptr<Karrot::Driver> driver)
   {
   self->package_handler.add(std::move(driver));
   }
 
-void k_engine_add_request(KEngine *self, char const *url, int source)
+void Engine::add_request(char const *url, int source)
   {
   Karrot::Spec spec(url);
   if (source != 0)
@@ -101,7 +105,7 @@ static bool engine_run(KEngine *self)
     }
   for (int i : model)
     {
-    const KImplementation& impl = self->database[i];
+    Implementation const& impl = self->database[i];
     Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
     bool requested = std::any_of(self->requests.begin(), self->requests.end(),
       [&impl](const Spec& spec)
@@ -113,7 +117,7 @@ static bool engine_run(KEngine *self)
       {
       for (int k : model)
         {
-        const KImplementation& other = self->database[k];
+        Implementation const& other = self->database[k];
         if (satisfies(other, spec))
           {
           impl.driver->depend(impl, other);
@@ -124,11 +128,11 @@ static bool engine_run(KEngine *self)
   return true;
   }
 
-int k_engine_run(KEngine *self)
+bool Engine::run()
   {
   try
     {
-    return engine_run(self) ? 0 : 1;
+    return engine_run(self);
     }
   catch (Karrot::XmlParseError& error)
     {
@@ -142,5 +146,6 @@ int k_engine_run(KEngine *self)
       ;
     throw std::runtime_error(stream.str());
     }
-  return -1;
   }
+
+} // namespace Karrot

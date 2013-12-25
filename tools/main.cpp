@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot.h>
+#include <karrot/engine.hpp>
 
 #include "archive.hpp"
 #include "git.hpp"
@@ -42,29 +42,26 @@ static void run(std::string& sysname, std::string& machine,
 		std::cout << string << std::endl;
 	};
 
-	KEngine *engine = k_engine_new();
+	Karrot::Engine engine;
 
-	k_engine_set_logger(engine, print, nullptr);
+	engine.set_logger(print, nullptr);
 
-	k_engine_add_driver(engine,
+	engine.add_driver(
 			std::unique_ptr<Driver>(new Archive(machine, sysname)));
-	k_engine_add_driver(engine,
+	engine.add_driver(
 			std::unique_ptr<Driver>(new Git));
-	k_engine_add_driver(engine,
+	engine.add_driver(
 			std::unique_ptr<Driver>(new Subversion));
 
 	for (const auto& url : request_urls)
 	{
-		k_engine_add_request(engine, url.c_str(), true);
+		engine.add_request(url.c_str(), true);
 	}
 
-	int result = k_engine_run(engine);
-	if (result != 0)
+	if (!engine.run())
 	{
 		std::cerr << "Not solvable!" << std::endl;
 	}
-
-	k_engine_free(engine);
 }
 
 int main(int argc, char *argv[])

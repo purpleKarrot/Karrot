@@ -6,10 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef KARROT_ENGINE_HPP
-#define KARROT_ENGINE_HPP
-
-#include <karrot.h>
+#ifndef KARROT_ENGINE_PRIV_HPP
+#define KARROT_ENGINE_PRIV_HPP
 
 #include <string>
 #include <vector>
@@ -23,7 +21,7 @@ namespace Karrot
 
 class Spec;
 using Requests = std::vector<Spec>;
-using Database = std::vector<KImplementation>;
+using Database = std::vector<Implementation>;
 using LogFunct = std::function<void(std::string const&)>;
 
 } // namespace Karrot
@@ -41,4 +39,4 @@ struct KEngine
     Karrot::LogFunct log_function = [](std::string const&){};
   };
 
-#endif /* KARROT_ENGINE_HPP */
+#endif /* KARROT_ENGINE_PRIV_HPP */

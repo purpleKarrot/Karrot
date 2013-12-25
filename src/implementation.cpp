@@ -6,92 +6,15 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "implementation.hpp"
+#include <karrot/implementation.hpp>
 #include <karrot/driver.hpp>
 #include "spec.hpp"
 
-static inline const char *
-c_str(std::string const& str)
-  {
-  return str.c_str();
-  }
 
-char const *
-k_implementation_get_id(KImplementation const *self)
-  {
-  return c_str(self->id);
-  }
+namespace Karrot
+{
 
-char const *
-k_implementation_get_name(KImplementation const *self)
-  {
-  return c_str(self->name);
-  }
-
-char const *
-k_implementation_get_version(KImplementation const *self)
-  {
-  return c_str(self->version);
-  }
-
-void
-k_implementation_set_version(KImplementation *self, char const *value)
-  {
-  self->version = value;
-  }
-
-char const *
-k_implementation_get_component(KImplementation const *self)
-  {
-  return c_str(self->component);
-  }
-
-void
-k_implementation_set_component(KImplementation *self, char const *value)
-  {
-  self->component = value;
-  }
-
-char const *
-k_implementation_get_driver (KImplementation const *self)
-  {
-  self->driver->name().c_str();
-  }
-
-char const *
-k_implementation_get_meta(KImplementation const *self, char const *key)
-  {
-  return Karrot::get(*self->meta, key);
-  }
-
-char const *
-k_implementation_get_variant(KImplementation const *self, char const *key)
-  {
-  return Karrot::get(self->variant, key);
-  }
-
-void
-k_implementation_foreach_variant(KImplementation const *self, KVisit visit, void *target)
-  {
-  for (auto& entry : self->variant)
-    {
-    visit(target, c_str(entry.first), c_str(entry.second));
-    }
-  }
-
-char const *
-k_implementation_get_value(KImplementation const *self, char const *key)
-  {
-  return Karrot::get(self->values, key);
-  }
-
-void
-k_implementation_set_value(KImplementation *self, char const *key, char const *value)
-  {
-  Karrot::set(self->values, key, value);
-  }
-
-std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
+std::ostream& operator<<(std::ostream &os, Implementation const& impl)
   {
   os << impl.id;
   if (!impl.version.get().empty())
@@ -105,3 +28,5 @@ std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
   os << " (" << impl.driver->name() << ')';
   return os;
   }
+
+} // namespace Karrot

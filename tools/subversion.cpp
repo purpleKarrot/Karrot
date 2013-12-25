@@ -7,6 +7,8 @@
  */
 
 #include "subversion.hpp"
+#include <karrot/dictionary.hpp>
+#include <karrot/implementation.hpp>
 
 #include <svn_cmdline.h>
 #include <svn_path.h>
@@ -103,7 +105,7 @@ Subversion::~Subversion()
 	svn_pool_destroy(pool);
 }
 
-void Subversion::do_handle(KImplementation const& impl, bool requested) const
+void Subversion::do_handle(Implementation const& impl, bool requested) const
 {
 	svn_revnum_t result_rev;
 	svn_opt_revision_t revision;
@@ -111,9 +113,9 @@ void Subversion::do_handle(KImplementation const& impl, bool requested) const
 	peg_revision.kind = svn_opt_revision_unspecified;
 	svn_error_t* error = nullptr;
 
-	char const *url = k_implementation_get_value(&impl, "href");
-	char const *tag = k_implementation_get_value(&impl, "tag");
-	char const *path = k_implementation_get_meta(&impl, "name");
+	char const *url = Karrot::get(impl.values, "href");
+	char const *tag = Karrot::get(impl.values, "tag");
+	char const *path = Karrot::get(*impl.meta, "name");
 
 	char const *revchr = std::strrchr(tag, '@');
 	if (revchr != nullptr)

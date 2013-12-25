@@ -12,10 +12,9 @@
 #include <string>
 #include <functional>
 
-struct KImplementation;
-
 namespace Karrot
 {
+class Implementation;
 
 class Driver
 {
@@ -43,30 +42,30 @@ public:
 		return xmlns_;
 	}
 
-	using Add = std::function<void(KImplementation&, bool)>;
-	void filter(KImplementation& impl, Add add) const
+	using Add = std::function<void(Implementation&, bool)>;
+	void filter(Implementation& impl, Add add) const
 	{
 		do_filter(impl, add);
 	}
 
-	void handle(KImplementation const& impl, bool requested) const
+	void handle(Implementation const& impl, bool requested) const
 	{
 		do_handle(impl, requested);
 	}
 
-	void depend(KImplementation const& impl, KImplementation const& other) const
+	void depend(Implementation const& impl, Implementation const& other) const
 	{
 		do_depend(impl, other);
 	}
 
 private:
-	virtual void do_filter(KImplementation& impl, Add add) const
+	virtual void do_filter(Implementation& impl, Add add) const
 	{
 	}
 
-	virtual void do_handle(KImplementation const& impl, bool requested) const = 0;
+	virtual void do_handle(Implementation const& impl, bool requested) const = 0;
 
-	virtual void do_depend(KImplementation const& impl, KImplementation const& other) const
+	virtual void do_depend(Implementation const& impl, Implementation const& other) const
 	{
 	}
 

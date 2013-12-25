@@ -11,10 +11,9 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <boost/filesystem.hpp>
-#include <curl/curl.h>
-#include <karrot.h>
+#include <karrot/dictionary.hpp>
+#include <karrot/implementation.hpp>
 #include <openssl/evp.h>
-#include <proxy.h>
 
 #include <string>
 #include <cstring>
@@ -293,17 +292,17 @@ Archive::~Archive()
 	px_proxy_factory_free(proxy_factory);
 }
 
-void Archive::do_filter(KImplementation& impl, Add add) const
+void Archive::do_filter(Implementation& impl, Add add) const
 {
 	char const* value;
 
-	value = k_implementation_get_value(&impl, "sysname");
+	value = Karrot::get(impl.values, "sysname");
 	if (std::strcmp(value, "*") != 0 && value != this->sysname)
 	{
 		return;
 	}
 
-	value = k_implementation_get_value(&impl, "machine");
+	value = Karrot::get(impl.values, "machine");
 	if (std::strcmp(value, "*") != 0 && value != this->machine)
 	{
 		return;
@@ -312,11 +311,11 @@ void Archive::do_filter(KImplementation& impl, Add add) const
 	add(impl, false);
 }
 
-void Archive::do_handle(KImplementation const& impl, bool requested) const
+void Archive::do_handle(Implementation const& impl, bool requested) const
 {
-	char const *name = k_implementation_get_name(&impl);
-	char const *href = k_implementation_get_value(&impl, "href");
-	char const *checksum = k_implementation_get_value(&impl, "checksum");
+	String name = impl.name;
+	char const *href = Karrot::get(impl.values, "href");
+	char const *checksum = Karrot::get(impl.values, "checksum");
 	char const *cache = ".";
 
 	fs::path archive = fs::path(cache) / urlencode(href);

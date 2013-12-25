@@ -61,8 +61,8 @@ static std::vector<Var> make_preferences(const Database& database)
   std::sort(std::begin(preferences), std::end(preferences),
     [&database](Var var1, Var var2) -> bool
     {
-    const KImplementation& impl1 = database[var1];
-    const KImplementation& impl2 = database[var2];
+    auto const& impl1 = database[var1];
+    auto const& impl2 = database[var2];
     if (impl1.component != SOURCE && impl2.component == SOURCE)
       {
       return true;
@@ -141,8 +141,8 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
     {
     for (std::size_t k = i + 1; k < database.size(); ++k)
       {
-      const KImplementation& impl1 = database[i];
-      const KImplementation& impl2 = database[k];
+      auto const& impl1 = database[i];
+      auto const& impl2 = database[k];
       if (impl1.id != impl2.id)
         {
         break;

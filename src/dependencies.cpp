@@ -7,14 +7,14 @@
  */
 
 #include "dependencies.hpp"
-#include "implementation.hpp"
+#include <karrot/implementation.hpp>
 #include "feed_queue.hpp"
 #include <boost/logic/tribool.hpp>
 
 namespace Karrot
 {
 
-void Dependencies::replay(KImplementation& impl) const
+void Dependencies::replay(Implementation& impl) const
   {
   auto ignore = [&]
     {
