@@ -136,10 +136,11 @@ static int extract_local(fs::path const& archive_path)
 	archive_write_disk_set_standard_lookup(write.get());
 
 #ifdef BOOST_WINDOWS
-	if (ret = archive_read_open_filename_w(read.get(), archive_path.c_str(), 10240))
+	ret = archive_read_open_filename_w(read.get(), archive_path.c_str(), 10240);
 #else
-	if (ret = archive_read_open_filename(read.get(), archive_path.c_str(), 10240))
+	ret = archive_read_open_filename(read.get(), archive_path.c_str(), 10240);
 #endif
+	if (ret != ARCHIVE_OK)
 	{
 		return ret;
 	}

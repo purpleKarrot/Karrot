@@ -137,7 +137,7 @@ void Subversion::do_handle(Implementation const& impl, bool requested) const
 	}
 	else
 	{
-		url = apr_pstrcat(this->pool, url, "/tags/", tag);
+		url = apr_pstrcat(this->pool, url, "/tags/", tag, NULL);
 	}
 
 	apr_finfo_t finfo;
