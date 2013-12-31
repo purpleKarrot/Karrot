@@ -9,6 +9,7 @@
 #include <karrot/subversion.hpp>
 #include <karrot/dictionary.hpp>
 
+#define SVN_DEPRECATED
 #include <svn_client.h>
 #include <svn_cmdline.h>
 #include <svn_path.h>
@@ -28,7 +29,7 @@ struct InfoBaton
 };
 
 static svn_error_t *
-info_receiver(void* baton, const char* path, const svn_client_info2_t* info, apr_pool_t *pool)
+info_receiver(void *baton, const char *path, const svn_info_t *info, apr_pool_t *pool)
 {
 	struct InfoBaton* info_baton = (struct InfoBaton*) baton;
 	info_baton->url_ok = strcmp(info_baton->url, info->URL) == 0;
@@ -63,7 +64,7 @@ Subversion::Subversion() :
 	}
 
 	/* Initialize and allocate the client_ctx object. */
-	error = svn_client_create_context2(&client, nullptr, pool);
+	error = svn_client_create_context(&client, pool);
 	if (error)
 	{
 		goto error;
@@ -151,15 +152,12 @@ void Subversion::do_handle(Module const& impl)
 
 	if (finfo.filetype == APR_NOFILE)
 	{
-		error = svn_client_checkout3(
+		error = svn_client_checkout(
 			&result_rev,
 			url,
 			path,
-			&peg_revision,
 			&revision,
-			svn_depth_infinity,
-			true,  // ignore_externals
-			false, // allow_unver_obstructions
+			true, // recurse
 			this->client,
 			this->pool);
 		if (error)
@@ -171,16 +169,13 @@ void Subversion::do_handle(Module const& impl)
 	}
 
 	struct InfoBaton info_baton = {url, revision.value.number, false, false};
-	error = svn_client_info3(
+	error = svn_client_info(
 		path,
 		nullptr,  // peg_revision
 		nullptr,  // revision
-		svn_depth_empty,
-		false, // fetch_excluded
-		true, // fetch_actual_only
-		nullptr, // changelists
 		info_receiver,
 		&info_baton,
+		true, // recurse
 		this->client,
 		this->pool);
 	if (error)
@@ -190,17 +185,12 @@ void Subversion::do_handle(Module const& impl)
 
 	if (!info_baton.url_ok)
 	{
-		error = svn_client_switch3(
+		error = svn_client_switch(
 			&result_rev,
 			path,
 			url,
-			&peg_revision,
 			&revision,
-			svn_depth_infinity,
-			true,  // depth_is_sticky,
-			true,  // ignore_externals
-			false, // allow_unver_obstructions
-			true, // ignore_ancestry
+			true, // recurse
 			this->client,
 			this->pool);
 		if (error)
@@ -210,19 +200,11 @@ void Subversion::do_handle(Module const& impl)
 	}
 	else if(revision.kind == svn_opt_revision_number && !info_baton.rev_ok)
 	{
-		apr_array_header_t *paths = apr_array_make(this->pool, 1, sizeof(const char*));
-		apr_array_header_t *result_revs;
-		APR_ARRAY_PUSH(paths, const char*) = path;
-		error = svn_client_update4(
-			&result_revs,
-			paths,
+		error = svn_client_update(
+			&result_rev,
+			path,
 			&revision,
-			svn_depth_infinity,
-			true,  // depth_is_sticky,
-			true,  // ignore_externals
-			false, // allow_unver_obstructions
-			true,  // adds_as_modification
-			false, // make_parents
+			true, // recurse
 			this->client,
 			this->pool);
 		if (error)
