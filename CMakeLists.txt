@@ -7,7 +7,7 @@
 #=============================================================================
 
 cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
-project(Karrot CXX)
+project(Karrot)
 
 list(APPEND CMAKE_MODULE_PATH "${Karrot_SOURCE_DIR}/CMake")
 
@@ -39,11 +39,8 @@ if(BUILD_COVERAGE AND ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
 endif()
 
 add_subdirectory(doc)
-add_subdirectory(contrib/rapidxml)
-add_subdirectory(contrib/yaml-cpp)
-add_subdirectory(libs/drivers)
-add_subdirectory(libs/karrot)
-add_subdirectory(libs/xml)
+add_subdirectory(contrib)
+add_subdirectory(libs)
 add_subdirectory(tools)
 
 configure_file(coveralls.in coveralls @ONLY)
