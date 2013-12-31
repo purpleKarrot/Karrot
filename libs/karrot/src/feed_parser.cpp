@@ -7,8 +7,7 @@
  */
 
 #include "feed_parser.hpp"
-#include <karrot/driver.hpp>
-#include <karrot/implementation.hpp>
+#include "implementation.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
 #include "url.hpp"
@@ -20,14 +19,29 @@ static std::string const xmlns = "http://purplekarrot.net/2013/project";
 
 static const String SOURCE {"SOURCE"};
 static const String HREF   {"href"};
-static const String TAG {"tag"};
+static const String TAG    {"tag"};
 
-FeedParser::FeedParser(Spec const& spec, Engine& engine, Database& database, FeedQueue& queue) :
+FeedParser::FeedParser(Spec const& spec, std::vector<Driver>& drivers,
+                       Database& database, FeedQueue& queue) :
     spec(spec),
-    engine(engine),
+    drivers(drivers),
     database(database),
     queue(queue)
   {
+  }
+
+Driver* FeedParser::get_driver(std::string const& name) const
+  {
+  auto found = std::find_if(drivers.begin(), drivers.end(),
+      [&name](Driver const& driver)
+      {
+        return driver.name == name;
+      });
+  if (found == drivers.end())
+    {
+    return nullptr;
+    }
+  return &*found;
   }
 
 std::string FeedParser::next_element(XmlReader& xml) const
@@ -142,22 +156,20 @@ void FeedParser::parse_releases(XmlReader& xml)
 
 void FeedParser::add_src_package(std::string const& version, boost::optional<std::string> const& tag)
   {
-  Driver const *driver = this->engine.get_driver(vcs_type);
+  Driver* driver = get_driver(vcs_type);
   if (!driver)
     {
     return;
     }
-  Implementation impl
-    {
-    spec.id,
-    String{this->name},
-    String{version},
-    SOURCE,
-    driver
-    };
+  Implementation impl;
+  impl.id = spec.id;
+  impl.name = String{this->name};
+  impl.version = String{version};
+  impl.component = SOURCE;
+  impl.driver = String{vcs_type};
   impl.values[String{"href"}] = vcs_href;
   impl.meta = this->meta;
-  if(tag)
+  if (tag)
     {
     impl.values[String{"tag"}] = *tag;
     }
@@ -242,30 +254,32 @@ void FeedParser::parse_packages(XmlReader& xml)
 
 void FeedParser::parse_package(XmlReader& xml)
   {
-  Implementation impl{this->spec.id, String{this->name}};
-  impl.meta = this->meta;
-  impl.version = xml.attribute("version", xmlns);
-  impl.component = xml.attribute("component", xmlns);
-  impl.driver = engine.get_driver(xml.attribute("type", xmlns));
+  Module module;
+  module.id = this->spec.id;
+  module.name = String{this->name};
+  module.meta = this->meta;
+  module.version = xml.attribute("version", xmlns);
+  module.component = xml.attribute("component", xmlns);
+  module.driver = xml.attribute("type", xmlns);
+  Driver* driver = get_driver(module.driver);
   if (auto attr = xml.optional_attribute("variant", xmlns))
     {
-    impl.variant = parse_variant(*attr);
+    module.variant = parse_variant(*attr);
     }
   for (auto& attr : xml.attributes())
     {
-    if (attr.name.namespace_uri == impl.driver->xmlns())
+    if (attr.name.namespace_uri == driver->xmlns)
       {
-      impl.values[String{attr.name.local}] = attr.value;
+      module.values[String{attr.name.local}] = attr.value;
       }
     }
-  impl.driver->filter(impl, [&](Implementation& impl, bool system)
+  driver->filter(std::move(module), [&](Module module, bool system)
     {
-    if (!spec.query.evaluate(impl.version, impl.variant))
+    if (!spec.query.evaluate(module.version, module.variant))
       {
       return;
       }
-    impl.depends.clear();
-    impl.conflicts.clear();
+    Implementation impl{std::move(module)};
     if (!system)
       {
       if (std::find(begin(releases), end(releases), impl.version) == end(releases))
@@ -277,7 +291,7 @@ void FeedParser::parse_package(XmlReader& xml)
         component.replay(impl);
         }
       }
-    this->database.push_back(impl);
+    this->database.push_back(std::move(impl));
     });
   }
 

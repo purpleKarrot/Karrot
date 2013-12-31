@@ -11,7 +11,6 @@
 #include <cstring>
 #include <cstdio>
 #include <karrot/dictionary.hpp>
-#include <karrot/implementation.hpp>
 
 namespace Karrot
 {
@@ -55,7 +54,7 @@ Git::Git() :
 {
 }
 
-void Git::do_handle(Implementation const& impl, bool requested) const
+void Git::do_handle(Module const& impl)
 {
 	char const *url = Karrot::get(impl.values, "href");
 	char const *tag = Karrot::get(impl.values, "tag");

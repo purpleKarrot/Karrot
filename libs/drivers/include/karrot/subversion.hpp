@@ -24,7 +24,7 @@ public:
 	~Subversion();
 
 private:
-	void do_handle(Implementation const& impl, bool requested) const override;
+	void do_handle(Module const& module) override;
 
 private:
 	apr_pool_t *pool;

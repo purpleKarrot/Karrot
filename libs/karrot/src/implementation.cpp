@@ -6,10 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/implementation.hpp>
-#include <karrot/driver.hpp>
+#include "implementation.hpp"
 #include "spec.hpp"
-
 
 namespace Karrot
 {
@@ -25,7 +23,7 @@ std::ostream& operator<<(std::ostream &os, Implementation const& impl)
     {
     os << '#' << impl.component;
     }
-  os << " (" << impl.driver->name() << ')';
+  os << " (" << impl.driver << ')';
   return os;
   }
 

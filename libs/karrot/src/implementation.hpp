@@ -9,27 +9,23 @@
 #ifndef KARROT_IMPLEMENTATION_HPP
 #define KARROT_IMPLEMENTATION_HPP
 
-#include <karrot/string.hpp>
-#include <karrot/dictionary.hpp>
+#include <karrot/module.hpp>
 #include <iosfwd>
 
 namespace Karrot
 {
 class Spec;
-class Driver;
 
-struct Implementation
+struct Implementation: Module
 {
-	String id;
-	String name;
-	String version;
-	String component;
-	Driver const *driver;
-	Dictionary variant;
-	Dictionary values;
-	std::shared_ptr<Dictionary> meta;
-	std::vector<Spec> depends;
-	std::vector<Spec> conflicts;
+  Implementation() = default;
+  Implementation(Module module) :
+      Module(std::move(module))
+  {
+  }
+
+  std::vector<Spec> depends;
+  std::vector<Spec> conflicts;
 };
 
 std::ostream& operator<<(std::ostream &os, Implementation const& impl);

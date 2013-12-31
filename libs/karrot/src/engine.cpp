@@ -7,7 +7,6 @@
  */
 
 #include <karrot/engine.hpp>
-#include <karrot/driver.hpp>
 
 #include <cstring>
 #include <fstream>
@@ -27,7 +26,7 @@ namespace Karrot
 struct Engine::Private
   {
   FeedQueue feed_queue;
-  std::vector<std::unique_ptr<Driver>> drivers;
+  std::vector<Driver> drivers;
   Requests requests;
   Database database;
   Solution solution;
@@ -42,29 +41,16 @@ Engine::~Engine()
   delete self;
   }
 
-void Engine::add_driver(std::unique_ptr<Karrot::Driver> driver)
+void Engine::add_filter(std::string name, std::string xmlns, Filter filter)
   {
-  self->drivers.push_back(std::move(driver));
+  using std::move;
+  self->drivers.push_back({move(name), move(xmlns), move(filter)});
   }
 
-Driver* Engine::get_driver(std::string const& name) const
+void Engine::add_request(std::string const& url, bool source)
   {
-  auto it = std::find_if(std::begin(self->drivers), std::end(self->drivers),
-    [&name](std::unique_ptr<Driver> const& driver) -> bool
-    {
-    return name == driver->name();
-    });
-  if (it != std::end(self->drivers))
-    {
-    return it->get();
-    }
-  return nullptr;
-  }
-
-void Engine::add_request(char const *url, int source)
-  {
-  Karrot::Spec spec(url);
-  if (source != 0)
+  Karrot::Spec spec(url.c_str());
+  if (source)
     {
     spec.component = "SOURCE";
     }
@@ -83,7 +69,7 @@ void Engine::load(std::string const& cache, bool force)
       {
       throw std::runtime_error("failed to read feed: " + local_path);
       }
-    FeedParser parser{*spec, *this, self->database, self->feed_queue};
+    FeedParser parser{*spec, self->drivers, self->database, self->feed_queue};
     try
       {
       parser.parse(xml);
@@ -115,15 +101,15 @@ std::size_t Engine::num_modules() const
   return self->solution.size();
   }
 
-Implementation const& Engine::get_module(std::size_t index) const
+Module const& Engine::get_module(std::size_t index) const
   {
   return self->database[self->solution[index]];
   }
 
-std::vector<int> Engine::get_depends(Implementation const& module) const
+std::vector<int> Engine::get_depends(std::size_t index) const
   {
   std::set<int> result;
-  for (auto& spec : module.depends)
+  for (auto& spec : self->database[self->solution[index]].depends)
     {
     for (std::size_t i = 0; i < num_modules(); ++i)
       {
@@ -136,8 +122,9 @@ std::vector<int> Engine::get_depends(Implementation const& module) const
   return std::vector<int>(result.begin(), result.end());
   }
 
-bool Engine::is_requested(Implementation const& module) const
+bool Engine::is_requested(std::size_t index) const
   {
+  auto const& module = get_module(index);
   return std::any_of(self->requests.begin(), self->requests.end(),
     [&module](const Spec& spec)
     {

@@ -14,8 +14,7 @@
 
 namespace Karrot
 {
-class Driver;
-class Implementation;
+class Module;
 
 class Engine
 {
@@ -26,21 +25,22 @@ public:
 	Engine(Engine const&) = delete;
 	Engine& operator=(Engine const&) = delete;
 
-	void add_driver(std::unique_ptr<Driver> driver);
-	Driver* get_driver(std::string const& name) const;
+  using AddModule = std::function<void(Module, bool)>;
+  using Filter = std::function<void(Module, AddModule)>;
+  void add_filter(std::string name, std::string xmlns, Filter filter);
 
-	void add_request(char const *url, int source);
+	void add_request(std::string const& url, bool source);
 
 	void load(std::string const& cache, bool force);
 	bool solve();
 
 	std::size_t num_modules() const;
 
-	Implementation const& get_module(std::size_t index) const;
+	Module const& get_module(std::size_t index) const;
 
-	std::vector<int> get_depends(Implementation const& module) const;
+	std::vector<int> get_depends(std::size_t index) const;
 
-	bool is_requested(Implementation const& module) const;
+	bool is_requested(std::size_t index) const;
 
 private:
 	struct Private;

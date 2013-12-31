@@ -21,12 +21,21 @@ namespace Karrot
 
 class XmlReader;
 
+struct Driver
+  {
+  std::string name;
+  std::string xmlns;
+  Engine::Filter filter;
+  };
+
 class FeedParser
   {
   public:
-    FeedParser(Spec const& spec, Engine& engine, Database& database, FeedQueue& feed_queue);
+    FeedParser(Spec const& spec, std::vector<Driver>& drivers,
+               Database& database, FeedQueue& feed_queue);
     void parse(XmlReader& xml);
   private:
+    Driver* get_driver(std::string const& name) const;
     std::string next_element(XmlReader& xml) const;
     void parse_meta(XmlReader& xml);
     void parse_variants(XmlReader& xml);
@@ -38,7 +47,7 @@ class FeedParser
     void add_src_package(std::string const& version, boost::optional<std::string> const& tag);
   private:
     Spec spec;
-    Engine& engine;
+    std::vector<Driver>& drivers;
     Database& database;
     FeedPreQueue queue;
     std::string name;

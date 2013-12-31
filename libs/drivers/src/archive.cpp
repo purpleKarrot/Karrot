@@ -12,7 +12,7 @@
 #include <archive_entry.h>
 #include <boost/filesystem.hpp>
 #include <karrot/dictionary.hpp>
-#include <karrot/implementation.hpp>
+#include <karrot/module.hpp>
 #include <openssl/evp.h>
 
 #include <string>
@@ -293,26 +293,26 @@ Archive::~Archive()
 	px_proxy_factory_free(proxy_factory);
 }
 
-void Archive::do_filter(Implementation& impl, Add add) const
+void Archive::do_filter(Module module, Add add)
 {
 	char const* value;
 
-	value = Karrot::get(impl.values, "sysname");
+	value = Karrot::get(module.values, "sysname");
 	if (std::strcmp(value, "*") != 0 && value != this->sysname)
 	{
 		return;
 	}
 
-	value = Karrot::get(impl.values, "machine");
+	value = Karrot::get(module.values, "machine");
 	if (std::strcmp(value, "*") != 0 && value != this->machine)
 	{
 		return;
 	}
 
-	add(impl, false);
+	add(std::move(module), false);
 }
 
-void Archive::do_handle(Implementation const& impl, bool requested) const
+void Archive::do_handle(Module const& impl)
 {
 	String name = impl.name;
 	char const *href = Karrot::get(impl.values, "href");

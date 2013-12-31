@@ -23,8 +23,8 @@ public:
 	~Archive();
 
 private:
-	void do_filter(Implementation& impl, Add add) const override;
-	void do_handle(Implementation const& impl, bool requested) const override;
+	void do_filter(Module module, Add add) override;
+	void do_handle(Module const& impl) override;
 	void download(const char* path, const char* url, const char* checksum) const;
 
 private:

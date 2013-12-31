@@ -8,7 +8,6 @@
 
 #include <karrot/subversion.hpp>
 #include <karrot/dictionary.hpp>
-#include <karrot/implementation.hpp>
 
 #include <svn_client.h>
 #include <svn_cmdline.h>
@@ -106,7 +105,7 @@ Subversion::~Subversion()
 	svn_pool_destroy(pool);
 }
 
-void Subversion::do_handle(Implementation const& impl, bool requested) const
+void Subversion::do_handle(Module const& impl)
 {
 	svn_revnum_t result_rev;
 	svn_opt_revision_t revision;

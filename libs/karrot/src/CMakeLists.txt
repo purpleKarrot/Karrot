@@ -29,9 +29,9 @@ re2c_target(
 
 add_library(karrot STATIC
   ../include/karrot/dictionary.hpp
-  ../include/karrot/driver.hpp
+  ../include/karrot/engine.hpp
+  ../include/karrot/module.hpp
   ../include/karrot/string.hpp
-  ../include/karrot/implementation.hpp
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
@@ -43,6 +43,7 @@ add_library(karrot STATIC
   feed_queue.hpp
   hash.hpp
   implementation.cpp
+  implementation.hpp
   package.hpp
   query_re2c.hpp
   query_re2c.in.hpp
