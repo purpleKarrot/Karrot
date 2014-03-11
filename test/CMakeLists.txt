@@ -9,30 +9,22 @@
 find_package(Boost "1.46" REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-# module tests
 set(test_list
+  query
+  sat
+  spec
+  unsat
+  url
+  variants
+  vercmp
   version
   )
-
-# unit tests
-if(NOT BUILD_SHARED_LIBS OR (NOT BUILD_VISIBILITY_HIDDEN AND NOT WIN32))
-  list(APPEND test_list
-    query
-    sat
-    spec
-    unsat
-    url
-    variants
-    vercmp
-    )
-endif()
 
 create_test_sourcelist(test_sources
   main.cpp
   ${test_list}
   )
 
-add_definitions(-DKARROT_STATIC)
 add_executable(karrot_test_driver ${test_sources})
 target_link_libraries(karrot_test_driver karrot)
 
