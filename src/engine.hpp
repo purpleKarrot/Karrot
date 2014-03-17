@@ -40,7 +40,6 @@ struct KEngine
     Karrot::Dictionary globals;
     std::string feed_cache = ".";
     bool reload_feeds = false;
-    bool ignore_source_conflicts = false;
     bool no_topological_order = false;
     Karrot::LogFunct log_function = [](std::string const&){};
   };

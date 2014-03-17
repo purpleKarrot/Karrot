@@ -49,10 +49,6 @@ void k_engine_set_global(KEngine *self, char const *key, char const *value)
     {
     self->reload_feeds = value != nullptr;
     }
-  else if (std::strcmp(key, ":ignore-source-conflicts") == 0)
-    {
-    self->ignore_source_conflicts = value != nullptr;
-    }
   else if (std::strcmp(key, ":no-topological-order") == 0)
     {
     self->no_topological_order = value != nullptr;
@@ -120,7 +116,6 @@ static bool engine_run(KEngine *self)
   bool solvable = solve(
       self->database,
       self->requests,
-      self->ignore_source_conflicts,
       self->log_function,
       model);
   if (!solvable)

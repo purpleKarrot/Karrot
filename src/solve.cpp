@@ -189,7 +189,6 @@ static void source_conflict_clauses(const Database& database, Solver& solver)
 bool solve(
     const Database& database,
     const Requests& requests,
-    bool ignore_source_conflicts,
     LogFunct& log,
     std::vector<int>& model)
   {
@@ -248,11 +247,7 @@ bool solve(
   dependency_clauses(hash, database, solver, log);
   explicit_conflict_clauses(hash, database, solver);
   implicit_conflict_clauses(database, solver);
-
-  if (!ignore_source_conflicts)
-    {
-    source_conflict_clauses(database, solver);
-    }
+  source_conflict_clauses(database, solver);
 
   if (!solver.solve(request))
     {
