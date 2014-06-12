@@ -19,21 +19,21 @@ VS_VERSION_INFO   VERSIONINFO
   FILEFLAGS       0
 #endif
   FILEOS          VOS__WINDOWS32
-  FILETYPE        VFT_DLL
+  FILETYPE        VFT_APP
   FILESUBTYPE     0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904E4"
     BEGIN
-      VALUE "FileDescription", "Project Dependency Solver\0"
-      VALUE "FileVersion", KARROT_VERSION "\0"
-      VALUE "InternalName", "karrot.dll\0"
-      VALUE "LegalCopyright", "Copyright (C) Daniel Pfeifer. All rights reserved.\0"
-      VALUE "OriginalFilename", "karrot.dll\0"
-      VALUE "ProductName", "Karrot\0"
-      VALUE "ProductVersion", KARROT_VERSION "\0"
-      VALUE "Comments", "For more information visit http://purplekarrot.net/\0"
+      VALUE "FileDescription", "Project Dependency Solver"
+      VALUE "FileVersion", KARROT_VERSION
+      VALUE "InternalName", "karrot.exe"
+      VALUE "LegalCopyright", "Copyright (C) Daniel Pfeifer. All rights reserved."
+      VALUE "OriginalFilename", "karrot.exe"
+      VALUE "ProductName", "Karrot"
+      VALUE "ProductVersion", KARROT_VERSION
+      VALUE "Comments", "For more information visit http://purplekarrot.net/"
     END
   END
   BLOCK "VarFileInfo"

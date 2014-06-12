@@ -55,7 +55,7 @@ k_implementation_set_component(KImplementation *self, char const *value)
 char const *
 k_implementation_get_driver (KImplementation const *self)
   {
-  self->driver->name().c_str();
+  return self->driver->name().c_str();
   }
 
 char const *

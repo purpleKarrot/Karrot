@@ -9,11 +9,7 @@
 find_package(RE2C REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(WIN32)
-  find_package(Boost "1.46" REQUIRED)
-else()
-  find_package(Boost "1.46" REQUIRED filesystem system)
-endif()
+find_package(Boost "1.46" REQUIRED filesystem system program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 
 if(NOT WIN32)
@@ -31,7 +27,7 @@ re2c_target(
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
 
-add_library(karrot STATIC
+add_library(karrotlib STATIC
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
@@ -77,12 +73,23 @@ add_library(karrot STATIC
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 
 if(WIN32)
-  target_link_libraries(karrot LINK_PRIVATE
+  target_link_libraries(karrotlib LINK_PRIVATE
     shlwapi
     )
 else()
-  target_link_libraries(karrot LINK_PRIVATE
-    ${Boost_LIBRARIES}
+  target_link_libraries(karrotlib LINK_PRIVATE
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
     ${CURL_LIBRARIES}
     )
 endif()
+
+add_executable(karrot
+  karrot.rc
+  main.cpp
+  )
+
+target_link_libraries(karrot
+  karrotlib
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  )

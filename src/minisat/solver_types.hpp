@@ -191,7 +191,7 @@ using Clause = std::vector<Lit>;
 class GClause
   {
     using intp = std::ptrdiff_t;
-    using uintp = unsigned intp;
+    using uintp = std::size_t;
   public:
     explicit GClause(Lit const& p)
         : data{(void*) (((intp) index(p) << 1) + 1)}

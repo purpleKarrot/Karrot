@@ -26,7 +26,7 @@ create_test_sourcelist(test_sources
   )
 
 add_executable(karrot_test_driver ${test_sources})
-target_link_libraries(karrot_test_driver karrot)
+target_link_libraries(karrot_test_driver karrotlib)
 
 find_program(VALGRIND_EXECUTABLE valgrind)
 

@@ -22,10 +22,7 @@ if(MSVC)
     )
 endif()
 
-if(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-  set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libstdc++")
-  set(CMAKE_CXX_LINK_FLAGS "-std=c++11 -stdlib=libstdc++")
-elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+if(NOT MSVC)
   set(CMAKE_CXX_FLAGS "-std=c++11")
 endif()
 
