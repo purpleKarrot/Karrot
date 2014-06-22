@@ -31,17 +31,10 @@ static void set_uname(std::string& sysname, std::string& machine)
 static void run(std::string& sysname, std::string& machine,
     std::vector<std::string> const& request_urls)
 {
-  KPrint print = [](void *target, int level, char const *string)
-    {
-    std::cout << string << std::endl;
-    };
-
   KEngine *engine = k_engine_new();
 
   k_engine_set_global(engine, "sysname", sysname.c_str());
   k_engine_set_global(engine, "machine", machine.c_str());
-
-  k_engine_set_logger(engine, print, nullptr);
 
   // k_engine_add_driver(engine,
   //     std::unique_ptr<Karrot::Driver>(new Karrot::Archive));

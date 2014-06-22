@@ -25,9 +25,9 @@ class FeedParser
   {
   public:
     FeedParser(Spec const& spec, KEngine& engine);
-    void parse(XmlReader& xml, LogFunct& log);
+    void parse(XmlReader& xml);
   private:
-    std::string next_element(XmlReader& xml, LogFunct& log) const;
+    std::string next_element(XmlReader& xml) const;
     void parse_meta(XmlReader& xml);
     void parse_variants(XmlReader& xml);
     void parse_releases(XmlReader& xml);

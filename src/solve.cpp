@@ -12,7 +12,7 @@
 #include "vercmp.hpp"
 #include "minisat/solver.hpp"
 #include "url.hpp"
-#include "log.hpp"
+#include <boost/format.hpp>
 #include <algorithm>
 #include <stdexcept>
 
@@ -87,8 +87,7 @@ static std::vector<Var> make_preferences(const Database& database)
 static void dependency_clauses(
     const Hash& hash,
     const Database& database,
-    Solver& solver,
-    LogFunct& log)
+    Solver& solver)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
@@ -98,8 +97,8 @@ static void dependency_clauses(
       query(hash, database, spec, clause);
       if (clause.size() == 1)
         {
-        Log(log, "Warning: No implementation satisfies '%1%'") % spec;
-        Log(log, "Warning: blacklisting '%1%'") % database[i];
+        std::clog << boost::format("Warning: No implementation satisfies '%1%'\n") % spec;
+        std::clog << boost::format("Warning: blacklisting '%1%'\n") % database[i];
         solver.addUnit(clause[0]);
         }
       else
@@ -189,7 +188,6 @@ static void source_conflict_clauses(const Database& database, Solver& solver)
 bool solve(
     const Database& database,
     const Requests& requests,
-    LogFunct& log,
     std::vector<int>& model)
   {
   Hash hash;
@@ -216,45 +214,45 @@ bool solve(
     query(hash, database, spec, choices);
     if (choices.size() == 0)
       {
-      Log(log, "No implementation for '%1%':") % spec;
+      std::clog << boost::format("No implementation for '%1%':\n") % spec;
       for (auto& entry : database)
         {
-        Log(log, "  - %1%") % entry;
+        std::clog << boost::format("  - %1%\n") % entry;
         }
       return false;
       }
     if (choices.size() == 1)
       {
-      Log(log, "Exactly one implementation for '%1%':") % spec;
-      Log(log, "  + %1%") % database[var(choices[0])];
+      std::clog << boost::format("Exactly one implementation for '%1%':\n") % spec;
+      std::clog << boost::format("  + %1%\n") % database[var(choices[0])];
       request.push_back(choices[0]);
       }
     else
       {
-      Log(log, "Multiple implementations for '%1%':") % spec;
+      std::clog << boost::format("Multiple implementations for '%1%':\n") % spec;
       for (int i = 0; i < choices.size(); ++i)
         {
-        Log(log, "  + %1%") % database[var(choices[i])];
+        std::clog << boost::format("  + %1%\n") % database[var(choices[i])];
         }
       solver.add_clause(choices);
       }
     }
   if (request.size() == 0)
     {
-    log("Warning: request is ambiguous.");
+    std::clog << "Warning: request is ambiguous.\n";
     }
 
-  dependency_clauses(hash, database, solver, log);
+  dependency_clauses(hash, database, solver);
   explicit_conflict_clauses(hash, database, solver);
   implicit_conflict_clauses(database, solver);
   source_conflict_clauses(database, solver);
 
   if (!solver.solve(request))
     {
-    log("no solution exists, because of conflicts");
+    std::clog << "no solution exists, because of conflicts.\n";
     for (Lit const& lit : solver.conflict)
       {
-      Log(log, "  %1% %2%") % (sign(lit) ? "-" : "+") % database[var(lit)];
+      std::clog << boost::format("  %1% %2%\n") % (sign(lit) ? "-" : "+") % database[var(lit)];
       }
     return false;
     }

@@ -24,7 +24,6 @@ namespace Karrot
 class Spec;
 using Requests = std::vector<Spec>;
 using Database = std::vector<KImplementation>;
-using LogFunct = std::function<void(std::string const&)>;
 
 } // namespace Karrot
 
@@ -41,7 +40,6 @@ struct KEngine
     std::string feed_cache = ".";
     bool reload_feeds = false;
     bool no_topological_order = false;
-    Karrot::LogFunct log_function = [](std::string const&){};
   };
 
 #endif /* KARROT_ENGINE_HPP */

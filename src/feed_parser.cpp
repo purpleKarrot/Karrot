@@ -11,7 +11,7 @@
 #include "implementation.hpp"
 #include "xml_reader.hpp"
 #include "variants.hpp"
-#include "log.hpp"
+#include <boost/format.hpp>
 #include "url.hpp"
 
 namespace Karrot
@@ -28,7 +28,7 @@ FeedParser::FeedParser(Spec const& spec, KEngine& engine) :
   {
   }
 
-std::string FeedParser::next_element(XmlReader& xml, LogFunct& log) const
+std::string FeedParser::next_element(XmlReader& xml) const
   {
   while (xml.start_element())
     {
@@ -36,13 +36,13 @@ std::string FeedParser::next_element(XmlReader& xml, LogFunct& log) const
       {
       return xml.name();
       }
-    Log(log, "skipping '{%1%}:%2%'.") % xml.namespace_uri() % xml.name();
+    std::clog << boost::format("skipping '{%1%}:%2%'.\n") % xml.namespace_uri() % xml.name();
     xml.skip();
     }
   return std::string();
   }
 
-void FeedParser::parse(XmlReader& xml, LogFunct& log)
+void FeedParser::parse(XmlReader& xml)
   {
   if (xml.name() != "project" || xml.namespace_uri() != engine.xmlns)
     {
@@ -55,37 +55,37 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
     queue.current_id(id);
     }
   name = xml.attribute("name", engine.xmlns);
-  std::string tag = next_element(xml, log);
+  std::string tag = next_element(xml);
   if (tag == "meta")
     {
     parse_meta(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "vcs")
     {
     vcs_type = xml.attribute("type", engine.xmlns);
     vcs_href = xml.attribute("href", engine.xmlns);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "variants")
     {
     parse_variants(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "releases")
     {
     parse_releases(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "components")
     {
     parse_components(xml);
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (tag == "packages")
     {
@@ -94,11 +94,11 @@ void FeedParser::parse(XmlReader& xml, LogFunct& log)
       parse_packages(xml);
       }
     xml.skip();
-    tag = next_element(xml, log);
+    tag = next_element(xml);
     }
   if (!tag.empty())
     {
-    Log(log, "element '%1%' not expected!!") % tag;
+    std::clog << boost::format("element '%1%' not expected!!\n") % tag;
     }
   }
 

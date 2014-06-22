@@ -25,7 +25,6 @@ typedef struct KDriver KDriver;
 typedef struct KEngine KEngine;
 
 typedef void (*KAdd) (KImplementation *impl, int native, void *self);
-typedef void (*KPrint) (void *target, int level, char const *string);
 typedef void (*KVisit) (void *target, char const *key, char const *val);
 
 
@@ -99,9 +98,6 @@ k_engine_new (void);
 
 void
 k_engine_set_global (KEngine *self, char const *key, char const *value);
-
-void
-k_engine_set_logger (KEngine *self, KPrint print, void *target);
 
 /**
  * Add a Driver to an Engine.

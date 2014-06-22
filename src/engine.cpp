@@ -15,7 +15,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 
-#include "log.hpp"
+#include <boost/format.hpp>
 #include "url.hpp"
 #include "graph.hpp"
 #include "solve.hpp"
@@ -60,15 +60,6 @@ void k_engine_set_global(KEngine *self, char const *key, char const *value)
   }
 
 void
-k_engine_set_logger (KEngine *self, KPrint print, void *target)
-  {
-  self->log_function = [print,target](std::string const& message)
-    {
-    print(target, 0, message.c_str());
-    };
-  }
-
-void
 k_engine_add_driver(KEngine *self, char const *name, char const *xmlns, KDriver const *driver)
   {
   assert(name);
@@ -93,7 +84,7 @@ static bool engine_run(KEngine *self)
   using namespace Karrot;
   while (auto spec = self->feed_queue.get_next())
     {
-    Log(self->log_function, "Reading feed '%1%'") % spec->id;
+    std::clog << boost::format("Reading feed '%1%'\n") % spec->id;
     std::string local_path = download(spec->id, self->feed_cache, self->reload_feeds);
     XmlReader xml(local_path);
     if (!xml.start_element())
@@ -103,7 +94,7 @@ static bool engine_run(KEngine *self)
     FeedParser parser{*spec, *self};
     try
       {
-      parser.parse(xml, self->log_function);
+      parser.parse(xml);
       }
     catch (XmlParseError& error)
       {
@@ -112,12 +103,8 @@ static bool engine_run(KEngine *self)
       }
     }
   std::vector<int> model;
-  Log(self->log_function, "Solving SAT with %1% variables") % self->database.size();
-  bool solvable = solve(
-      self->database,
-      self->requests,
-      self->log_function,
-      model);
+  std::clog << boost::format("Solving SAT with %1% variables\n") % self->database.size();
+  bool solvable = solve(self->database, self->requests, model);
   if (!solvable)
     {
     self->error = "Not solvable!";
@@ -130,7 +117,7 @@ static bool engine_run(KEngine *self)
   for (int i : model)
     {
     const KImplementation& impl = self->database[i];
-    Log(self->log_function, "Handling '%1% %2%'") % impl.name % impl.version;
+    std::clog << boost::format("Handling '%1% %2%'\n") % impl.name % impl.version;
     bool requested = std::any_of(self->requests.begin(), self->requests.end(),
       [&impl](const Spec& spec)
       {
