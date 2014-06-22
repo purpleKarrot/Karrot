@@ -7,6 +7,8 @@
  */
 
 #include <karrot.h>
+#include "engine.hpp"
+#include "implementation.hpp"
 
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -31,10 +33,10 @@ static void set_uname(std::string& sysname, std::string& machine)
 static void run(std::string& sysname, std::string& machine,
     std::vector<std::string> const& request_urls)
 {
-  KEngine *engine = k_engine_new();
+  Karrot::Engine engine;
 
-  k_engine_set_global(engine, "sysname", sysname.c_str());
-  k_engine_set_global(engine, "machine", machine.c_str());
+  engine.set_global("sysname", sysname.c_str());
+  engine.set_global("machine", machine.c_str());
 
   // k_engine_add_driver(engine,
   //     std::unique_ptr<Karrot::Driver>(new Karrot::Archive));
@@ -45,16 +47,13 @@ static void run(std::string& sysname, std::string& machine,
 
   for (const auto& url : request_urls)
     {
-    k_engine_add_request(engine, url.c_str(), true);
+    engine.add_request(url.c_str(), true);
     }
 
-  int result = k_engine_run(engine);
-  if (result != 0)
+  if (!engine.run())
     {
-    std::cerr << k_engine_get_error(engine) << std::endl;
+    std::cerr << "Not solvable!\n";
     }
-
-  k_engine_free(engine);
   }
 
 int main(int argc, char *argv[])

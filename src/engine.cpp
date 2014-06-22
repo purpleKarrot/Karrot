@@ -24,74 +24,64 @@
 #include "package_handler.hpp"
 #include "xml_reader.hpp"
 
-KEngine *
-k_engine_new()
-  {
-  return new KEngine;
-  }
+namespace Karrot
+{
 
-void k_engine_free(KEngine *self)
-  {
-  delete self;
-  }
-
-void k_engine_set_global(KEngine *self, char const *key, char const *value)
+void Engine::set_global(char const *key, char const *value)
   {
   if (std::strcmp(key, ":xmlns") == 0)
     {
-    self->xmlns = value;
+    this->xmlns = value;
     }
   else if (std::strcmp(key, ":feed-cache") == 0)
     {
-    self->feed_cache = value ? value : ".";
+    this->feed_cache = value ? value : ".";
     }
   else if (std::strcmp(key, ":reload-feeds") == 0)
     {
-    self->reload_feeds = value != nullptr;
+    this->reload_feeds = value != nullptr;
     }
   else if (std::strcmp(key, ":no-topological-order") == 0)
     {
-    self->no_topological_order = value != nullptr;
+    this->no_topological_order = value != nullptr;
     }
   else
     {
-    Karrot::set(self->globals, key, value);
+    Karrot::set(this->globals, key, value);
     }
   }
 
-void
-k_engine_add_driver(KEngine *self, char const *name, char const *xmlns, KDriver const *driver)
+void Engine::add_driver(char const *name, char const *xmlns, KDriver const *driver)
   {
   assert(name);
   assert(xmlns);
   assert(driver);
-  self->package_handler.add(name, xmlns, driver);
+  this->package_handler.add(name, xmlns, driver);
   }
 
-void k_engine_add_request(KEngine *self, char const *url, int source)
+void Engine::add_request(char const *url, int source)
   {
   Karrot::Spec spec(url);
   if (source != 0)
     {
     spec.component = "SOURCE";
     }
-  self->feed_queue.push(spec);
-  self->requests.push_back(spec);
+  this->feed_queue.push(spec);
+  this->requests.push_back(spec);
   }
 
-static bool engine_run(KEngine *self)
+bool Engine::run()
   {
-  using namespace Karrot;
-  while (auto spec = self->feed_queue.get_next())
+  while (auto spec = this->feed_queue.get_next())
     {
     std::clog << boost::format("Reading feed '%1%'\n") % spec->id;
-    std::string local_path = download(spec->id, self->feed_cache, self->reload_feeds);
+    std::string local_path = download(spec->id, this->feed_cache, this->reload_feeds);
     XmlReader xml(local_path);
     if (!xml.start_element())
       {
       BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + local_path));
       }
-    FeedParser parser{*spec, *self};
+    FeedParser parser{*spec, *this};
     try
       {
       parser.parse(xml);
@@ -103,22 +93,21 @@ static bool engine_run(KEngine *self)
       }
     }
   std::vector<int> model;
-  std::clog << boost::format("Solving SAT with %1% variables\n") % self->database.size();
-  bool solvable = solve(self->database, self->requests, model);
+  std::clog << boost::format("Solving SAT with %1% variables\n") % this->database.size();
+  bool solvable = solve(this->database, this->requests, model);
   if (!solvable)
     {
-    self->error = "Not solvable!";
     return false;
     }
-  if (!self->no_topological_order)
+  if (!this->no_topological_order)
     {
-    model = topological_sort(model, self->database);
+    model = topological_sort(model, this->database);
     }
   for (int i : model)
     {
-    const KImplementation& impl = self->database[i];
+    const KImplementation& impl = this->database[i];
     std::clog << boost::format("Handling '%1% %2%'\n") % impl.name % impl.version;
-    bool requested = std::any_of(self->requests.begin(), self->requests.end(),
+    bool requested = std::any_of(this->requests.begin(), this->requests.end(),
       [&impl](const Spec& spec)
       {
       return satisfies(impl, spec);
@@ -128,7 +117,7 @@ static bool engine_run(KEngine *self)
       {
       for (int k : model)
         {
-        const KImplementation& other = self->database[k];
+        const KImplementation& other = this->database[k];
         if (satisfies(other, spec))
           {
           impl.driver->depend(impl, other);
@@ -139,32 +128,4 @@ static bool engine_run(KEngine *self)
   return true;
   }
 
-int k_engine_run(KEngine *self)
-  {
-  try
-    {
-    return engine_run(self) ? 0 : 1;
-    }
-  catch (Karrot::XmlParseError& error)
-    {
-    std::stringstream stream;
-    stream
-      << error.what()
-      << " in '" << error.filename << "' at line " << error.line << ".\n"
-      << error.current_line << '\n'
-      << std::string(error.column, ' ') << "^\n"
-      << error.message << '\n'
-      ;
-    self->error = stream.str();
-    }
-  catch (...)
-    {
-    self->error = boost::current_exception_diagnostic_information();
-    }
-  return -1;
-  }
-
-char const *k_engine_get_error(KEngine *self)
-  {
-  return self->error.c_str();
-  }
+} // namespace Karrot

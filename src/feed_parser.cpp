@@ -21,7 +21,7 @@ static const String SOURCE {"SOURCE"};
 static const String HREF   {"href"};
 static const String TAG {"tag"};
 
-FeedParser::FeedParser(Spec const& spec, KEngine& engine) :
+FeedParser::FeedParser(Spec const& spec, Engine& engine) :
     spec(spec),
     engine(engine),
     queue(engine.feed_queue)

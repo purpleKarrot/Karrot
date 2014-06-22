@@ -24,7 +24,7 @@ class XmlReader;
 class FeedParser
   {
   public:
-    FeedParser(Spec const& spec, KEngine& engine);
+    FeedParser(Spec const& spec, Engine& engine);
     void parse(XmlReader& xml);
   private:
     std::string next_element(XmlReader& xml) const;
@@ -38,7 +38,7 @@ class FeedParser
     void add_src_package(std::string const& version, boost::optional<std::string> const& tag);
   private:
     Spec spec;
-    KEngine& engine;
+    Engine& engine;
     FeedPreQueue queue;
     std::string name;
     std::shared_ptr<Dictionary> meta = std::make_shared<Dictionary>();

@@ -25,21 +25,25 @@ class Spec;
 using Requests = std::vector<Spec>;
 using Database = std::vector<KImplementation>;
 
-} // namespace Karrot
-
-struct KEngine
+class Engine
   {
   public:
-    std::string error;
+    void set_global(char const *key, char const *value);
+    void add_driver(char const *name, char const *xmlns, KDriver const *driver);
+    void add_request(char const *url, int source);
+    bool run();
+  public:
     std::string xmlns = "http://purplekarrot.net/2013/project";
-    Karrot::FeedQueue feed_queue;
-    Karrot::PackageHandler package_handler;
-    Karrot::Requests requests;
-    Karrot::Database database;
-    Karrot::Dictionary globals;
+    FeedQueue feed_queue;
+    PackageHandler package_handler;
+    Requests requests;
+    Database database;
+    Dictionary globals;
     std::string feed_cache = ".";
     bool reload_feeds = false;
     bool no_topological_order = false;
   };
+
+} // namespace Karrot
 
 #endif /* KARROT_ENGINE_HPP */
