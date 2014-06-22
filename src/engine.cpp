@@ -29,15 +29,7 @@ namespace Karrot
 
 void Engine::set_global(char const *key, char const *value)
   {
-  if (std::strcmp(key, ":feed-cache") == 0)
-    {
-    this->feed_cache = value ? value : ".";
-    }
-  else if (std::strcmp(key, ":reload-feeds") == 0)
-    {
-    this->reload_feeds = value != nullptr;
-    }
-  else if (std::strcmp(key, ":no-topological-order") == 0)
+  if (std::strcmp(key, ":no-topological-order") == 0)
     {
     this->no_topological_order = value != nullptr;
     }
@@ -71,11 +63,10 @@ bool Engine::run()
   while (auto spec = this->feed_queue.get_next())
     {
     std::clog << boost::format("Reading feed '%1%'\n") % spec->id;
-    std::string local_path = download(spec->id, this->feed_cache, this->reload_feeds);
-    XmlReader xml(local_path);
+    XmlReader xml(download(spec->id));
     if (!xml.start_element())
       {
-      BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + local_path));
+      BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + std::string(spec->id)));
       }
     FeedParser parser{*spec, *this};
     try
@@ -84,7 +75,7 @@ bool Engine::run()
       }
     catch (XmlParseError& error)
       {
-      error.filename = local_path;
+      error.filename = spec->id;
       throw;
       }
     }

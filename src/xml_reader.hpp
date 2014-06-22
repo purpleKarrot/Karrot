@@ -58,7 +58,7 @@ class XmlReader
       std::string value;
       };
   public:
-    XmlReader(std::string const& filepath);
+    XmlReader(std::vector<char> buffer);
     bool read();
     XmlToken token() const;
     std::string name() const;

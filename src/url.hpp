@@ -10,13 +10,13 @@
 #define KARROT_URL_HPP
 
 #include <string>
+#include <vector>
 
 namespace Karrot
 {
 
-std::string url_encode(std::string const& url);
 std::string resolve_uri(std::string const& base, std::string const& relative);
-std::string download(std::string const& url, std::string const& feed_cache, bool force);
+std::vector<char> download(std::string const& url);
 
 } // namespace Karrot
 

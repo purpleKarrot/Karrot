@@ -9,19 +9,18 @@
 #ifndef _WIN32
 
 #include "url.hpp"
+#include <cassert>
 #include <memory>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <curl/curl.h>
 
 namespace
 {
 
-size_t write_fun(char* ptr, size_t size, size_t nmemb, void* userdata)
+static size_t write_fun(char* ptr, size_t size, size_t nmemb, void* userdata)
   {
   assert(size == 1);
-  std::ofstream& file = *reinterpret_cast<std::ofstream*>(userdata);
-  file.write(ptr, static_cast<std::streamsize>(nmemb));
+  std::vector<char>& buffer = *reinterpret_cast<std::vector<char>*>(userdata);
+  buffer.insert(buffer.end(), ptr, ptr + nmemb);
   return nmemb;
   }
 
@@ -35,15 +34,15 @@ class Downloader
       curl_easy_setopt(curl_handle.get(), CURLOPT_USERAGENT, "Karrot/0.1");
       curl_easy_setopt(curl_handle.get(), CURLOPT_FOLLOWLOCATION, 1);
       }
-    void download(std::string const& url, std::ostream& file) const;
+    void download(std::string const& url, std::vector<char>& result) const;
   private:
     std::unique_ptr<CURL, void (*)(CURL*)> curl_handle;
   };
 
-void Downloader::download(std::string const& url, std::ostream& file) const
+void Downloader::download(std::string const& url, std::vector<char>& result) const
   {
   curl_easy_setopt(curl_handle.get(), CURLOPT_URL, url.c_str());
-  curl_easy_setopt(curl_handle.get(), CURLOPT_FILE, &file);
+  curl_easy_setopt(curl_handle.get(), CURLOPT_WRITEDATA, &result);
   CURLcode res = curl_easy_perform(curl_handle.get());
   if (res != CURLE_OK)
     {
@@ -56,25 +55,12 @@ void Downloader::download(std::string const& url, std::ostream& file) const
 namespace Karrot
 {
 
-std::string download(std::string const& url, std::string const& feed_cache, bool force)
+std::vector<char> download(std::string const& url)
   {
-  namespace fs = boost::filesystem;
-  fs::path filepath = fs::path(feed_cache) / url_encode(url);
-  if (force || !exists(filepath))
-    {
-    static Downloader downloader;
-    try
-      {
-      fs::ofstream file(filepath, std::ios::binary);
-      downloader.download(url, file);
-      }
-    catch (...)
-      {
-      remove(filepath);
-      throw;
-      }
-    }
-  return filepath.string();
+  std::vector<char> result;
+  static Downloader downloader;
+  downloader.download(url, result);
+  return result;
   }
 
 } // namespace Karrot

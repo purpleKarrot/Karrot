@@ -17,33 +17,6 @@
 namespace Karrot
 {
 
-static int hex_char(unsigned int c)
-  {
-  return "0123456789abcdef"[c & 0xF];
-  }
-
-std::string url_encode(std::string const& input)
-  {
-  std::string result;
-  for (char c : input)
-    {
-    if (('0' <= c && c <= '9')
-     || ('A' <= c && c <= 'Z')
-     || ('a' <= c && c <= 'z')
-     || (c == '~' || c == '-' || c == '_' || c == '.'))
-      {
-      result.push_back(c);
-      }
-    else
-      {
-      result.push_back('%');
-      result.push_back(hex_char(c >> 4));
-      result.push_back(hex_char(c));
-      }
-    }
-  return result;
-  }
-
 std::string resolve_uri(std::string const& base, std::string const& relative)
   {
   std::size_t scheme_end = base.find("://");

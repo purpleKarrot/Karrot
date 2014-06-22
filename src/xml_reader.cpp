@@ -106,22 +106,10 @@ void XmlReader::throw_error(std::string const& message) const
 
 /******************************************************************************/
 
-XmlReader::XmlReader(std::string const& filepath) :
-    token_(token_none), is_empty_element(false)
+XmlReader::XmlReader(std::vector<char> buffer) :
+    buffer(std::move(buffer)), token_(token_none), is_empty_element(false)
   {
-  std::ifstream stream(filepath, std::ios::binary);
-  if (!stream)
-    {
-    throw std::runtime_error("cannot open file " + filepath);
-    }
-  stream.unsetf(std::ios::skipws);
-  stream.seekg(0, std::ios::end);
-  std::size_t size = static_cast<std::size_t>(stream.tellg());
-  stream.seekg(0);
-  buffer.resize(size + 1);
   cursor = marker = Iterator(buffer.begin());
-  stream.read(&buffer[0], static_cast<std::streamsize>(size));
-  buffer[size] = 0;
   }
 
 XmlToken XmlReader::token() const

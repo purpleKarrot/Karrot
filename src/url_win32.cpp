@@ -153,7 +153,7 @@ class Downloader
         }
       }
   public:
-    void download(std::string const& url, std::string const& filepath)
+    void download(std::string const& url, std::vector<char>& result)
       {
       int wide_url_length = MultiByteToWideChar(CP_ACP, 0, url.c_str(), url.length(), NULL, 0);
       if (wide_url_length <= 0)
@@ -213,7 +213,6 @@ class Downloader
       DWORD size = 0;
       DWORD down = 0;
       std::vector<char> buffer;
-      std::ofstream file(filepath);
       do
         {
         size = 0;
@@ -223,12 +222,12 @@ class Downloader
           BOOST_THROW_EXCEPTION(std::system_error(error));
           }
         buffer.resize(size);
-        if (!win_http.read_data(request.get(), &buffer[0], size, &down))
+        if (!win_http.read_data(request.get(), buffer.data(), size, &down))
           {
           std::error_code error(GetLastError(), std::system_category());
           BOOST_THROW_EXCEPTION(std::system_error(error));
           }
-        file.write(buffer.data(), down);
+        result.insert(result.end(), buffer.data(), buffer.data() + down);
         }
       while (down > 0);
       }
@@ -283,50 +282,35 @@ class Downloader
     std::vector<Connection> connections;
   };
 
-bool file_exists(char const *file_name)
-  {
-  DWORD attr = GetFileAttributesA(file_name);
-  if (attr == INVALID_FILE_ATTRIBUTES)
-    {
-    DWORD error = GetLastError();
-    if (error == ERROR_FILE_NOT_FOUND)
-      {
-      return false;
-      }
-    std::error_code error_code(error, std::system_category());
-    BOOST_THROW_EXCEPTION(std::system_error(error_code));
-    }
-  return true;
-  }
-
 } // namespace
 
 namespace Karrot
 {
 
-std::string download(std::string const& url, std::string const& feed_cache, bool force)
+std::vector<char> download(std::string const& url)
   {
+  std::vector<char> result;
   if (boost::starts_with(url, "file://"))
     {
-    return url.substr(7);
+    std::ifstream stream(url.substr(7), std::ios::binary);
+    if (!stream)
+      {
+      throw std::runtime_error("cannot open file '" + url + "'");
+      }
+    stream.unsetf(std::ios::skipws);
+    stream.seekg(0, std::ios::end);
+    std::size_t size = static_cast<std::size_t>(stream.tellg());
+    stream.seekg(0);
+    result.resize(size + 1);
+    stream.read(result.data(), static_cast<std::streamsize>(size));
+    result[size] = 0;
     }
-  char filepath[MAX_PATH];
-  if (GetFullPathNameA(feed_cache.c_str(), MAX_PATH, filepath, nullptr) == 0)
-    {
-    std::error_code error(GetLastError(), std::system_category());
-    BOOST_THROW_EXCEPTION(std::system_error(error));
-    }
-  if (FAILED(PathAppendA(filepath, url_encode(url).c_str())))
-    {
-    std::error_code error(GetLastError(), std::system_category());
-    BOOST_THROW_EXCEPTION(std::system_error(error));
-    }
-  if (force || !file_exists(filepath))
+  else
     {
     static Downloader downloader;
-    downloader.download(url, filepath);
+    downloader.download(url, result);
     }
-  return filepath;
+  return result;
   }
 
 } // namespace Karrot

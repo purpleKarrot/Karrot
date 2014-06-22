@@ -38,8 +38,6 @@ class Engine
     Requests requests;
     Database database;
     Dictionary globals;
-    std::string feed_cache = ".";
-    bool reload_feeds = false;
     bool no_topological_order = false;
   };
 
