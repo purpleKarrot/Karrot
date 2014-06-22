@@ -74,7 +74,7 @@ source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 
 if(WIN32)
   target_link_libraries(karrotlib LINK_PRIVATE
-    shlwapi
+    winhttp
     )
 else()
   target_link_libraries(karrotlib LINK_PRIVATE
