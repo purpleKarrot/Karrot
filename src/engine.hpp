@@ -33,7 +33,6 @@ class Engine
     void add_request(char const *url, int source);
     bool run();
   public:
-    std::string xmlns = "http://purplekarrot.net/2013/project";
     FeedQueue feed_queue;
     PackageHandler package_handler;
     Requests requests;

@@ -29,11 +29,7 @@ namespace Karrot
 
 void Engine::set_global(char const *key, char const *value)
   {
-  if (std::strcmp(key, ":xmlns") == 0)
-    {
-    this->xmlns = value;
-    }
-  else if (std::strcmp(key, ":feed-cache") == 0)
+  if (std::strcmp(key, ":feed-cache") == 0)
     {
     this->feed_cache = value ? value : ".";
     }
