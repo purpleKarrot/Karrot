@@ -73,11 +73,9 @@ add_library(karrotlib STATIC
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
 
 if(WIN32)
-  target_link_libraries(karrotlib LINK_PRIVATE
-    winhttp
-    )
+  target_link_libraries(karrotlib PRIVATE winhttp)
 else()
-  target_link_libraries(karrotlib LINK_PRIVATE
+  target_link_libraries(karrotlib PRIVATE
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${CURL_LIBRARIES}
