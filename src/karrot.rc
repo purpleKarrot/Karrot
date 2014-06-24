@@ -7,7 +7,7 @@
  */
 
 #include <winver.h>
-#include <karrot.h>
+#include "version.h"
 
 VS_VERSION_INFO   VERSIONINFO
   FILEVERSION     KARROT_VER_MAJOR, KARROT_VER_MINOR, KARROT_VER_PATCH, 0

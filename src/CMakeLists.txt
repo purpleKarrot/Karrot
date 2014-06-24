@@ -9,7 +9,7 @@
 find_package(RE2C REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Boost "1.46" REQUIRED filesystem system program_options)
+find_package(Boost "1.55" REQUIRED filesystem system program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 
 if(NOT WIN32)
@@ -26,6 +26,8 @@ re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/xml_re2c.in.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
+
+configure_file(version.h.in version.h)
 
 add_library(karrotlib STATIC
   minisat/solver.cpp
@@ -63,7 +65,6 @@ add_library(karrotlib STATIC
   variants.hpp
   vercmp.cpp
   vercmp.hpp
-  version.cpp
   xml_re2c.hpp
   xml_re2c.in.hpp
   xml_reader.cpp

@@ -11,11 +11,6 @@
 
 #include <stddef.h>
 
-#define KARROT_VER_MAJOR 1
-#define KARROT_VER_MINOR 0
-#define KARROT_VER_PATCH 0
-#define KARROT_VERSION "1.0.0"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,10 +20,6 @@ typedef struct KDriver KDriver;
 
 typedef void (*KAdd) (KImplementation *impl, int native, void *self);
 typedef void (*KVisit) (void *target, char const *key, char const *val);
-
-
-char const *
-k_version (int *major, int *minor, int *patch);
 
 
 char const *
