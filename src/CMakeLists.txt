@@ -38,7 +38,6 @@ add_library(karrotlib STATIC
   dictionary.hpp
   driver.cpp
   driver.hpp
-  engine.cpp
   engine.hpp
   feed_parser.cpp
   feed_parser.hpp

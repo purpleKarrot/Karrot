@@ -28,11 +28,6 @@ using Database = std::vector<KImplementation>;
 class Engine
   {
   public:
-    void set_global(char const *key, char const *value);
-    void add_driver(char const *name, char const *xmlns, KDriver const *driver);
-    void add_request(char const *url, int source);
-    bool run();
-  public:
     FeedQueue feed_queue;
     PackageHandler package_handler;
     Requests requests;

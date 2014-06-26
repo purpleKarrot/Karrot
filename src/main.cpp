@@ -8,8 +8,15 @@
 
 #include <karrot.h>
 #include "engine.hpp"
-#include "implementation.hpp"
+#include "url.hpp"
+#include "graph.hpp"
+#include "solve.hpp"
+#include "feed_queue.hpp"
+#include "feed_parser.hpp"
+#include "xml_reader.hpp"
+#include "version.h"
 
+#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
 
@@ -33,10 +40,11 @@ static void set_uname(std::string& sysname, std::string& machine)
 static void run(std::string& sysname, std::string& machine,
     std::vector<std::string> const& request_urls)
 {
+  using namespace Karrot;
   Karrot::Engine engine;
 
-  engine.set_global("sysname", sysname.c_str());
-  engine.set_global("machine", machine.c_str());
+  engine.globals.emplace(String{"sysname"}, String{sysname});
+  engine.globals.emplace(String{"machine"}, String{machine});
 
   // k_engine_add_driver(engine,
   //     std::unique_ptr<Karrot::Driver>(new Karrot::Archive));
@@ -47,12 +55,67 @@ static void run(std::string& sysname, std::string& machine,
 
   for (const auto& url : request_urls)
     {
-    engine.add_request(url.c_str(), true);
+    Karrot::Spec spec(url.c_str());
+    spec.component = "SOURCE";
+    engine.feed_queue.push(spec);
+    engine.requests.push_back(spec);
     }
 
-  if (!engine.run())
+  while (auto spec = engine.feed_queue.get_next())
+    {
+    std::clog << boost::format("Reading feed '%1%'\n") % spec->id;
+    XmlReader xml(download(spec->id));
+    if (!xml.start_element())
+      {
+      BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + std::string(spec->id)));
+      }
+    FeedParser parser{*spec, engine};
+    try
+      {
+      parser.parse(xml);
+      }
+    catch (XmlParseError& error)
+      {
+      error.filename = spec->id;
+      throw;
+      }
+    }
+
+  std::vector<int> model;
+  std::clog << boost::format("Solving SAT with %1% variables\n") % engine.database.size();
+  bool solvable = solve(engine.database, engine.requests, model);
+  if (!solvable)
     {
     std::cerr << "Not solvable!\n";
+    return;
+    }
+
+  if (!engine.no_topological_order)
+    {
+    model = topological_sort(model, engine.database);
+    }
+
+  for (int i : model)
+    {
+    const KImplementation& impl = engine.database[i];
+    std::clog << boost::format("Handling '%1% %2%'\n") % impl.name % impl.version;
+    bool requested = std::any_of(engine.requests.begin(), engine.requests.end(),
+      [&impl](const Spec& spec)
+      {
+      return satisfies(impl, spec);
+      });
+    impl.driver->handle(impl, requested);
+    for (auto& spec : impl.depends)
+      {
+      for (int k : model)
+        {
+        const KImplementation& other = engine.database[k];
+        if (satisfies(other, spec))
+          {
+          impl.driver->depend(impl, other);
+          }
+        }
+      }
     }
   }
 
@@ -105,7 +168,7 @@ int main(int argc, char *argv[])
 
     if (variables.count("version"))
       {
-      std::cout << "Lemonade 0.1" << std::endl;
+      std::cout << "Karrot " KARROT_VERSION << std::endl;
       return 0;
       }
 
