@@ -65,7 +65,6 @@ k_implementation_get_global (KImplementation const *self, char const *key);
 struct KDriver
   {
   int (*filter) (KDriver const *self, KImplementation *impl, KAdd add, void *target);
-  int (*depend) (KDriver const *self, KImplementation const *impl, KImplementation const *other);
   int (*handle) (KDriver const *self, KImplementation const *impl, int requested);
   int (*commit) (KDriver const *self);
   char const* (*get_error) (KDriver const *self);

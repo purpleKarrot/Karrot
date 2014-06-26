@@ -105,18 +105,9 @@ static void run(std::string& sysname, std::string& machine,
       return satisfies(impl, spec);
       });
     impl.driver->handle(impl, requested);
-    for (auto& spec : impl.depends)
-      {
-      for (int k : model)
-        {
-        const KImplementation& other = engine.database[k];
-        if (satisfies(other, spec))
-          {
-          impl.driver->depend(impl, other);
-          }
-        }
-      }
     }
+
+  write_graphviz("dependencies.dot", model, engine.database);
   }
 
 int main(int argc, char *argv[])

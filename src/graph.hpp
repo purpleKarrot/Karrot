@@ -19,6 +19,12 @@ topological_sort(
     std::vector<int> const& model,
     Database const& database);
 
+void
+write_graphviz(
+    std::string const& filename,
+    std::vector<int> const& model,
+    Database const& database);
+
 } // namespace Karrot
 
 #endif /* KARROT_GRAPH_HPP */

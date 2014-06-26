@@ -48,4 +48,33 @@ topological_sort(std::vector<int> const& model, Database const& database)
   return topo_order;
   }
 
+void write_graphviz(
+    std::string const& filename,
+    std::vector<int> const& model,
+    Karrot::Database const& database)
+  {
+  std::ofstream dot_file(filename);
+  dot_file << "digraph G {\n";
+  for (std::size_t i = 0; i < model.size(); ++i)
+    {
+    auto& entry = database[model[i]];
+    dot_file << "  " << i << " ["
+      << "label=\"" << entry.name << ' ' << entry.version << "\", "
+      << "URL=\"" << entry.id << "\""
+      << "];" << std::endl;
+      ;
+    for (std::size_t k = 0; k < model.size(); ++k)
+      {
+      for (auto& spec : database[model[k]].depends)
+        {
+        if (satisfies(entry, spec))
+          {
+          dot_file << "  " << k << " -> " << i << ";\n";
+          }
+        }
+      }
+    }
+  dot_file << "}\n";
+  }
+
 } // namespace Karrot

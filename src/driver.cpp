@@ -31,18 +31,6 @@ void Driver::filter(KImplementation& impl, KAdd add, void *add_target) const
     }
   }
 
-void Driver::depend(KImplementation const& impl, KImplementation const& other) const
-  {
-  if (!driver_->depend)
-    {
-    return;
-    }
-  if (driver_->depend(driver_, &impl, &other) != 0)
-    {
-    throw_error();
-    }
-  }
-
 void Driver::handle(KImplementation const& impl, bool requested) const
   {
   if (!driver_->handle)

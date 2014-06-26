@@ -38,7 +38,6 @@ class Driver
         };
       filter(impl, add_fn, &add);
       }
-    void depend (KImplementation const& impl, KImplementation const& other) const;
     void handle (KImplementation const& impl, bool requested) const;
     void commit() const;
   private:
