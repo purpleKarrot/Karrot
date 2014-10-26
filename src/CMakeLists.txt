@@ -12,19 +12,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Boost "1.55" REQUIRED filesystem system)
 include_directories(${Boost_INCLUDE_DIRS})
 
-if(NOT WIN32)
-  find_package(CURL REQUIRED)
-  include_directories(${CURL_INCLUDE_DIRS})
-endif()
-
 re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/query_re2c.hpp -s
-  )
-
-re2c_target(
-  ${CMAKE_CURRENT_SOURCE_DIR}/xml_re2c.in.hpp
-  ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
 
 add_library(karrotlib STATIC
@@ -37,44 +27,14 @@ add_library(karrotlib STATIC
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
-  dependencies.cpp
-  dependencies.hpp
-  driver.cpp
-  driver.hpp
-  engine.hpp
-  feed_parser.cpp
-  feed_parser.hpp
-  feed_queue.hpp
   hash.hpp
   implementation.cpp
-  package_handler.hpp
-  package.hpp
   query_re2c.hpp
   query_re2c.in.hpp
   query.cpp
   solve.cpp
-  url.cpp
-  url.hpp
-  url_curl.cpp
-  url_win32.cpp
-  variants.cpp
-  variants.hpp
   vercmp.cpp
   vercmp.hpp
-  xml_re2c.hpp
-  xml_re2c.in.hpp
-  xml_reader.cpp
-  xml_reader.hpp
   )
 
 source_group("Minisat Files" REGULAR_EXPRESSION "/minisat/")
-
-if(WIN32)
-  target_link_libraries(karrotlib PRIVATE winhttp)
-else()
-  target_link_libraries(karrotlib PRIVATE
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${CURL_LIBRARIES}
-    )
-endif()

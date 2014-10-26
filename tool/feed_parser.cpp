@@ -153,7 +153,7 @@ void FeedParser::add_src_package(std::string const& version, boost::optional<std
     String{this->name},
     String{version},
     SOURCE,
-    driver
+    String{driver->name()}
     };
   impl.values[String{"href"}] = vcs_href;
   impl.meta = this->meta;
@@ -248,19 +248,20 @@ void FeedParser::parse_package(XmlReader& xml)
   impl.globals = &engine.globals;
   impl.version = xml.attribute("version", xmlns);
   impl.component = xml.attribute("component", xmlns);
-  impl.driver = engine.package_handler.get(xml.attribute("type", xmlns));
+  impl.driver = xml.attribute("type", xmlns);
   if (auto attr = xml.optional_attribute("variant", xmlns))
     {
     impl.variant = parse_variant(*attr);
     }
   for (auto& attr : xml.attributes())
     {
-    if (attr.name.namespace_uri == impl.driver->xmlns())
+    if (attr.name.namespace_uri == xmlns)
       {
       impl.values[String{attr.name.local}] = attr.value;
       }
     }
-  impl.driver->filter(impl, [&](KImplementation& impl, bool system)
+  auto driver = engine.package_handler.get(impl.driver);
+  driver->filter(impl, [&](KImplementation& impl, bool system)
     {
     if (!spec.query.evaluate(impl.version, impl.variant))
       {

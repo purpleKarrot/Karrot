@@ -17,7 +17,6 @@
 namespace Karrot
 {
 class Spec;
-class Driver;
 }
 
 struct KImplementation
@@ -26,7 +25,7 @@ struct KImplementation
   Karrot::String name;
   Karrot::String version;
   Karrot::String component;
-  Karrot::Driver const *driver;
+  Karrot::String driver;
   Karrot::Dictionary variant;
   Karrot::Dictionary values;
   std::shared_ptr<Karrot::Dictionary> meta;

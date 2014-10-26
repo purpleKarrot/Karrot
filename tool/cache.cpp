@@ -8,7 +8,6 @@
 
 #include "cache.hpp"
 #include <karrot/spec.hpp>
-#include "../src/driver.hpp"
 #include <karrot/implementation.hpp>
 #include "yaml_writer.hpp"
 #include <boost/lexical_cast.hpp>
@@ -45,7 +44,7 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
         writer.scalar(impl.component);
 
         writer.scalar("driver");
-        writer.scalar(impl.driver->name());
+        writer.scalar(impl.driver);
 
         if (!impl.variant.empty())
         {

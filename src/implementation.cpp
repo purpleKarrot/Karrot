@@ -7,7 +7,6 @@
  */
 
 #include <karrot/implementation.hpp>
-#include "driver.hpp"
 #include <karrot/spec.hpp>
 
 static inline const char *
@@ -55,7 +54,7 @@ k_implementation_set_component(KImplementation *self, char const *value)
 char const *
 k_implementation_get_driver (KImplementation const *self)
   {
-  return self->driver->name().c_str();
+  return c_str(self->driver);
   }
 
 char const *
@@ -108,6 +107,6 @@ std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
     {
     os << '#' << impl.component;
     }
-  os << " (" << impl.driver->name() << ')';
+  os << " (" << impl.driver << ')';
   return os;
   }

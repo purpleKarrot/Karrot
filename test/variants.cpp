@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "../src/variants.hpp"
+#include "../tool/variants.cpp"
 #include <boost/detail/lightweight_test.hpp>
 
 int variants(int argc, char* argv[])

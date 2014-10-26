@@ -7,7 +7,7 @@
  */
 
 #include <karrot/query.hpp>
-#include "../src/variants.hpp"
+#include "../tool/variants.hpp"
 #include <boost/detail/lightweight_test.hpp>
 
 int query(int argc, char* argv[])

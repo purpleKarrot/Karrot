@@ -11,7 +11,6 @@
 
 #include "query_re2c.hpp"
 #include "vercmp.hpp"
-#include "variants.hpp"
 #include <iostream>
 #include <sstream>
 

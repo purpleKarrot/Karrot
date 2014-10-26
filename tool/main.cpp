@@ -7,14 +7,14 @@
  */
 
 #include <karrot.h>
-#include "../src/engine.hpp"
-#include "../src/url.hpp"
+#include "engine.hpp"
+#include "url.hpp"
 #include "cache.hpp"
 #include "graph.hpp"
 #include <karrot/solve.hpp>
-#include "../src/feed_queue.hpp"
-#include "../src/feed_parser.hpp"
-#include "../src/xml_reader.hpp"
+#include "feed_queue.hpp"
+#include "feed_parser.hpp"
+#include "xml_reader.hpp"
 #include "version.h"
 
 #include <boost/format.hpp>
@@ -105,7 +105,8 @@ static void run(std::string& sysname, std::string& machine,
       {
       return satisfies(impl, spec);
       });
-    impl.driver->handle(impl, requested);
+    auto driver = engine.package_handler.get(impl.driver);
+    driver->handle(impl, requested);
     }
 
   write_cache("cache.yaml", model, engine.database);
