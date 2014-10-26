@@ -64,21 +64,6 @@ k_implementation_get_meta(KImplementation const *self, char const *key)
   }
 
 char const *
-k_implementation_get_variant(KImplementation const *self, char const *key)
-  {
-  return Karrot::get(self->variant, key);
-  }
-
-void
-k_implementation_foreach_variant(KImplementation const *self, KVisit visit, void *target)
-  {
-  for (auto& entry : self->variant)
-    {
-    visit(target, c_str(entry.first), c_str(entry.second));
-    }
-  }
-
-char const *
 k_implementation_get_value(KImplementation const *self, char const *key)
   {
   return Karrot::get(self->values, key);

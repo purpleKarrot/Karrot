@@ -28,7 +28,7 @@ inline bool satisfies(const KImplementation& impl, const Spec& spec)
     {
     return false;
     }
-  return spec.query.evaluate(impl.version, impl.variant);
+  return spec.query.evaluate(impl.version, impl.values);
   }
 
 bool solve(

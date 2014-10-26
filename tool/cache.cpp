@@ -46,20 +46,6 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
         writer.scalar("driver");
         writer.scalar(impl.driver);
 
-        if (!impl.variant.empty())
-        {
-            writer.scalar("variant");
-            writer.start_mapping();
-
-            for (auto&& entry : impl.variant)
-            {
-                writer.scalar(entry.first);
-                writer.scalar(entry.second);
-            }
-
-            writer.end_mapping();
-        }
-
         if (!impl.values.empty())
         {
             writer.scalar("values");

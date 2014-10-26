@@ -26,7 +26,6 @@ struct KImplementation
   Karrot::String version;
   Karrot::String component;
   Karrot::String driver;
-  Karrot::Dictionary variant;
   Karrot::Dictionary values;
   std::shared_ptr<Karrot::Dictionary> meta;
   Karrot::Dictionary const* globals;

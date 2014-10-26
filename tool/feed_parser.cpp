@@ -162,21 +162,11 @@ void FeedParser::add_src_package(std::string const& version, boost::optional<std
     {
     impl.values[String{"tag"}] = *tag;
     }
-  foreach_variant(variants, [&](Dictionary variant)
+  for (const Dependencies& component : components)
     {
-    if (!spec.query.evaluate(impl.version, variant))
-      {
-      return;
-      }
-    impl.variant = variant;
-    impl.depends.clear();
-    impl.conflicts.clear();
-    for (const Dependencies& component : components)
-      {
-      component.replay(impl);
-      }
-    this->engine.database.push_back(impl);
-    });
+    component.replay(impl);
+    }
+  this->engine.database.push_back(impl);
   }
 
 void FeedParser::parse_components(XmlReader& xml)
@@ -249,10 +239,11 @@ void FeedParser::parse_package(XmlReader& xml)
   impl.version = xml.attribute("version", xmlns);
   impl.component = xml.attribute("component", xmlns);
   impl.driver = xml.attribute("type", xmlns);
-  if (auto attr = xml.optional_attribute("variant", xmlns))
-    {
-    impl.variant = parse_variant(*attr);
-    }
+//if (auto attr = xml.optional_attribute("variant", xmlns))
+//  {
+//  auto variant = parse_variant(*attr);
+//  // TODO: evaluate global spec to see whether this variant is allowed
+//  }
   for (auto& attr : xml.attributes())
     {
     if (attr.name.namespace_uri == xmlns)
@@ -263,10 +254,6 @@ void FeedParser::parse_package(XmlReader& xml)
   auto driver = engine.package_handler.get(impl.driver);
   driver->filter(impl, [&](KImplementation& impl, bool system)
     {
-    if (!spec.query.evaluate(impl.version, impl.variant))
-      {
-      return;
-      }
     impl.depends.clear();
     impl.conflicts.clear();
     if (!system)

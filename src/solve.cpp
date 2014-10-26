@@ -130,26 +130,31 @@ static void explicit_conflict_clauses(
 
 // Implementations of the same project either complement or conflict each other.
 // Example: the component runtime(exe, dll) and develop(lib, hpp) complement
-// each other when both have the same version and variant. If version and
-// variant differ, the version does not match, or one implementation provides
-// all components, there is a conflict.
+// each other when both have the same version. If the version differs, or one
+// implementation provides all components, there is a conflict.
+static bool implicitly_conflicts(
+    KImplementation const& impl1,
+    KImplementation const& impl2)
+{
+  if (impl1.id == impl2.id)
+    {
+    if (impl1.version != impl2.version ||
+        impl1.component == "*" || impl2.component == "*" ||
+        impl1.component == SOURCE || impl2.component == SOURCE)
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
 static void implicit_conflict_clauses(const Database& database, Solver& solver)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
     for (std::size_t k = i + 1; k < database.size(); ++k)
       {
-      const KImplementation& impl1 = database[i];
-      const KImplementation& impl2 = database[k];
-      if (impl1.id != impl2.id)
-        {
-        break;
-        }
-      if (impl1.version != impl2.version ||
-          impl1.variant != impl2.variant ||
-          impl1.component == impl2.component ||
-          impl1.component == "*" || impl2.component == "*" ||
-          impl1.component == SOURCE || impl2.component == SOURCE)
+      if (implicitly_conflicts(database[i],  database[k]))
         {
         solver.addBinary(~Lit(i), ~Lit(k));
         }

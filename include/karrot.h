@@ -47,12 +47,6 @@ char const *
 k_implementation_get_meta (KImplementation const *self, char const *key);
 
 char const *
-k_implementation_get_variant (KImplementation const *self, char const *key);
-
-void
-k_implementation_foreach_variant (KImplementation const *self, KVisit visit, void *target);
-
-char const *
 k_implementation_get_value (KImplementation const *self, char const *key);
 
 void

@@ -47,42 +47,4 @@ Dictionary parse_variant(const std::string& string)
   return result;
   }
 
-static void r_variants_recurse(
-    const Dictionary::const_iterator& cur,
-    const Dictionary::const_iterator& end,
-    const Dictionary& dict,
-    const std::function<void(Dictionary)>& func)
-  {
-  assert(cur != end);
-  std::vector<String> values;
-  split(values, cur->second.get(), boost::is_any_of(";"), boost::token_compress_on);
-  for (String const& val : values)
-    {
-    Dictionary copy(dict);
-    copy.emplace(cur->first, val);
-    if (std::next(cur) == end)
-      {
-      func(copy);
-      }
-    else
-      {
-      r_variants_recurse(std::next(cur), end, copy, func);
-      }
-    }
-  }
-
-void foreach_variant(
-    const Dictionary& variants,
-    const std::function<void(Dictionary)>& func)
-  {
-  if (variants.empty())
-    {
-    func(Dictionary());
-    }
-  else
-    {
-    r_variants_recurse(variants.begin(), variants.end(), Dictionary(), func);
-    }
-  }
-
 } // namespace Karrot
