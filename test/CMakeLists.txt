@@ -13,6 +13,7 @@ set(test_list
   query
   sat
   spec
+  string_pool
   unsat
   url
   variants

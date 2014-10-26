@@ -24,6 +24,7 @@ add_library(karrotlib STATIC
   ../include/karrot/query.hpp
   ../include/karrot/solve.hpp
   ../include/karrot/spec.hpp
+  ../include/karrot/string_pool.hpp
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
@@ -33,6 +34,7 @@ add_library(karrotlib STATIC
   query_re2c.in.hpp
   query.cpp
   solve.cpp
+  string_pool.cpp
   vercmp.cpp
   vercmp.hpp
   )
