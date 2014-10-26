@@ -40,8 +40,7 @@ class FeedParser
     Spec spec;
     Engine& engine;
     FeedPreQueue queue;
-    std::string name;
-    std::shared_ptr<Dictionary> meta = std::make_shared<Dictionary>();
+    Dictionary meta;
     Dictionary variants;
     std::vector<std::string> releases;
     std::vector<Dependencies> components;

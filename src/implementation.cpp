@@ -12,14 +12,13 @@
 std::ostream& operator<<(std::ostream &os, KImplementation const& impl)
   {
   os << impl.id;
-  if (!impl.version.get().empty())
-    {
-    os << "?version==" << impl.version;
-    }
   if (!impl.component.get().empty())
     {
     os << '#' << impl.component;
     }
-  os << " (" << impl.driver << ')';
+  if (!impl.version.get().empty())
+    {
+    os << ' ' << impl.version;
+    }
   return os;
   }

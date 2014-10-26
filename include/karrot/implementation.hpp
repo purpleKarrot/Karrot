@@ -21,13 +21,9 @@ class Spec;
 struct KImplementation
   {
   Karrot::String id;
-  Karrot::String name;
   Karrot::String version;
   Karrot::String component;
-  Karrot::String driver;
   Karrot::Dictionary values;
-  std::shared_ptr<Karrot::Dictionary> meta;
-  Karrot::Dictionary const* globals;
   std::vector<Karrot::Spec> depends;
   std::vector<Karrot::Spec> conflicts;
   };

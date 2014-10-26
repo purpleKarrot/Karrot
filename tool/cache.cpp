@@ -34,17 +34,11 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
         writer.scalar("id");
         writer.scalar(impl.id);
 
-        writer.scalar("name");
-        writer.scalar(impl.name);
-
         writer.scalar("version");
         writer.scalar(impl.version);
 
         writer.scalar("component");
         writer.scalar(impl.component);
-
-        writer.scalar("driver");
-        writer.scalar(impl.driver);
 
         if (!impl.values.empty())
         {

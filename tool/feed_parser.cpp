@@ -55,7 +55,6 @@ void FeedParser::parse(XmlReader& xml)
     spec.id = id;
     queue.current_id(id);
     }
-  name = xml.attribute("name", xmlns);
   std::string tag = next_element(xml);
   if (tag == "meta")
     {
@@ -109,7 +108,7 @@ void FeedParser::parse_meta(XmlReader& xml)
     {
     String name {xml.name()};
     String value {xml.content()};
-    meta->emplace(name, value);
+    meta.emplace(name, value);
     xml.skip();
     }
   }
@@ -147,17 +146,10 @@ void FeedParser::add_src_package(std::string const& version, boost::optional<std
     {
     return;
     }
-  KImplementation impl
-    {
-    spec.id,
-    String{this->name},
-    String{version},
-    SOURCE,
-    String{driver->name()}
-    };
+  KImplementation impl{spec.id, String{version}, SOURCE};
+  impl.values = this->meta;
   impl.values[String{"href"}] = vcs_href;
-  impl.meta = this->meta;
-  impl.globals = &engine.globals;
+  impl.values[String{"driver"}] = driver->name();
   if(tag)
     {
     impl.values[String{"tag"}] = *tag;
@@ -233,12 +225,12 @@ void FeedParser::parse_packages(XmlReader& xml)
 
 void FeedParser::parse_package(XmlReader& xml)
   {
-  KImplementation impl{this->spec.id, String{this->name}};
-  impl.meta = this->meta;
-  impl.globals = &engine.globals;
+  auto driver_name = xml.attribute("type", xmlns);
+  KImplementation impl{this->spec.id};
+  impl.values = this->meta;
   impl.version = xml.attribute("version", xmlns);
   impl.component = xml.attribute("component", xmlns);
-  impl.driver = xml.attribute("type", xmlns);
+  impl.values[String{"driver"}] = driver_name;
 //if (auto attr = xml.optional_attribute("variant", xmlns))
 //  {
 //  auto variant = parse_variant(*attr);
@@ -251,7 +243,7 @@ void FeedParser::parse_package(XmlReader& xml)
       impl.values[String{attr.name.local}] = attr.value;
       }
     }
-  auto driver = engine.package_handler.get(impl.driver);
+  auto driver = engine.package_handler.get(driver_name);
   driver->filter(impl, [&](KImplementation& impl, bool system)
     {
     impl.depends.clear();

@@ -59,7 +59,7 @@ void write_graphviz(
     {
     auto& entry = database[model[i]];
     dot_file << "  " << i << " ["
-      << "label=\"" << entry.name << ' ' << entry.version << "\", "
+      << "label=\"" << entry.id << ' ' << entry.version << "\", "
       << "URL=\"" << entry.id << "\""
       << "];" << std::endl;
       ;
