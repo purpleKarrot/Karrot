@@ -9,12 +9,14 @@
 #ifndef KARROT_SOLVE_HPP
 #define KARROT_SOLVE_HPP
 
-#include "engine.hpp"
 #include "implementation.hpp"
 #include "spec.hpp"
 
 namespace Karrot
 {
+
+using Requests = std::vector<Spec>;
+using Database = std::vector<KImplementation>;
 
 inline bool satisfies(const KImplementation& impl, const Spec& spec)
   {

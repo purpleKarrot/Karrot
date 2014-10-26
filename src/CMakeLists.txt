@@ -9,15 +9,13 @@
 find_package(RE2C REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Boost "1.55" REQUIRED filesystem system program_options)
+find_package(Boost "1.55" REQUIRED filesystem system)
 include_directories(${Boost_INCLUDE_DIRS})
 
 if(NOT WIN32)
   find_package(CURL REQUIRED)
   include_directories(${CURL_INCLUDE_DIRS})
 endif()
-
-find_package(LibYAML REQUIRED)
 
 re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
@@ -29,15 +27,18 @@ re2c_target(
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
 
-configure_file(version.h.in version.h)
-
 add_library(karrotlib STATIC
+  ../include/karrot.h
+  ../include/karrot/dictionary.hpp
+  ../include/karrot/implementation.hpp
+  ../include/karrot/query.hpp
+  ../include/karrot/solve.hpp
+  ../include/karrot/spec.hpp
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
   dependencies.cpp
   dependencies.hpp
-  dictionary.hpp
   driver.cpp
   driver.hpp
   engine.hpp
@@ -46,16 +47,12 @@ add_library(karrotlib STATIC
   feed_queue.hpp
   hash.hpp
   implementation.cpp
-  implementation.hpp
   package_handler.hpp
   package.hpp
   query_re2c.hpp
   query_re2c.in.hpp
   query.cpp
-  query.hpp
   solve.cpp
-  solve.hpp
-  spec.hpp
   url.cpp
   url.hpp
   url_curl.cpp
@@ -81,20 +78,3 @@ else()
     ${CURL_LIBRARIES}
     )
 endif()
-
-add_executable(karrot
-  cache.cpp
-  cache.hpp
-  graph.cpp
-  graph.hpp
-  yaml_writer.cpp
-  yaml_writer.hpp
-  karrot.rc
-  main.cpp
-  )
-
-target_link_libraries(karrot
-  karrotlib
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  yaml::libyaml
-  )

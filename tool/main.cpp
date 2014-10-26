@@ -7,14 +7,14 @@
  */
 
 #include <karrot.h>
-#include "engine.hpp"
-#include "url.hpp"
+#include "../src/engine.hpp"
+#include "../src/url.hpp"
 #include "cache.hpp"
 #include "graph.hpp"
 #include <karrot/solve.hpp>
-#include "feed_queue.hpp"
-#include "feed_parser.hpp"
-#include "xml_reader.hpp"
+#include "../src/feed_queue.hpp"
+#include "../src/feed_parser.hpp"
+#include "../src/xml_reader.hpp"
 #include "version.h"
 
 #include <boost/format.hpp>

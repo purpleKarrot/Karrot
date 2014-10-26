@@ -8,7 +8,7 @@
 
 #include "cache.hpp"
 #include <karrot/spec.hpp>
-#include "driver.hpp"
+#include "../src/driver.hpp"
 #include <karrot/implementation.hpp>
 #include "yaml_writer.hpp"
 #include <boost/lexical_cast.hpp>
