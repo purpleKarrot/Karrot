@@ -9,7 +9,6 @@
 #ifndef KARROT_IMPLEMENTATION_HPP
 #define KARROT_IMPLEMENTATION_HPP
 
-#include <karrot.h>
 #include "dictionary.hpp"
 #include "string.hpp"
 #include <iosfwd>

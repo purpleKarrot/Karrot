@@ -6,7 +6,6 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot.h>
 #include "engine.hpp"
 #include "url.hpp"
 #include "cache.hpp"

@@ -11,6 +11,8 @@
 
 #include <karrot/spec.hpp>
 
+struct KImplementation;
+
 namespace Karrot
 {
 

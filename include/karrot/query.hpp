@@ -9,7 +9,6 @@
 #ifndef KARROT_QUERY_HPP
 #define KARROT_QUERY_HPP
 
-#include <karrot.h>
 #include <iostream>
 #include <vector>
 #include "string.hpp"

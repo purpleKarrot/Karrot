@@ -21,7 +21,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #define Solver_h
 
 #include <vector>
-#include <karrot.h>
 #include "solver_types.hpp"
 
 //=================================================================================================

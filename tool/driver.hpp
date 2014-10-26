@@ -9,8 +9,11 @@
 #ifndef KARROT_DRIVER_HPP
 #define KARROT_DRIVER_HPP
 
-#include <karrot.h>
 #include <karrot/dictionary.hpp>
+
+struct KImplementation;
+struct KDriver;
+typedef void (*KAdd) (KImplementation *impl, int native, void *self);
 
 namespace Karrot
 {

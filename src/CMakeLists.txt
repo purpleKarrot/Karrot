@@ -18,7 +18,6 @@ re2c_target(
   )
 
 add_library(karrotlib STATIC
-  ../include/karrot.h
   ../include/karrot/dictionary.hpp
   ../include/karrot/implementation.hpp
   ../include/karrot/query.hpp

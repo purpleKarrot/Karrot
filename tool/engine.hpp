@@ -9,8 +9,6 @@
 #ifndef KARROT_ENGINE_HPP
 #define KARROT_ENGINE_HPP
 
-#include <karrot.h>
-
 #include <string>
 #include <vector>
 #include <functional>

@@ -9,6 +9,14 @@
 #include "driver.hpp"
 #include <karrot/implementation.hpp>
 
+struct KDriver
+  {
+  int (*filter) (KDriver const *self, KImplementation *impl, KAdd add, void *target);
+  int (*handle) (KDriver const *self, KImplementation const *impl, int requested);
+  int (*commit) (KDriver const *self);
+  char const* (*get_error) (KDriver const *self);
+  };
+
 namespace Karrot
 {
 
