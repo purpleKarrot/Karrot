@@ -6,12 +6,11 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "solve.hpp"
+#include <karrot/solve.hpp>
 #include "hash.hpp"
-#include "query.hpp"
+#include <karrot/query.hpp>
 #include "vercmp.hpp"
 #include "minisat/solver.hpp"
-#include "url.hpp"
 #include <boost/format.hpp>
 #include <algorithm>
 #include <stdexcept>

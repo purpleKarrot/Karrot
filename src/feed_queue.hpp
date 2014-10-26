@@ -9,7 +9,7 @@
 #ifndef KARROT_FEED_QUEUE_HPP
 #define KARROT_FEED_QUEUE_HPP
 
-#include "spec.hpp"
+#include <karrot/spec.hpp>
 #include <vector>
 #include <boost/optional.hpp>
 

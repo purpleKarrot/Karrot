@@ -11,7 +11,7 @@
 #include "url.hpp"
 #include "cache.hpp"
 #include "graph.hpp"
-#include "solve.hpp"
+#include <karrot/solve.hpp>
 #include "feed_queue.hpp"
 #include "feed_parser.hpp"
 #include "xml_reader.hpp"

@@ -6,9 +6,9 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "implementation.hpp"
+#include <karrot/implementation.hpp>
 #include "driver.hpp"
-#include "spec.hpp"
+#include <karrot/spec.hpp>
 
 static inline const char *
 c_str(std::string const& str)

@@ -9,7 +9,7 @@
 #ifndef KARROT_VARIANTS_HPP
 #define KARROT_VARIANTS_HPP
 
-#include "dictionary.hpp"
+#include <karrot/dictionary.hpp>
 #include <functional>
 #include <vector>
 

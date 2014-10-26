@@ -9,7 +9,7 @@
 #ifndef KARROT_DEPENDENCIES_HPP
 #define KARROT_DEPENDENCIES_HPP
 
-#include "spec.hpp"
+#include <karrot/spec.hpp>
 
 namespace Karrot
 {

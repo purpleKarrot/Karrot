@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "../src/query.hpp"
+#include <karrot/query.hpp>
 #include "../src/variants.hpp"
 #include <boost/detail/lightweight_test.hpp>
 

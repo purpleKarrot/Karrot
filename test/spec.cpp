@@ -6,7 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "../src/spec.hpp"
+#include <karrot/spec.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/detail/lightweight_test.hpp>
 

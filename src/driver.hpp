@@ -10,7 +10,7 @@
 #define KARROT_DRIVER_HPP
 
 #include <karrot.h>
-#include "dictionary.hpp"
+#include <karrot/dictionary.hpp>
 
 namespace Karrot
 {

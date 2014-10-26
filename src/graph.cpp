@@ -7,7 +7,7 @@
  */
 
 #include "graph.hpp"
-#include "solve.hpp"
+#include <karrot/solve.hpp>
 
 #include <fstream>
 #include <boost/graph/vector_as_graph.hpp>

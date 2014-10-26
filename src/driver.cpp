@@ -7,7 +7,7 @@
  */
 
 #include "driver.hpp"
-#include "implementation.hpp"
+#include <karrot/implementation.hpp>
 
 namespace Karrot
 {

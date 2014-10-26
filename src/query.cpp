@@ -6,8 +6,8 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "query.hpp"
-#include "string.hpp"
+#include <karrot/query.hpp>
+#include <karrot/string.hpp>
 
 #include "query_re2c.hpp"
 #include "vercmp.hpp"
