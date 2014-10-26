@@ -9,6 +9,7 @@
 #include <karrot.h>
 #include "engine.hpp"
 #include "url.hpp"
+#include "cache.hpp"
 #include "graph.hpp"
 #include "solve.hpp"
 #include "feed_queue.hpp"
@@ -107,6 +108,7 @@ static void run(std::string& sysname, std::string& machine,
     impl.driver->handle(impl, requested);
     }
 
+  write_cache("cache.yaml", model, engine.database);
   write_graphviz("dependencies.dot", model, engine.database);
   }
 

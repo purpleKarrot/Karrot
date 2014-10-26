@@ -17,6 +17,8 @@ if(NOT WIN32)
   include_directories(${CURL_INCLUDE_DIRS})
 endif()
 
+find_package(LibYAML REQUIRED)
+
 re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/query_re2c.in.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/query_re2c.hpp -s
@@ -42,8 +44,6 @@ add_library(karrotlib STATIC
   feed_parser.cpp
   feed_parser.hpp
   feed_queue.hpp
-  graph.cpp
-  graph.hpp
   hash.hpp
   implementation.cpp
   implementation.hpp
@@ -83,6 +83,12 @@ else()
 endif()
 
 add_executable(karrot
+  cache.cpp
+  cache.hpp
+  graph.cpp
+  graph.hpp
+  yaml_writer.cpp
+  yaml_writer.hpp
   karrot.rc
   main.cpp
   )
@@ -90,4 +96,5 @@ add_executable(karrot
 target_link_libraries(karrot
   karrotlib
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  yaml::libyaml
   )
