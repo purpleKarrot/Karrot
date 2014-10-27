@@ -120,6 +120,16 @@ struct StringPool::Implementation
 StringPool::StringPool() :
         pimpl(new Implementation)
 {
+    from_static_string("(");
+    from_static_string(")");
+    from_static_string("<");
+    from_static_string("<=");
+    from_static_string(">");
+    from_static_string(">=");
+    from_static_string("!=");
+    from_static_string("==");
+    from_static_string("&&");
+    from_static_string("||");
 }
 
 StringPool::~StringPool()
@@ -140,7 +150,7 @@ int StringPool::from_static_string(const char* str)
     return pimpl->from_string(str, false);
 }
 
-const char* StringPool::to_string(int val)
+const char* StringPool::to_string(int val) const
 {
     return pimpl->strings_[val];
 }

@@ -19,13 +19,23 @@ int string_pool(int argc, char* argv[])
 {
     Karrot::StringPool pool;
 
-    BOOST_TEST_EQ(pool.from_string("foo"), 2);
-    BOOST_TEST_EQ(pool.from_string("bar"), 3);
-    BOOST_TEST_EQ(pool.from_string("cow"), 4);
+    BOOST_TEST_EQ(pool.from_string(0),    Karrot::STR_NULL);
+    BOOST_TEST_EQ(pool.from_string(""),   Karrot::STR_EMPTY);
+    BOOST_TEST_EQ(pool.from_string("("),  Karrot::STR_LPAREN);
+    BOOST_TEST_EQ(pool.from_string(")"),  Karrot::STR_RPAREN);
+    BOOST_TEST_EQ(pool.from_string("<"),  Karrot::STR_LESS);
+    BOOST_TEST_EQ(pool.from_string("<="), Karrot::STR_LESS_EQUAL);
+    BOOST_TEST_EQ(pool.from_string(">"),  Karrot::STR_GREATER);
+    BOOST_TEST_EQ(pool.from_string(">="), Karrot::STR_GREATER_EQUAL);
+    BOOST_TEST_EQ(pool.from_string("!="), Karrot::STR_NOT_EQUAL);
+    BOOST_TEST_EQ(pool.from_string("=="), Karrot::STR_EQUAL);
+    BOOST_TEST_EQ(pool.from_string("&&"), Karrot::STR_AND);
+    BOOST_TEST_EQ(pool.from_string("||"), Karrot::STR_OR);
 
-    BOOST_TEST_EQ(pool.from_string(nullptr), 0);
-    BOOST_TEST_EQ(pool.from_string(""), 1);
-    BOOST_TEST_EQ(pool.from_string("foo"), 2);
+    BOOST_TEST_EQ(pool.from_string("foo"), 12);
+    BOOST_TEST_EQ(pool.from_string("bar"), 13);
+    BOOST_TEST_EQ(pool.from_string("cow"), 14);
+    BOOST_TEST_EQ(pool.from_string("foo"), 12);
 
     return boost::report_errors();
 }

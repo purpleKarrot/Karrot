@@ -20,6 +20,19 @@
 namespace Karrot
 {
 
+static const int STR_NULL          =  0;
+static const int STR_EMPTY         =  1;
+static const int STR_LPAREN        =  2;
+static const int STR_RPAREN        =  3;
+static const int STR_LESS          =  4;
+static const int STR_LESS_EQUAL    =  5;
+static const int STR_GREATER       =  6;
+static const int STR_GREATER_EQUAL =  7;
+static const int STR_NOT_EQUAL     =  8;
+static const int STR_EQUAL         =  9;
+static const int STR_AND           = 10;
+static const int STR_OR            = 11;
+
 class StringPool
 {
 public:
@@ -35,7 +48,7 @@ public:
     int from_string(const char* str);
     int from_static_string(const char* str);
 
-    const char* to_string(int val);
+    const char* to_string(int val) const;
 
 private:
     struct Implementation;

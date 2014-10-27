@@ -17,19 +17,6 @@ namespace Karrot
 
 using Dictionary = std::map<String, String>;
 
-inline void
-set (Dictionary& self, char const *key, char const *value)
-  {
-  if (value)
-    {
-    self.emplace(String{key}, String{value});
-    }
-  else
-    {
-    self.erase(String{key});
-    }
-  }
-
 inline char const *
 get (Dictionary const& self, char const *key)
   {
