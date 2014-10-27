@@ -32,6 +32,7 @@ add_library(karrotlib STATIC
   query_re2c.in.hpp
   query.cpp
   solve.cpp
+  spec.cpp
   string_pool.cpp
   vercmp.cpp
   vercmp.hpp

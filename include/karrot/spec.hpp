@@ -11,8 +11,7 @@
 
 #include "query.hpp"
 #include "string.hpp"
-#include <iostream>
-#include <cstring>
+#include <iosfwd>
 
 namespace Karrot
 {
@@ -24,48 +23,15 @@ class Spec
     Spec(
       const std::string& id,
       const std::string& component,
-      const std::string& query)
-      : id(id)
-      , component(component)
-      , query(query)
-      {
-      }
-    explicit Spec(char const* url)
-      {
-      std::size_t length = std::strcspn(url, "?#");
-      id = std::string(url, length);
-      url += length;
-      if (*url == '?')
-        {
-        ++url;
-        length = std::strcspn(url, "#");
-        query = Query(String(url, length));
-        url += length;
-        }
-      if (*url == '#')
-        {
-        ++url;
-        component = String(url);
-        }
-      }
-    friend std::ostream& operator<<(std::ostream &os, Spec const& spec)
-      {
-      os << spec.id;
-      if (!spec.query.empty())
-        {
-        os << '?' << spec.query;
-        }
-      if (!spec.component.get().empty())
-        {
-        os << '#' << spec.component;
-        }
-      return os;
-      }
+      const std::string& query);
+    explicit Spec(char const* url);
   public:
     String id;
     String component;
     Query query;
   };
+
+std::ostream& operator<<(std::ostream &os, Spec const& spec);
 
 } // namespace Karrot
 
