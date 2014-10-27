@@ -21,7 +21,7 @@ namespace Karrot
 
 class Spec;
 using Requests = std::vector<Spec>;
-using Database = std::vector<KImplementation>;
+using Database = std::vector<Implementation>;
 
 class Engine
   {

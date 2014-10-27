@@ -11,9 +11,9 @@
 
 #include <karrot/dictionary.hpp>
 
-struct KImplementation;
+namespace Karrot { struct Implementation; }
 struct KDriver;
-typedef void (*KAdd) (KImplementation *impl, int native, void *self);
+typedef void (*KAdd) (Karrot::Implementation *impl, int native, void *self);
 
 namespace Karrot
 {
@@ -32,19 +32,19 @@ class Driver
       return xmlns_;
       }
     template<typename Add>
-    void filter (KImplementation& impl, Add add) const
+    void filter (Implementation& impl, Add add) const
       {
-      KAdd add_fn = [](KImplementation *impl, int native, void *self)
+      KAdd add_fn = [](Implementation *impl, int native, void *self)
         {
         auto add = *reinterpret_cast<Add*>(self);
         add(*impl, native != 0);
         };
       filter(impl, add_fn, &add);
       }
-    void handle (KImplementation const& impl, bool requested) const;
+    void handle (Implementation const& impl, bool requested) const;
     void commit() const;
   private:
-    void filter (KImplementation& impl, KAdd add, void *add_target) const;
+    void filter (Implementation& impl, KAdd add, void *add_target) const;
     void throw_error() const;
   private:
     std::string name_;

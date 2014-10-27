@@ -11,8 +11,8 @@
 
 struct KDriver
   {
-  int (*filter) (KDriver const *self, KImplementation *impl, KAdd add, void *target);
-  int (*handle) (KDriver const *self, KImplementation const *impl, int requested);
+  int (*filter) (KDriver const *self, Karrot::Implementation *impl, KAdd add, void *target);
+  int (*handle) (KDriver const *self, Karrot::Implementation const *impl, int requested);
   int (*commit) (KDriver const *self);
   char const* (*get_error) (KDriver const *self);
   };
@@ -27,7 +27,7 @@ Driver::Driver(std::string const& name, std::string const& xmlns, KDriver const*
   {
   }
 
-void Driver::filter(KImplementation& impl, KAdd add, void *add_target) const
+void Driver::filter(Implementation& impl, KAdd add, void *add_target) const
   {
   if (!driver_->filter)
     {
@@ -39,7 +39,7 @@ void Driver::filter(KImplementation& impl, KAdd add, void *add_target) const
     }
   }
 
-void Driver::handle(KImplementation const& impl, bool requested) const
+void Driver::handle(Implementation const& impl, bool requested) const
   {
   if (!driver_->handle)
     {

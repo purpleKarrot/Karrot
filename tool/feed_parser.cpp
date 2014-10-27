@@ -146,7 +146,7 @@ void FeedParser::add_src_package(std::string const& version, boost::optional<std
     {
     return;
     }
-  KImplementation impl{spec.id, String{version}, SOURCE};
+  Implementation impl{spec.id, String{version}, SOURCE};
   impl.values = this->meta;
   impl.values[String{"href"}] = vcs_href;
   impl.values[String{"driver"}] = driver->name();
@@ -226,7 +226,7 @@ void FeedParser::parse_packages(XmlReader& xml)
 void FeedParser::parse_package(XmlReader& xml)
   {
   auto driver_name = xml.attribute("type", xmlns);
-  KImplementation impl{this->spec.id};
+  Implementation impl{this->spec.id};
   impl.values = this->meta;
   impl.version = xml.attribute("version", xmlns);
   impl.component = xml.attribute("component", xmlns);
@@ -244,7 +244,7 @@ void FeedParser::parse_package(XmlReader& xml)
       }
     }
   auto driver = engine.package_handler.get(driver_name);
-  driver->filter(impl, [&](KImplementation& impl, bool system)
+  driver->filter(impl, [&](Implementation& impl, bool system)
     {
     impl.depends.clear();
     impl.conflicts.clear();

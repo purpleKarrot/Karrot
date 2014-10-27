@@ -11,23 +11,22 @@
 
 #include "dictionary.hpp"
 #include "string.hpp"
-#include <iosfwd>
 
 namespace Karrot
 {
-class Spec;
-}
 
-struct KImplementation
+class Spec;
+
+struct Implementation
   {
-  Karrot::String id;
-  Karrot::String version;
-  Karrot::String component;
-  Karrot::Dictionary values;
-  std::vector<Karrot::Spec> depends;
-  std::vector<Karrot::Spec> conflicts;
+  String id;
+  String version;
+  String component;
+  Dictionary values;
+  std::vector<Spec> depends;
+  std::vector<Spec> conflicts;
   };
 
-std::ostream& operator<<(std::ostream &os, KImplementation const& impl);
+} // namespace Karrot
 
 #endif /* KARROT_IMPLEMENTATION_HPP */

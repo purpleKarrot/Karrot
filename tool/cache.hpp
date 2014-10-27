@@ -12,12 +12,12 @@
 #include <string>
 #include <vector>
 
-struct KImplementation;
 
 namespace Karrot
 {
 
-using Database = std::vector<KImplementation>;
+struct Implementation;
+using Database = std::vector<Implementation>;
 
 void
 write_cache(

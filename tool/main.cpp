@@ -97,7 +97,7 @@ static void run(std::string& sysname, std::string& machine,
 
   for (int i : model)
     {
-    const KImplementation& impl = engine.database[i];
+    const Implementation& impl = engine.database[i];
     std::clog << boost::format("Handling '%1% %2%'\n") % impl.id % impl.version;
     bool requested = std::any_of(engine.requests.begin(), engine.requests.end(),
       [&impl](const Spec& spec)

@@ -20,6 +20,20 @@ namespace Karrot
 
 static const String SOURCE{"SOURCE"};
 
+static std::ostream& operator<<(std::ostream &os, Implementation const& impl)
+  {
+  os << impl.id;
+  if (!impl.component.get().empty())
+    {
+    os << '#' << impl.component;
+    }
+  if (!impl.version.get().empty())
+    {
+    os << ' ' << impl.version;
+    }
+  return os;
+  }
+
 static inline std::size_t hash_artefact(const std::string& id)
   {
   std::hash<std::string> hash_fn;
@@ -60,8 +74,8 @@ static std::vector<Var> make_preferences(const Database& database)
   std::sort(std::begin(preferences), std::end(preferences),
     [&database](Var var1, Var var2) -> bool
     {
-    const KImplementation& impl1 = database[var1];
-    const KImplementation& impl2 = database[var2];
+    const Implementation& impl1 = database[var1];
+    const Implementation& impl2 = database[var2];
     if (impl1.component != SOURCE && impl2.component == SOURCE)
       {
       return true;
@@ -133,8 +147,8 @@ static void explicit_conflict_clauses(
 // each other when both have the same version. If the version differs, or one
 // implementation provides all components, there is a conflict.
 static bool implicitly_conflicts(
-    KImplementation const& impl1,
-    KImplementation const& impl2)
+    Implementation const& impl1,
+    Implementation const& impl2)
 {
   if (impl1.id == impl2.id)
     {

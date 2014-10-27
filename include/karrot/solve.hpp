@@ -16,9 +16,9 @@ namespace Karrot
 {
 
 using Requests = std::vector<Spec>;
-using Database = std::vector<KImplementation>;
+using Database = std::vector<Implementation>;
 
-inline bool satisfies(const KImplementation& impl, const Spec& spec)
+inline bool satisfies(const Implementation& impl, const Spec& spec)
   {
   if (impl.id != spec.id)
     {

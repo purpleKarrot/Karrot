@@ -14,7 +14,7 @@
 namespace Karrot
 {
 
-void Dependencies::replay(KImplementation& impl) const
+void Dependencies::replay(Implementation& impl) const
   {
   auto ignore = [&]
     {

@@ -11,12 +11,11 @@
 
 #include <karrot/spec.hpp>
 
-struct KImplementation;
-
 namespace Karrot
 {
 
 class FeedPreQueue;
+struct Implementation;
 
 class Dependencies
   {
@@ -60,7 +59,7 @@ class Dependencies
       {
       deps.emplace_back(CONFLICTS, spec);
       }
-    void replay(KImplementation& impl) const;
+    void replay(Implementation& impl) const;
   private:
     enum Code
       {
