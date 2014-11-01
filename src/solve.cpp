@@ -7,7 +7,6 @@
  */
 
 #include <karrot.h>
-#include "hash.hpp"
 #include "vercmp.hpp"
 #include "minisat/solver.hpp"
 #include <boost/format.hpp>
@@ -18,31 +17,6 @@
 
 namespace Karrot
 {
-
-static inline std::size_t hash_artefact(int id)
-  {
-  std::hash<int> hash_fn;
-  return hash_fn(id);
-  }
-
-static void query(
-    const Hash& hash,
-    const Database& database,
-    const Spec& spec,
-    std::vector<Lit>& res, StringPool& pool)
-  {
-  int id;
-  std::size_t h = hash_artefact(spec.id) & hash.mask;
-  std::size_t hh = hash.begin();
-  while ((id = hash.table[h]) != 0)
-    {
-    if (spec.satisfies(database[id - 1], pool))
-      {
-      res.push_back(Lit(id - 1));
-      }
-    h = hash.next(h, hh);
-    }
-  }
 
 // 1. prefer binary packages
 // 2. prefer fewer dependencies
@@ -83,7 +57,6 @@ static std::vector<Var> make_preferences(const Database& database, StringPool& p
   }
 
 static void dependency_clauses(
-    const Hash& hash,
     const Database& database,
     Solver& solver, StringPool& pool)
   {
@@ -92,7 +65,13 @@ static void dependency_clauses(
     for (const Spec& spec : database[i].depends)
       {
       std::vector<Lit> clause{~Lit(i)};
-      query(hash, database, spec, clause, pool);
+      for (std::size_t k = 0; k < database.size(); ++k)
+        {
+        if (spec.satisfies(database[k], pool))
+          {
+          clause.push_back(Lit(k));
+          }
+        }
       if (clause.size() == 1)
         {
         std::clog << boost::format("Warning: No implementation satisfies '%1%'\n") % SpecPrinter{spec, pool};
@@ -108,20 +87,19 @@ static void dependency_clauses(
   }
 
 static void explicit_conflict_clauses(
-    const Hash& hash,
     const Database& database,
     Solver& solver, StringPool& pool)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
-    Lit lit = ~Lit(i);
     for (const Spec& spec : database[i].conflicts)
       {
-      std::vector<Lit> conflicts;
-      query(hash, database, spec, conflicts, pool);
-      for (Lit const& conflict : conflicts)
+      for (std::size_t k = 0; k < database.size(); ++k)
         {
-        solver.addBinary(lit, ~conflict);
+        if (spec.satisfies(database[k], pool))
+          {
+          solver.addBinary(~Lit(i), ~Lit(k));
+          }
         }
       }
     }
@@ -193,28 +171,19 @@ bool solve(
     const Requests& requests,
     std::vector<int>& model, StringPool& pool)
   {
-  Hash hash;
-  if (hash.rehash_needed(database.size()))
-    {
-    for (std::size_t i = 0; i < database.size(); ++i)
-      {
-      std::size_t h = hash_artefact(database[i].id) & hash.mask;
-      std::size_t hh = hash.begin();
-      while (hash.table[h] != 0)
-        {
-        h = hash.next(h, hh);
-        }
-      hash.table[h] = i + 1;
-      }
-    }
-
   Solver solver(make_preferences(database, pool));
 
   std::vector<Lit> request;
   for (const Spec& spec : requests)
     {
     std::vector<Lit> choices;
-    query(hash, database, spec, choices, pool);
+    for (std::size_t k = 0; k < database.size(); ++k)
+      {
+      if (spec.satisfies(database[k], pool))
+        {
+        choices.push_back(Lit(k));
+        }
+      }
     if (choices.size() == 0)
       {
       std::clog << boost::format("No implementation for '%1%':\n") % SpecPrinter{spec, pool};
@@ -245,8 +214,8 @@ bool solve(
     std::clog << "Warning: request is ambiguous.\n";
     }
 
-  dependency_clauses(hash, database, solver, pool);
-  explicit_conflict_clauses(hash, database, solver, pool);
+  dependency_clauses(database, solver, pool);
+  explicit_conflict_clauses(database, solver, pool);
   implicit_conflict_clauses(database, solver);
   source_conflict_clauses(database, solver, pool);
 
