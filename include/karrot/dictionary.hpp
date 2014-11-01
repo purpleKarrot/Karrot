@@ -10,19 +10,33 @@
 #define KARROT_DICTIONARY_HPP
 
 #include <map>
-#include "string_pool.hpp"
 
 namespace Karrot
 {
 
-using Dictionary = std::map<int, int>;
-
-inline char const *
-get (Dictionary const& self, char const *key, StringPool& pool)
-  {
-  auto it = self.find(pool.from_string(key));
-  return it != self.end() ? pool.to_string(it->second) : nullptr;
-  }
+class Dictionary
+{
+public:
+  void set(int key, int val)
+    {
+    impl[key] = val;
+    }
+  int get(int key) const
+    {
+    auto it = impl.find(key);
+    return it != impl.end() ? it->second : 0;
+    }
+  template<typename Visit>
+  void foreach(Visit&& visit) const
+    {
+    for(auto& e : impl)
+      {
+      visit(e.first, e.second);
+      }
+    }
+private:
+  std::map<int, int> impl;
+};
 
 } // namespace Karrot
 

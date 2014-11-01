@@ -31,7 +31,7 @@ Dictionary parse_variant(const std::string& string, StringPool& pool)
   auto marker = cursor;
   while (1)
     {
-    marker = cursor;    
+    marker = cursor;
     /*!re2c
     alpha alnum*
       {
@@ -42,7 +42,7 @@ Dictionary parse_variant(const std::string& string, StringPool& pool)
       break;
       }
     */
-    marker = cursor;    
+    marker = cursor;
     /*!re2c
     alnum+
       {
@@ -53,7 +53,7 @@ Dictionary parse_variant(const std::string& string, StringPool& pool)
       break;
       }
     */
-    result.emplace(key, val);
+    result.set(key, val);
     }
   if (cursor - string.c_str() < string.length())
     {

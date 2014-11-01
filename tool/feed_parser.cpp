@@ -102,7 +102,7 @@ void FeedParser::parse_meta(XmlReader& xml)
     {
     int name = engine.string_pool.from_string(xml.name().c_str());
     int value = engine.string_pool.from_string(xml.content().c_str());
-    meta.emplace(name, value);
+    meta.set(name, value);
     xml.skip();
     }
   }
@@ -113,7 +113,7 @@ void FeedParser::parse_variants(XmlReader& xml)
     {
     int name = engine.string_pool.from_string(xml.attribute("name", xmlns).c_str());
     int values = engine.string_pool.from_string(xml.attribute("values", xmlns).c_str());
-    variants.emplace(name, values);
+    variants.set(name, values);
     xml.skip();
     }
   }
@@ -142,11 +142,11 @@ void FeedParser::add_src_package(int version, int tag)
     }
   Implementation impl{id, version, STR_SOURCE};
   impl.values = this->meta;
-  impl.values[engine.string_pool.from_static_string("href")] = engine.string_pool.from_string(vcs_href.c_str());
-  impl.values[engine.string_pool.from_static_string("driver")] = engine.string_pool.from_string(driver->name().c_str());
+  impl.values.set(engine.string_pool.from_static_string("href"), engine.string_pool.from_string(vcs_href.c_str()));
+  impl.values.set(engine.string_pool.from_static_string("driver"), engine.string_pool.from_string(driver->name().c_str()));
   if(tag)
     {
-    impl.values[engine.string_pool.from_static_string("tag")] = tag;
+    impl.values.set(engine.string_pool.from_static_string("tag"), tag);
     }
   for (const Dependencies& component : components)
     {
@@ -224,7 +224,7 @@ void FeedParser::parse_package(XmlReader& xml)
   impl.values = this->meta;
   impl.version = engine.string_pool.from_string(xml.attribute("version", xmlns).c_str());
   impl.component = engine.string_pool.from_string(xml.attribute("component", xmlns).c_str());
-  impl.values[engine.string_pool.from_static_string("driver")] = engine.string_pool.from_string(driver_name.c_str());
+  impl.values.set(engine.string_pool.from_static_string("driver"), engine.string_pool.from_string(driver_name.c_str()));
 //if (auto attr = xml.optional_attribute("variant", xmlns))
 //  {
 //  auto variant = parse_variant(*attr);
@@ -234,7 +234,7 @@ void FeedParser::parse_package(XmlReader& xml)
     {
     if (attr.name.namespace_uri == xmlns)
       {
-      impl.values[engine.string_pool.from_string(attr.name.local.c_str())] = engine.string_pool.from_string(attr.value.c_str());
+      impl.values.set(engine.string_pool.from_string(attr.name.local.c_str()), engine.string_pool.from_string(attr.value.c_str()));
       }
     }
   auto driver = engine.package_handler.get(driver_name);

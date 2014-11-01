@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <karrot/string_pool.hpp>
 
 #include "feed_queue.hpp"
 #include "package_handler.hpp"

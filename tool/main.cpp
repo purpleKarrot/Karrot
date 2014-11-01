@@ -47,8 +47,8 @@ static void run(std::string& sysname, std::string& machine,
   using namespace Karrot;
   Karrot::Engine engine;
 
-  engine.globals.emplace(S(sysname), s(sysname.c_str()));
-  engine.globals.emplace(S(machine), s(machine.c_str()));
+  engine.globals.set(S(sysname), s(sysname.c_str()));
+  engine.globals.set(S(machine), s(machine.c_str()));
 
   // k_engine_add_driver(engine,
   //     std::unique_ptr<Karrot::Driver>(new Karrot::Archive));
@@ -109,7 +109,8 @@ static void run(std::string& sysname, std::string& machine,
       {
       return spec.satisfies(impl, engine.string_pool);
       });
-    auto driver = engine.package_handler.get(get(impl.values, "driver", engine.string_pool));
+    int STR_DRIVER = engine.string_pool.from_static_string("driver");
+    auto driver = engine.package_handler.get(engine.string_pool.to_string(impl.values.get(STR_DRIVER)));
     driver->handle(impl, requested);
     }
 

@@ -58,19 +58,11 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
         writer.scalar("component");
         writer.scalar(pool.to_string(impl.component));
 
-        if (!impl.values.empty())
+        impl.values.foreach([&writer, &pool](int key, int val)
         {
-            writer.scalar("values");
-            writer.start_mapping();
-
-            for (auto&& entry : impl.values)
-            {
-                writer.scalar(pool.to_string(entry.first));
-                writer.scalar(pool.to_string(entry.second));
-            }
-
-            writer.end_mapping();
-        }
+            writer.scalar(pool.to_string(key));
+            writer.scalar(pool.to_string(val));
+        });
 
         if (!impl.depends.empty())
         {

@@ -66,10 +66,9 @@ static inline bool is_ident(int id)
 static inline int
 get_variant(const Dictionary& variants, int key, StringPool const& pool)
   {
-  auto it = variants.find(key);
-  if (it != variants.end())
+  if (int val = variants.get(key))
     {
-    return it->second;
+    return val;
     }
   std::stringstream message;
   message
@@ -77,10 +76,10 @@ get_variant(const Dictionary& variants, int key, StringPool const& pool)
     << pool.to_string(key)
     << "' used in test. Known variables are: "
     ;
-  for (auto& entry : variants)
+  variants.foreach([&message, &pool](int key, int val)
     {
-    message << "'" << pool.to_string(entry.first) << "', ";
-    }
+    message << "'" << pool.to_string(key) << "', ";
+    });
   message << "and 'version'.";
   throw std::runtime_error(message.str());
   }
