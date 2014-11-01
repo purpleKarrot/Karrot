@@ -21,7 +21,7 @@ namespace Karrot
 // 1. prefer binary packages
 // 2. prefer fewer dependencies
 // 3. prefer older releases
-static std::vector<Var> make_preferences(const Database& database, StringPool& pool)
+static std::vector<Var> make_preferences(const Database& database, StringPool const& pool)
   {
   Var i = 0;
   std::vector<Var> preferences(database.size());
@@ -58,7 +58,7 @@ static std::vector<Var> make_preferences(const Database& database, StringPool& p
 
 static void dependency_clauses(
     const Database& database,
-    Solver& solver, StringPool& pool)
+    Solver& solver, StringPool const& pool)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
@@ -88,7 +88,7 @@ static void dependency_clauses(
 
 static void explicit_conflict_clauses(
     const Database& database,
-    Solver& solver, StringPool& pool)
+    Solver& solver, StringPool const& pool)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
@@ -141,7 +141,7 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
 
 // If a project is built from source, all dependent projects should be built
 // from source too.
-static void source_conflict_clauses(const Database& database, Solver& solver, StringPool& pool)
+static void source_conflict_clauses(const Database& database, Solver& solver, StringPool const& pool)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
@@ -169,7 +169,7 @@ static void source_conflict_clauses(const Database& database, Solver& solver, St
 bool solve(
     const Database& database,
     const Requests& requests,
-    std::vector<int>& model, StringPool& pool)
+    std::vector<int>& model, StringPool const& pool)
   {
   Solver solver(make_preferences(database, pool));
 

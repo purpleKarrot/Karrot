@@ -125,11 +125,21 @@ class Implementation
     std::vector<Spec> conflicts;
   };
 
-bool solve(
-    Database const& database,
-    Requests const& requests,
-    std::vector<int>& model,
-    StringPool& pool);
+class Context
+{
+public:
+  void add(Implementation impl);
+  void erase(Spec const& spec, StringPool const& pool);
+
+  bool solve(Requests const& requests, StringPool const& pool);
+
+  void for_each(std::function<void(Implementation const&)> fun) const;
+  void for_solution(std::function<void(Implementation const&)> fun) const;
+
+public:
+  std::vector<Implementation> database;
+  std::vector<int> model;
+};
 
 } // namespace Karrot
 

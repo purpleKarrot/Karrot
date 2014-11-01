@@ -157,7 +157,7 @@ void FeedParser::add_src_package(int version, int tag)
     {
     component.replay(impl, engine.string_pool);
     }
-  this->engine.database.push_back(impl);
+  this->engine.add(std::move(impl));
   }
 
 void FeedParser::parse_components(XmlReader& xml)
@@ -261,7 +261,7 @@ void FeedParser::parse_package(XmlReader& xml)
         component.replay(impl, engine.string_pool);
         }
       }
-    this->engine.database.push_back(impl);
+    this->engine.add(std::move(impl));
     });
   }
 

@@ -22,7 +22,7 @@ add_library(karrotlib STATIC
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
-  hash.hpp
+  context.cpp
   implementation.cpp
   query_re2c.hpp
   query_re2c.in.hpp

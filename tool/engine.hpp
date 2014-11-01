@@ -21,14 +21,13 @@
 namespace Karrot
 {
 
-class Engine
+class Engine: public Context
   {
   public:
     StringPool string_pool;
     FeedQueue feed_queue;
     PackageHandler package_handler;
     Requests requests;
-    Database database;
     std::map<int, int> globals;
     bool no_topological_order = false;
   };

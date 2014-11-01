@@ -85,9 +85,8 @@ static void run(std::string& sysname, std::string& machine,
       }
     }
 
-  std::vector<int> model;
   std::clog << boost::format("Solving SAT with %1% variables\n") % engine.database.size();
-  bool solvable = solve(engine.database, engine.requests, model, engine.string_pool);
+  bool solvable = engine.solve(engine.requests, engine.string_pool);
   if (!solvable)
     {
     std::cerr << "Not solvable!\n";
@@ -96,10 +95,10 @@ static void run(std::string& sysname, std::string& machine,
 
   if (!engine.no_topological_order)
     {
-    model = topological_sort(model, engine.database, engine.string_pool);
+    engine.model = topological_sort(engine.model, engine.database, engine.string_pool);
     }
 
-  for (int i : model)
+  for (int i : engine.model)
     {
     const Implementation& impl = engine.database[i];
     std::clog << boost::format("Handling '%1% %2%'\n") % impl.id % impl.version;
@@ -113,8 +112,8 @@ static void run(std::string& sysname, std::string& machine,
     driver->handle(impl, requested);
     }
 
-  write_cache("cache.yaml", model, engine.database, engine.string_pool);
-  write_graphviz("dependencies.dot", model, engine.database, engine.string_pool);
+  write_cache("cache.yaml", engine.model, engine.database, engine.string_pool);
+  write_graphviz("dependencies.dot", engine.model, engine.database, engine.string_pool);
   }
 
 int main(int argc, char *argv[])
