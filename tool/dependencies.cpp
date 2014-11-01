@@ -7,7 +7,7 @@
  */
 
 #include "dependencies.hpp"
-#include <karrot/implementation.hpp>
+#include <karrot.h>
 #include "feed_queue.hpp"
 #include <boost/logic/tribool.hpp>
 

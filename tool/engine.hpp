@@ -12,17 +12,13 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <karrot/string_pool.hpp>
+#include <karrot.h>
 
 #include "feed_queue.hpp"
 #include "package_handler.hpp"
 
 namespace Karrot
 {
-
-class Spec;
-using Requests = std::vector<Spec>;
-using Database = std::vector<Implementation>;
 
 class Engine
   {

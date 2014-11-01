@@ -12,13 +12,21 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-#ifndef KARROT_STRING_POOL_INCLUDED
-#define KARROT_STRING_POOL_INCLUDED
+#ifndef KARROT_H_INCLUDED
+#define KARROT_H_INCLUDED
 
+#include <map>
 #include <memory>
+#include <vector>
 
 namespace Karrot
 {
+
+class Spec;
+struct Implementation;
+
+using Requests = std::vector<Spec>;
+using Database = std::vector<Implementation>;
 
 static const int STR_NULL          =  0;
 static const int STR_EMPTY         =  1;
@@ -58,6 +66,83 @@ private:
     std::unique_ptr<Implementation> pimpl;
 };
 
+class Dictionary
+{
+public:
+  void set(int key, int val)
+    {
+    impl[key] = val;
+    }
+  int get(int key) const
+    {
+    auto it = impl.find(key);
+    return it != impl.end() ? it->second : 0;
+    }
+  template<typename Visit>
+  void foreach(Visit&& visit) const
+    {
+    for(auto& e : impl)
+      {
+      visit(e.first, e.second);
+      }
+    }
+private:
+  std::map<int, int> impl;
+};
+
+class Query
+  {
+  public:
+    Query() = default;
+    Query(std::string const& string, StringPool& pool);
+  public:
+    explicit operator bool() const
+      {
+      return !compiled.empty();
+      }
+    std::string to_string(StringPool const& pool) const;
+    bool evaluate(int version, const Dictionary& variants, StringPool const& pool) const;
+  private:
+    friend bool operator!=(Query const& q1, Query const& q2)
+      {
+      return q1.compiled != q2.compiled;
+      }
+  private:
+    std::vector<int> compiled;
+  };
+
+class Spec
+  {
+  public:
+    Spec() = default;
+    Spec(
+      const std::string& id,
+      const std::string& component,
+      const std::string& query, StringPool& pool);
+    Spec(char const* url, StringPool& pool);
+    bool satisfies(const Implementation& impl, StringPool const& pool) const;
+  public:
+    int id = 0;
+    int component = 0;
+    Query query;
+  };
+
+struct Implementation
+  {
+  int id;
+  int version;
+  int component;
+  Dictionary values;
+  std::vector<Spec> depends;
+  std::vector<Spec> conflicts;
+  };
+
+bool solve(
+    Database const& database,
+    Requests const& requests,
+    std::vector<int>& model,
+    StringPool& pool);
+
 } // namespace Karrot
 
-#endif /* FUSEL_STRING_POOL_INCLUDED */
+#endif /* KARROT_H_INCLUDED */

@@ -9,7 +9,7 @@
 #ifndef KARROT_VERCMP_HPP
 #define KARROT_VERCMP_HPP
 
-#include <karrot/string_pool.hpp>
+#include <karrot.h>
 
 namespace Karrot
 {

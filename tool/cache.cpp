@@ -7,8 +7,7 @@
  */
 
 #include "cache.hpp"
-#include <karrot/spec.hpp>
-#include <karrot/implementation.hpp>
+#include <karrot.h>
 #include "yaml_writer.hpp"
 #include <memory>
 

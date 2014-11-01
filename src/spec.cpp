@@ -6,8 +6,7 @@
  *   http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <karrot/spec.hpp>
-#include <karrot/implementation.hpp>
+#include <karrot.h>
 #include <ostream>
 #include <cstring>
 

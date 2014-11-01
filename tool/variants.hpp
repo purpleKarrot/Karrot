@@ -9,8 +9,7 @@
 #ifndef KARROT_VARIANTS_HPP
 #define KARROT_VARIANTS_HPP
 
-#include <karrot/dictionary.hpp>
-#include <karrot/string_pool.hpp>
+#include <karrot.h>
 #include <functional>
 #include <vector>
 

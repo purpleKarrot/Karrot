@@ -9,7 +9,7 @@
 #ifndef KARROT_PACKAGE_HPP
 #define KARROT_PACKAGE_HPP
 
-#include <karrot/dictionary.hpp>
+#include <karrot.h>
 
 namespace Karrot
 {

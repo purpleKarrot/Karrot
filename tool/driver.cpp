@@ -7,7 +7,7 @@
  */
 
 #include "driver.hpp"
-#include <karrot/implementation.hpp>
+#include <karrot.h>
 
 struct KDriver
   {

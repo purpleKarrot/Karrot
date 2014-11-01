@@ -8,7 +8,7 @@
 
 #include "feed_parser.hpp"
 #include "engine.hpp"
-#include <karrot/implementation.hpp>
+#include <karrot.h>
 #include "xml_reader.hpp"
 #include "variants.hpp"
 #include <boost/format.hpp>

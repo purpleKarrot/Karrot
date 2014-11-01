@@ -15,9 +15,7 @@
 #ifndef KARROT_PRINT_INCLUDED
 #define KARROT_PRINT_INCLUDED
 
-#include <karrot/implementation.hpp>
-#include <karrot/spec.hpp>
-#include <karrot/string_pool.hpp>
+#include <karrot.h>
 #include <ostream>
 
 namespace Karrot

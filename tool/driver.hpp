@@ -9,7 +9,7 @@
 #ifndef KARROT_DRIVER_HPP
 #define KARROT_DRIVER_HPP
 
-#include <karrot/dictionary.hpp>
+#include <karrot.h>
 
 namespace Karrot { struct Implementation; }
 struct KDriver;

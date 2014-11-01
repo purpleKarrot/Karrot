@@ -12,7 +12,7 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-#include <karrot/string_pool.hpp>
+#include <karrot.h>
 #include <boost/detail/lightweight_test.hpp>
 
 int string_pool(int argc, char* argv[])

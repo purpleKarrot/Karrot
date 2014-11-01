@@ -10,8 +10,7 @@
 #include "url.hpp"
 #include "cache.hpp"
 #include "graph.hpp"
-#include <karrot/solve.hpp>
-#include <karrot/implementation.hpp>
+#include <karrot.h>
 #include "feed_queue.hpp"
 #include "feed_parser.hpp"
 #include "xml_reader.hpp"
