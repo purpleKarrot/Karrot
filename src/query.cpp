@@ -12,6 +12,7 @@
 #include "vercmp.hpp"
 #include <iostream>
 #include <sstream>
+#include <stack>
 
 namespace Karrot
 {
@@ -84,8 +85,7 @@ get_variant(const Dictionary& variants, int key, StringPool const& pool)
   throw std::runtime_error(message.str());
   }
 
-Query::Query(std::string string, StringPool& pool)
-  : str{std::move(string)}
+Query::Query(std::string const& str, StringPool& pool)
   {
   if (str.empty())
     {
@@ -182,6 +182,34 @@ Query::Query(std::string string, StringPool& pool)
     }
   }
 
+std::string Query::to_string(StringPool const& pool) const
+  {
+  using Expression = std::pair<int, std::string>;
+  std::stack<Expression> expr;
+  for (int c : compiled)
+    {
+    if (is_ident(c))
+      {
+      expr.push({3, pool.to_string(c)});
+      }
+    else
+      {
+      Expression r = expr.top(); expr.pop();
+      Expression l = expr.top(); expr.pop();
+      int preced =  op_preced(c);
+      if (l.first < preced)
+        {
+        l.second = '(' + l.second + ')';
+        }
+      if (r.first < preced)
+        {
+        r.second = '(' + r.second + ')';
+        }
+      expr.push({preced, l.second + pool.to_string(c) + r.second});
+      }
+    }
+  return expr.top().second;
+  }
 
 bool Query::evaluate(int version, const Dictionary& variants, StringPool const& pool) const
   {

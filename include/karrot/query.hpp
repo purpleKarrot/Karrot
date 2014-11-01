@@ -9,7 +9,6 @@
 #ifndef KARROT_QUERY_HPP
 #define KARROT_QUERY_HPP
 
-#include <ostream>
 #include <vector>
 #include "dictionary.hpp"
 #include "string_pool.hpp"
@@ -21,24 +20,20 @@ class Query
   {
   public:
     Query() = default;
-    Query(std::string string, StringPool& pool);
+    Query(std::string const& string, StringPool& pool);
   public:
     explicit operator bool() const
       {
       return !compiled.empty();
       }
+    std::string to_string(StringPool const& pool) const;
     bool evaluate(int version, const Dictionary& variants, StringPool const& pool) const;
   private:
-    friend std::ostream& operator<<(std::ostream &os, Query const& query)
-      {
-      return os << query.str;
-      }
     friend bool operator!=(Query const& q1, Query const& q2)
       {
-      return q1.str != q2.str;
+      return q1.compiled != q2.compiled;
       }
   private:
-    std::string str;
     std::vector<int> compiled;
   };
 

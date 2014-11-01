@@ -10,7 +10,6 @@
 #include <karrot/spec.hpp>
 #include <karrot/implementation.hpp>
 #include "yaml_writer.hpp"
-#include <boost/lexical_cast.hpp>
 #include <memory>
 
 namespace Karrot
@@ -29,7 +28,7 @@ static std::string to_string(Spec const& spec, StringPool const& pool)
     if (spec.query)
     {
         result += " ";
-        result += boost::lexical_cast<std::string>(spec.query);
+        result += spec.query.to_string(pool);
     }
     
     return result;

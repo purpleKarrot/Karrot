@@ -50,7 +50,7 @@ struct SpecPrinter
     os << p.pool.to_string(p.spec.id);
     if (p.spec.query)
       {
-      os << '?' << p.spec.query;
+      os << '?' << p.spec.query.to_string(p.pool);
       }
     if (p.spec.component)
       {
