@@ -14,29 +14,15 @@
 #include <boost/format.hpp>
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
+#include "print.hpp"
 
 namespace Karrot
 {
 
-static const String SOURCE{"SOURCE"};
-
-static std::ostream& operator<<(std::ostream &os, Implementation const& impl)
+static inline std::size_t hash_artefact(int id)
   {
-  os << impl.id;
-  if (!impl.component.get().empty())
-    {
-    os << '#' << impl.component;
-    }
-  if (!impl.version.get().empty())
-    {
-    os << ' ' << impl.version;
-    }
-  return os;
-  }
-
-static inline std::size_t hash_artefact(const std::string& id)
-  {
-  std::hash<std::string> hash_fn;
+  std::hash<int> hash_fn;
   return hash_fn(id);
   }
 
@@ -44,14 +30,14 @@ static void query(
     const Hash& hash,
     const Database& database,
     const Spec& spec,
-    std::vector<Lit>& res)
+    std::vector<Lit>& res, StringPool& pool)
   {
   int id;
   std::size_t h = hash_artefact(spec.id) & hash.mask;
   std::size_t hh = hash.begin();
   while ((id = hash.table[h]) != 0)
     {
-    if (satisfies(database[id - 1], spec))
+    if (satisfies(database[id - 1], spec, pool))
       {
       res.push_back(Lit(id - 1));
       }
@@ -62,7 +48,7 @@ static void query(
 // 1. prefer binary packages
 // 2. prefer fewer dependencies
 // 3. prefer older releases
-static std::vector<Var> make_preferences(const Database& database)
+static std::vector<Var> make_preferences(const Database& database, StringPool& pool)
   {
   Var i = 0;
   std::vector<Var> preferences(database.size());
@@ -72,15 +58,15 @@ static std::vector<Var> make_preferences(const Database& database)
     return i++;
     });
   std::sort(std::begin(preferences), std::end(preferences),
-    [&database](Var var1, Var var2) -> bool
+    [&database, &pool](Var var1, Var var2) -> bool
     {
     const Implementation& impl1 = database[var1];
     const Implementation& impl2 = database[var2];
-    if (impl1.component != SOURCE && impl2.component == SOURCE)
+    if (impl1.component != STR_SOURCE && impl2.component == STR_SOURCE)
       {
       return true;
       }
-    if (impl1.component == SOURCE && impl2.component != SOURCE)
+    if (impl1.component == STR_SOURCE && impl2.component != STR_SOURCE)
       {
       return false;
       }
@@ -92,26 +78,26 @@ static std::vector<Var> make_preferences(const Database& database)
       {
       return false;
       }
-    return vercmp(impl1.version, impl2.version) < 0;
+    return vercmp(impl1.version, impl2.version, pool) < 0;
     });
-  return std::move(preferences);
+  return preferences;
   }
 
 static void dependency_clauses(
     const Hash& hash,
     const Database& database,
-    Solver& solver)
+    Solver& solver, StringPool& pool)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
     for (const Spec& spec : database[i].depends)
       {
       std::vector<Lit> clause{~Lit(i)};
-      query(hash, database, spec, clause);
+      query(hash, database, spec, clause, pool);
       if (clause.size() == 1)
         {
-        std::clog << boost::format("Warning: No implementation satisfies '%1%'\n") % spec;
-        std::clog << boost::format("Warning: blacklisting '%1%'\n") % database[i];
+        std::clog << boost::format("Warning: No implementation satisfies '%1%'\n") % SpecPrinter{spec, pool};
+        std::clog << boost::format("Warning: blacklisting '%1%'\n") % ImplPrinter{database[i], pool};
         solver.addUnit(clause[0]);
         }
       else
@@ -125,7 +111,7 @@ static void dependency_clauses(
 static void explicit_conflict_clauses(
     const Hash& hash,
     const Database& database,
-    Solver& solver)
+    Solver& solver, StringPool& pool)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
@@ -133,7 +119,7 @@ static void explicit_conflict_clauses(
     for (const Spec& spec : database[i].conflicts)
       {
       std::vector<Lit> conflicts;
-      query(hash, database, spec, conflicts);
+      query(hash, database, spec, conflicts, pool);
       for (Lit const& conflict : conflicts)
         {
         solver.addBinary(lit, ~conflict);
@@ -153,8 +139,8 @@ static bool implicitly_conflicts(
   if (impl1.id == impl2.id)
     {
     if (impl1.version != impl2.version ||
-        impl1.component == "*" || impl2.component == "*" ||
-        impl1.component == SOURCE || impl2.component == SOURCE)
+        impl1.component == STR_ANY || impl2.component == STR_ANY ||
+        impl1.component == STR_SOURCE || impl2.component == STR_SOURCE)
       {
       return true;
       }
@@ -178,23 +164,23 @@ static void implicit_conflict_clauses(const Database& database, Solver& solver)
 
 // If a project is built from source, all dependent projects should be built
 // from source too.
-static void source_conflict_clauses(const Database& database, Solver& solver)
+static void source_conflict_clauses(const Database& database, Solver& solver, StringPool& pool)
   {
   for (std::size_t i = 0; i < database.size(); ++i)
     {
-    if (database[i].component != SOURCE)
+    if (database[i].component != STR_SOURCE)
       {
       continue;
       }
     for (std::size_t k = 0; k < database.size(); ++k)
       {
-      if (database[k].component == SOURCE)
+      if (database[k].component == STR_SOURCE)
         {
         continue;
         }
       for (const Spec& spec : database[k].depends)
         {
-        if (satisfies(database[i], spec))
+        if (satisfies(database[i], spec, pool))
           {
           solver.addBinary(~Lit(i), ~Lit(k));
           }
@@ -206,7 +192,7 @@ static void source_conflict_clauses(const Database& database, Solver& solver)
 bool solve(
     const Database& database,
     const Requests& requests,
-    std::vector<int>& model)
+    std::vector<int>& model, StringPool& pool)
   {
   Hash hash;
   if (hash.rehash_needed(database.size()))
@@ -223,34 +209,34 @@ bool solve(
       }
     }
 
-  Solver solver(make_preferences(database));
+  Solver solver(make_preferences(database, pool));
 
   std::vector<Lit> request;
   for (const Spec& spec : requests)
     {
     std::vector<Lit> choices;
-    query(hash, database, spec, choices);
+    query(hash, database, spec, choices, pool);
     if (choices.size() == 0)
       {
-      std::clog << boost::format("No implementation for '%1%':\n") % spec;
+      std::clog << boost::format("No implementation for '%1%':\n") % SpecPrinter{spec, pool};
       for (auto& entry : database)
         {
-        std::clog << boost::format("  - %1%\n") % entry;
+        std::clog << boost::format("  - %1%\n") % ImplPrinter{entry, pool};
         }
       return false;
       }
     if (choices.size() == 1)
       {
-      std::clog << boost::format("Exactly one implementation for '%1%':\n") % spec;
-      std::clog << boost::format("  + %1%\n") % database[var(choices[0])];
+      std::clog << boost::format("Exactly one implementation for '%1%':\n") % SpecPrinter{spec, pool};
+      std::clog << boost::format("  + %1%\n") % ImplPrinter{database[var(choices[0])], pool};
       request.push_back(choices[0]);
       }
     else
       {
-      std::clog << boost::format("Multiple implementations for '%1%':\n") % spec;
+      std::clog << boost::format("Multiple implementations for '%1%':\n") % SpecPrinter{spec, pool};
       for (int i = 0; i < choices.size(); ++i)
         {
-        std::clog << boost::format("  + %1%\n") % database[var(choices[i])];
+        std::clog << boost::format("  + %1%\n") % ImplPrinter{database[var(choices[i])], pool};
         }
       solver.add_clause(choices);
       }
@@ -260,17 +246,17 @@ bool solve(
     std::clog << "Warning: request is ambiguous.\n";
     }
 
-  dependency_clauses(hash, database, solver);
-  explicit_conflict_clauses(hash, database, solver);
+  dependency_clauses(hash, database, solver, pool);
+  explicit_conflict_clauses(hash, database, solver, pool);
   implicit_conflict_clauses(database, solver);
-  source_conflict_clauses(database, solver);
+  source_conflict_clauses(database, solver, pool);
 
   if (!solver.solve(request))
     {
     std::clog << "no solution exists, because of conflicts.\n";
     for (Lit const& lit : solver.conflict)
       {
-      std::clog << boost::format("  %1% %2%\n") % (sign(lit) ? "-" : "+") % database[var(lit)];
+      std::clog << boost::format("  %1% %2%\n") % (sign(lit) ? "-" : "+") % ImplPrinter{database[var(lit)], pool};
       }
     return false;
     }

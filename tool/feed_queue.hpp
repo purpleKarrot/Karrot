@@ -9,7 +9,7 @@
 #ifndef KARROT_FEED_QUEUE_HPP
 #define KARROT_FEED_QUEUE_HPP
 
-#include <karrot/spec.hpp>
+#include <string>
 #include <vector>
 #include <boost/optional.hpp>
 
@@ -19,30 +19,22 @@ namespace Karrot
 class FeedQueue
   {
   public:
-    void push(Spec const& spec)
+    void push(int id)
       {
-      for (Spec& cur : urls)
+      for (int u : urls)
         {
-        if (cur.id == spec.id)
+        if (u == id)
           {
-          if (cur.component.get().empty())
-            {
-            cur.component = spec.component;
-            }
-          if (cur.query.empty())
-            {
-            cur.query = spec.query;
-            }
           return;
           }
         }
-      urls.push_back(spec);
+      urls.push_back(id);
       }
-    void current_id(std::string const& id)
+    void current_id(int id)
       {
-      urls[next - 1].id = id;
+      urls[next - 1] = id;
       }
-    boost::optional<Spec> get_next()
+    boost::optional<int> get_next()
       {
       if (next < urls.size())
         {
@@ -51,50 +43,8 @@ class FeedQueue
       return boost::none;
       }
   private:
-    std::vector<Spec> urls;
+    std::vector<int> urls;
     std::size_t next = 0;
-  };
-
-class FeedPreQueue
-  {
-  public:
-    FeedPreQueue(FeedQueue& feed_queue)
-      : feed_queue(feed_queue)
-      {
-      }
-    ~FeedPreQueue()
-      {
-      for (auto& url: urls)
-        {
-        feed_queue.push(url);
-        }
-      }
-    void push(Spec const& spec)
-      {
-      for (Spec& cur : urls)
-        {
-        if (cur.id == spec.id)
-          {
-          if (cur.component != spec.component)
-            {
-            cur.component = String{};
-            }
-          if (cur.query != spec.query)
-            {
-            cur.query = Query{};
-            }
-          return;
-          }
-        }
-      urls.push_back(spec);
-      }
-    void current_id(std::string const& id)
-      {
-      feed_queue.current_id(id);
-      }
-  private:
-    FeedQueue& feed_queue;
-    std::vector<Spec> urls;
   };
 
 } // namespace Karrot

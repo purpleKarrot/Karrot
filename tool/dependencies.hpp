@@ -10,24 +10,25 @@
 #define KARROT_DEPENDENCIES_HPP
 
 #include <karrot/spec.hpp>
+#include <iostream>
 
 namespace Karrot
 {
 
-class FeedPreQueue;
+class FeedQueue;
 struct Implementation;
 
 class Dependencies
   {
   public:
-    Dependencies(FeedPreQueue& feed_queue, const std::string& name = std::string())
+    Dependencies(FeedQueue& feed_queue, int name = 0)
       : name(name)
       , feed_queue(&feed_queue)
       {
       }
-    void start_if(const std::string& test)
+    void start_if(const std::string& test, StringPool& pool)
       {
-      deps.emplace_back(IF, Spec(std::string(), std::string(), test));
+      deps.emplace_back(IF, Spec(std::string(), std::string(), test, pool));
       }
     void start_else()
       {
@@ -38,14 +39,14 @@ class Dependencies
         }
       entry.first = ELSE;
       }
-    void start_elseif(const std::string& test)
+    void start_elseif(const std::string& test, StringPool& pool)
       {
       Entry& entry = deps.back();
       if (entry.first != ENDIF)
         {
         std::cout << "ERROR: <elseif> has no matching <if>!" << std::endl;
         }
-      entry = Entry(ELSEIF, Spec(std::string(), std::string(), test));
+      entry = Entry(ELSEIF, Spec(std::string(), std::string(), test, pool));
       }
     void end_if()
       {
@@ -59,7 +60,7 @@ class Dependencies
       {
       deps.emplace_back(CONFLICTS, spec);
       }
-    void replay(Implementation& impl) const;
+    void replay(Implementation& impl, StringPool& pool) const;
   private:
     enum Code
       {
@@ -70,10 +71,10 @@ class Dependencies
       DEPENDS,
       CONFLICTS,
       };
-    std::string name;
+    int name;
     using Entry = std::pair<Code, Spec>;
     std::vector<Entry> deps;
-    FeedPreQueue* feed_queue;
+    FeedQueue* feed_queue;
   };
 
 } // namespace Karrot

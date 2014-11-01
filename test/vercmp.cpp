@@ -11,20 +11,21 @@
 
 int vercmp(int argc, char* argv[])
   {
-  const std::string version1{"1.11"};
-  const std::string version2{"1.12"};
+  Karrot::StringPool pool;
+  int version1 = pool.from_static_string("1.11");
+  int version2 = pool.from_static_string("1.12");
 
-  BOOST_TEST(Karrot::vercmp(version1, version1) == 0);
-  BOOST_TEST(Karrot::vercmp(version1, version1) >= 0);
-  BOOST_TEST(Karrot::vercmp(version1, version1) <= 0);
+  BOOST_TEST(Karrot::vercmp(version1, version1, pool) == 0);
+  BOOST_TEST(Karrot::vercmp(version1, version1, pool) >= 0);
+  BOOST_TEST(Karrot::vercmp(version1, version1, pool) <= 0);
 
-  BOOST_TEST(Karrot::vercmp(version1, version2) != 0);
-  BOOST_TEST(Karrot::vercmp(version1, version2) <= 0);
-  BOOST_TEST(Karrot::vercmp(version1, version2) < 0);
+  BOOST_TEST(Karrot::vercmp(version1, version2, pool) != 0);
+  BOOST_TEST(Karrot::vercmp(version1, version2, pool) <= 0);
+  BOOST_TEST(Karrot::vercmp(version1, version2, pool) < 0);
 
-  BOOST_TEST(Karrot::vercmp(version2, version1) != 0);
-  BOOST_TEST(Karrot::vercmp(version2, version1) >= 0);
-  BOOST_TEST(Karrot::vercmp(version2, version1) > 0);
+  BOOST_TEST(Karrot::vercmp(version2, version1, pool) != 0);
+  BOOST_TEST(Karrot::vercmp(version2, version1, pool) >= 0);
+  BOOST_TEST(Karrot::vercmp(version2, version1, pool) > 0);
 
   return boost::report_errors();
   }

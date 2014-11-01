@@ -16,8 +16,27 @@
 namespace Karrot
 {
 
+static std::string to_string(Spec const& spec, StringPool const& pool)
+{
+    std::string result = pool.to_string(spec.id);
+
+    if (spec.component)
+    {
+        result += "#";
+        result += pool.to_string(spec.component);
+    }
+    
+    if (spec.query)
+    {
+        result += " ";
+        result += boost::lexical_cast<std::string>(spec.query);
+    }
+    
+    return result;
+}
+
 void write_cache(std::string const& filename, std::vector<int> const& model,
-        Database const& database)
+        Database const& database, StringPool const& pool)
 {
     using File = std::unique_ptr<FILE, decltype(&fclose)>;
     File file(fopen(filename.c_str(), "w"), &fclose);
@@ -32,13 +51,13 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
         auto const& impl = database[i];
 
         writer.scalar("id");
-        writer.scalar(impl.id);
+        writer.scalar(pool.to_string(impl.id));
 
         writer.scalar("version");
-        writer.scalar(impl.version);
+        writer.scalar(pool.to_string(impl.version));
 
         writer.scalar("component");
-        writer.scalar(impl.component);
+        writer.scalar(pool.to_string(impl.component));
 
         if (!impl.values.empty())
         {
@@ -47,8 +66,8 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
 
             for (auto&& entry : impl.values)
             {
-                writer.scalar(entry.first);
-                writer.scalar(entry.second);
+                writer.scalar(pool.to_string(entry.first));
+                writer.scalar(pool.to_string(entry.second));
             }
 
             writer.end_mapping();
@@ -61,7 +80,7 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
 
             for (auto&& dep : impl.depends)
             {
-                writer.scalar(boost::lexical_cast<std::string>(dep));
+                writer.scalar(to_string(dep, pool));
             }
 
             writer.end_sequence();
@@ -74,7 +93,7 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
 
             for (auto&& dep : impl.conflicts)
             {
-                writer.scalar(boost::lexical_cast<std::string>(dep));
+                writer.scalar(to_string(dep, pool));
             }
 
             writer.end_sequence();

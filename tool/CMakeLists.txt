@@ -28,6 +28,11 @@ endif()
 configure_file(version.h.in version.h)
 
 re2c_target(
+  ${CMAKE_CURRENT_SOURCE_DIR}/variants.cpp.in
+  ${CMAKE_CURRENT_BINARY_DIR}/variants.cpp -s
+  )
+
+re2c_target(
   ${CMAKE_CURRENT_SOURCE_DIR}/xml_re2c.in.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/xml_re2c.hpp -s
   )
@@ -52,6 +57,7 @@ add_executable(karrot
   url_curl.cpp
   url_win32.cpp
   variants.cpp
+  variants.cpp.in
   variants.hpp
   xml_re2c.hpp
   xml_re2c.in.hpp

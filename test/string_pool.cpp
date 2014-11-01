@@ -31,11 +31,14 @@ int string_pool(int argc, char* argv[])
     BOOST_TEST_EQ(pool.from_string("=="), Karrot::STR_EQUAL);
     BOOST_TEST_EQ(pool.from_string("&&"), Karrot::STR_AND);
     BOOST_TEST_EQ(pool.from_string("||"), Karrot::STR_OR);
+    BOOST_TEST_EQ(pool.from_string("*"),  Karrot::STR_ANY);
+    BOOST_TEST_EQ(pool.from_string("SOURCE"),  Karrot::STR_SOURCE);
+    BOOST_TEST_EQ(pool.from_string("version"), Karrot::STR_VERSION);
 
-    BOOST_TEST_EQ(pool.from_string("foo"), 12);
-    BOOST_TEST_EQ(pool.from_string("bar"), 13);
-    BOOST_TEST_EQ(pool.from_string("cow"), 14);
-    BOOST_TEST_EQ(pool.from_string("foo"), 12);
+    BOOST_TEST_EQ(pool.from_string("foo"), 15);
+    BOOST_TEST_EQ(pool.from_string("bar"), 16);
+    BOOST_TEST_EQ(pool.from_string("cow"), 17);
+    BOOST_TEST_EQ(pool.from_string("foo"), 15);
 
     return boost::report_errors();
 }

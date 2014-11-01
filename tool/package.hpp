@@ -19,8 +19,8 @@ class Driver;
 class Package
   {
   public:
-    String component;
-    String version;
+    int component;
+    int version;
     Dictionary variant;
     Dictionary values;
     Dictionary fields;

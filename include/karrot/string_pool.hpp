@@ -32,6 +32,9 @@ static const int STR_NOT_EQUAL     =  8;
 static const int STR_EQUAL         =  9;
 static const int STR_AND           = 10;
 static const int STR_OR            = 11;
+static const int STR_ANY           = 12;
+static const int STR_SOURCE        = 13;
+static const int STR_VERSION       = 14;
 
 class StringPool
 {

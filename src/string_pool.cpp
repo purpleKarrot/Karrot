@@ -130,6 +130,9 @@ StringPool::StringPool() :
     from_static_string("==");
     from_static_string("&&");
     from_static_string("||");
+    from_static_string("*");
+    from_static_string("SOURCE");
+    from_static_string("version");
 }
 
 StringPool::~StringPool()

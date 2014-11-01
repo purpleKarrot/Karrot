@@ -10,7 +10,8 @@
 #define KARROT_IMPLEMENTATION_HPP
 
 #include "dictionary.hpp"
-#include "string.hpp"
+#include "string_pool.hpp"
+#include <vector>
 
 namespace Karrot
 {
@@ -19,9 +20,9 @@ class Spec;
 
 struct Implementation
   {
-  String id;
-  String version;
-  String component;
+  int id;
+  int version;
+  int component;
   Dictionary values;
   std::vector<Spec> depends;
   std::vector<Spec> conflicts;

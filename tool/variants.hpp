@@ -16,7 +16,7 @@
 namespace Karrot
 {
 
-Dictionary parse_variant(const std::string& quark);
+Dictionary parse_variant(const std::string& quark, StringPool& pool);
 
 } // namespace Karrot
 

@@ -24,6 +24,9 @@
 #  include <sys/utsname.h>
 #endif
 
+#define S(X) engine.string_pool.from_static_string(#X)
+#define s(X) engine.string_pool.from_string(X)
+
 static void set_uname(std::string& sysname, std::string& machine)
   {
 #ifdef _WIN32
@@ -43,8 +46,8 @@ static void run(std::string& sysname, std::string& machine,
   using namespace Karrot;
   Karrot::Engine engine;
 
-  engine.globals.emplace(String{"sysname"}, String{sysname});
-  engine.globals.emplace(String{"machine"}, String{machine});
+  engine.globals.emplace(S(sysname), s(sysname.c_str()));
+  engine.globals.emplace(S(machine), s(machine.c_str()));
 
   // k_engine_add_driver(engine,
   //     std::unique_ptr<Karrot::Driver>(new Karrot::Archive));
@@ -55,35 +58,36 @@ static void run(std::string& sysname, std::string& machine,
 
   for (const auto& url : request_urls)
     {
-    Karrot::Spec spec(url.c_str());
-    spec.component = "SOURCE";
-    engine.feed_queue.push(spec);
+    Karrot::Spec spec(url.c_str(), engine.string_pool);
+    spec.component = STR_SOURCE;
+    engine.feed_queue.push(spec.id);
     engine.requests.push_back(spec);
     }
 
-  while (auto spec = engine.feed_queue.get_next())
+  while (auto id = engine.feed_queue.get_next())
     {
-    std::clog << boost::format("Reading feed '%1%'\n") % spec->id;
-    XmlReader xml(download(spec->id));
+    std::string url = engine.string_pool.to_string(*id);
+    std::clog << boost::format("Reading feed '%1%'\n") % url;
+    XmlReader xml(download(url));
     if (!xml.start_element())
       {
-      BOOST_THROW_EXCEPTION(std::runtime_error("failed to read feed: " + std::string(spec->id)));
+      throw std::runtime_error("failed to read feed" + url);
       }
-    FeedParser parser{*spec, engine};
+    FeedParser parser{*id, engine};
     try
       {
       parser.parse(xml);
       }
     catch (XmlParseError& error)
       {
-      error.filename = spec->id;
+      error.filename = url;
       throw;
       }
     }
 
   std::vector<int> model;
   std::clog << boost::format("Solving SAT with %1% variables\n") % engine.database.size();
-  bool solvable = solve(engine.database, engine.requests, model);
+  bool solvable = solve(engine.database, engine.requests, model, engine.string_pool);
   if (!solvable)
     {
     std::cerr << "Not solvable!\n";
@@ -92,7 +96,7 @@ static void run(std::string& sysname, std::string& machine,
 
   if (!engine.no_topological_order)
     {
-    model = topological_sort(model, engine.database);
+    model = topological_sort(model, engine.database, engine.string_pool);
     }
 
   for (int i : model)
@@ -100,16 +104,16 @@ static void run(std::string& sysname, std::string& machine,
     const Implementation& impl = engine.database[i];
     std::clog << boost::format("Handling '%1% %2%'\n") % impl.id % impl.version;
     bool requested = std::any_of(engine.requests.begin(), engine.requests.end(),
-      [&impl](const Spec& spec)
+      [&impl, &engine](const Spec& spec)
       {
-      return satisfies(impl, spec);
+      return satisfies(impl, spec, engine.string_pool);
       });
-    auto driver = engine.package_handler.get(get(impl.values, "driver"));
+    auto driver = engine.package_handler.get(get(impl.values, "driver", engine.string_pool));
     driver->handle(impl, requested);
     }
 
-  write_cache("cache.yaml", model, engine.database);
-  write_graphviz("dependencies.dot", model, engine.database);
+  write_cache("cache.yaml", model, engine.database, engine.string_pool);
+  write_graphviz("dependencies.dot", model, engine.database, engine.string_pool);
   }
 
 int main(int argc, char *argv[])

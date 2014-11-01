@@ -14,15 +14,15 @@
 namespace Karrot
 {
 
-void Dependencies::replay(Implementation& impl) const
+void Dependencies::replay(Implementation& impl, StringPool& pool) const
   {
   auto ignore = [&]
     {
-    if (impl.component == name || impl.component == "SOURCE")
+    if (impl.component == name || impl.component == STR_SOURCE)
       {
       return false;
       }
-    if (impl.component == "*" && name != "SOURCE")
+    if (impl.component == STR_ANY && name != STR_SOURCE)
       {
       return false;
       }
@@ -40,7 +40,7 @@ void Dependencies::replay(Implementation& impl) const
       case IF:
         if (stack.back() == true)
           {
-          stack.push_back(entry.second.query.evaluate(impl.version, impl.values));
+          stack.push_back(entry.second.query.evaluate(impl.version, impl.values, pool));
           }
         else
           {
@@ -64,7 +64,7 @@ void Dependencies::replay(Implementation& impl) const
           }
         else if (stack.back() == false)
           {
-          stack.back() = entry.second.query.evaluate(impl.version, impl.values);
+          stack.back() = entry.second.query.evaluate(impl.version, impl.values, pool);
           }
         break;
       case ENDIF:
@@ -73,7 +73,7 @@ void Dependencies::replay(Implementation& impl) const
       case DEPENDS:
         if (stack.back())
           {
-          feed_queue->push(entry.second);
+          feed_queue->push(entry.second.id);
           impl.depends.push_back(entry.second);
           }
         break;

@@ -16,7 +16,6 @@ set(test_list
   string_pool
   unsat
   url
-  variants
   vercmp
   )
 

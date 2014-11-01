@@ -26,6 +26,7 @@ using Database = std::vector<Implementation>;
 class Engine
   {
   public:
+    StringPool string_pool;
     FeedQueue feed_queue;
     PackageHandler package_handler;
     Requests requests;

@@ -15,13 +15,13 @@ namespace Karrot
   {                                                                            \
   if (cursor != marker)                                                        \
     {                                                                          \
-    return Query::Token{String(&(*marker), cursor - marker)};                  \
+    return pool.from_string(std::string(&(*marker), cursor - marker).c_str()); \
     }                                                                          \
   }                                                                            \
 
-static Query::Token query_tokenize(
+static int query_tokenize(
     std::string::const_iterator& cursor,
-    std::string::const_iterator limit)
+    std::string::const_iterator limit, StringPool& pool)
   {
   std::string::const_iterator marker = cursor;
   /*!re2c
@@ -32,47 +32,47 @@ static Query::Token query_tokenize(
   re2c:define:YYFILL:naked = 1;
   "("
     {
-    return Query::Token{Query::Token::LParen};
+    return STR_LPAREN;
     }
   ")"
     {
-    return Query::Token{Query::Token::RParen};
+    return STR_RPAREN;
     }
   "<"  | "&lt;"
     {
-    return Query::Token{Query::Token::Less};
+    return STR_LESS;
     }
   "<=" | "&lt;="
     {
-    return Query::Token{Query::Token::LessEqual};
+    return STR_LESS_EQUAL;
     }
   ">"  | "&gt;"
     {
-    return Query::Token{Query::Token::Greater};
+    return STR_GREATER;
     }
   ">=" | "&gt;="
     {
-    return Query::Token{Query::Token::GreaterEqual};
+    return STR_GREATER_EQUAL;
     }
   "=="
     {
-    return Query::Token{Query::Token::Equal};
+    return STR_EQUAL;
     }
   "!="
     {
-    return Query::Token{Query::Token::NotEqual};
+    return STR_NOT_EQUAL;
     }
   "&&" | "&amp;&amp;"
     {
-    return Query::Token{Query::Token::And};
+    return STR_AND;
     }
   "||"
     {
-    return Query::Token{Query::Token::Or};
+    return STR_OR;
     }
   [^()<>!=&|]+
     {
-    return Query::Token{String(&(*marker), cursor - marker)};
+    return pool.from_string(std::string(&(*marker), cursor - marker).c_str());
     }
   [^]
     {

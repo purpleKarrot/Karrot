@@ -17,13 +17,13 @@ namespace Karrot
 std::vector<int>
 topological_sort(
     std::vector<int> const& model,
-    Database const& database);
+    Database const& database, StringPool const& pool);
 
 void
 write_graphviz(
     std::string const& filename,
     std::vector<int> const& model,
-    Database const& database);
+    Database const& database, StringPool const& pool);
 
 } // namespace Karrot
 

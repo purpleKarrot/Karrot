@@ -17,13 +17,10 @@
 namespace Karrot
 {
 
-static const String SOURCE {"SOURCE"};
-static const String HREF   {"href"};
-static const String TAG {"tag"};
 static const std::string xmlns = "http://purplekarrot.net/2013/project";
 
-FeedParser::FeedParser(Spec const& spec, Engine& engine) :
-    spec(spec),
+FeedParser::FeedParser(int id, Engine& engine) :
+    id(id),
     engine(engine),
     queue(engine.feed_queue)
   {
@@ -49,10 +46,10 @@ void FeedParser::parse(XmlReader& xml)
     {
     throw std::runtime_error("not a project feed");
     }
-  std::string id = xml.attribute("href", xmlns);
-  if (id != spec.id)
+  int feed_id = engine.string_pool.from_string(xml.attribute("href", xmlns).c_str());
+  if (feed_id != id)
     {
-    spec.id = id;
+    id = feed_id;
     queue.current_id(id);
     }
   std::string tag = next_element(xml);
@@ -89,10 +86,7 @@ void FeedParser::parse(XmlReader& xml)
     }
   if (tag == "packages")
     {
-    if (spec.component != SOURCE)
-      {
-      parse_packages(xml);
-      }
+    parse_packages(xml);
     xml.skip();
     tag = next_element(xml);
     }
@@ -106,8 +100,8 @@ void FeedParser::parse_meta(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    String name {xml.name()};
-    String value {xml.content()};
+    int name = engine.string_pool.from_string(xml.name().c_str());
+    int value = engine.string_pool.from_string(xml.content().c_str());
     meta.emplace(name, value);
     xml.skip();
     }
@@ -117,8 +111,8 @@ void FeedParser::parse_variants(XmlReader& xml)
   {
   while (xml.start_element())
     {
-    String name {xml.attribute("name", xmlns)};
-    String values {xml.attribute("values", xmlns)};
+    int name = engine.string_pool.from_string(xml.attribute("name", xmlns).c_str());
+    int values = engine.string_pool.from_string(xml.attribute("values", xmlns).c_str());
     variants.emplace(name, values);
     xml.skip();
     }
@@ -130,8 +124,8 @@ void FeedParser::parse_releases(XmlReader& xml)
     {
     if (xml.name() == "release" && xml.namespace_uri() == xmlns)
       {
-      auto version = xml.attribute("version", xmlns);
-      auto tag = xml.optional_attribute("tag", xmlns);
+      int version = engine.string_pool.from_string(xml.attribute("version", xmlns).c_str());
+      int tag = engine.string_pool.from_string(xml.attribute("tag", xmlns).c_str());
       add_src_package(version, tag);
       releases.push_back(version);
       }
@@ -139,24 +133,24 @@ void FeedParser::parse_releases(XmlReader& xml)
     }
   }
 
-void FeedParser::add_src_package(std::string const& version, boost::optional<std::string> const& tag)
+void FeedParser::add_src_package(int version, int tag)
   {
   Driver const *driver = this->engine.package_handler.get(vcs_type);
   if (!driver)
     {
     return;
     }
-  Implementation impl{spec.id, String{version}, SOURCE};
+  Implementation impl{id, version, STR_SOURCE};
   impl.values = this->meta;
-  impl.values[String{"href"}] = vcs_href;
-  impl.values[String{"driver"}] = driver->name();
+  impl.values[engine.string_pool.from_static_string("href")] = engine.string_pool.from_string(vcs_href.c_str());
+  impl.values[engine.string_pool.from_static_string("driver")] = engine.string_pool.from_string(driver->name().c_str());
   if(tag)
     {
-    impl.values[String{"tag"}] = *tag;
+    impl.values[engine.string_pool.from_static_string("tag")] = tag;
     }
   for (const Dependencies& component : components)
     {
-    component.replay(impl);
+    component.replay(impl, engine.string_pool);
     }
   this->engine.database.push_back(impl);
   }
@@ -167,7 +161,7 @@ void FeedParser::parse_components(XmlReader& xml)
     {
     if (xml.name() == "component" && xml.namespace_uri() == xmlns)
       {
-      components.emplace_back(this->queue, xml.attribute("name", xmlns));
+      components.emplace_back(this->queue, engine.string_pool.from_string(xml.attribute("name", xmlns).c_str()));
       parse_depends(xml, components.back());
       }
     xml.skip();
@@ -181,13 +175,13 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
     std::string name = xml.name();
     if (name == "if")
       {
-      depends.start_if(xml.attribute("test", xmlns));
+      depends.start_if(xml.attribute("test", xmlns), engine.string_pool);
       parse_depends(xml, depends);
       depends.end_if();
       }
     else if (name == "elseif")
       {
-      depends.start_elseif(xml.attribute("test", xmlns));
+      depends.start_elseif(xml.attribute("test", xmlns), engine.string_pool);
       parse_depends(xml, depends);
       depends.end_if();
       }
@@ -199,13 +193,13 @@ void FeedParser::parse_depends(XmlReader& xml, Dependencies& depends)
       }
     else if (name == "depends")
       {
-      std::string dep = resolve_uri(spec.id, xml.attribute("href", xmlns));
-      depends.depends(Spec(dep.c_str()));
+      std::string dep = resolve_uri(engine.string_pool.to_string(id), xml.attribute("href", xmlns));
+      depends.depends(Spec(dep.c_str(), engine.string_pool));
       }
     else if (name == "conflicts")
       {
-      std::string dep = resolve_uri(spec.id, xml.attribute("href", xmlns));
-      depends.conflicts(Spec(dep.c_str()));
+      std::string dep = resolve_uri(engine.string_pool.to_string(id), xml.attribute("href", xmlns));
+      depends.conflicts(Spec(dep.c_str(), engine.string_pool));
       }
     xml.skip();
     }
@@ -226,11 +220,11 @@ void FeedParser::parse_packages(XmlReader& xml)
 void FeedParser::parse_package(XmlReader& xml)
   {
   auto driver_name = xml.attribute("type", xmlns);
-  Implementation impl{this->spec.id};
+  Implementation impl{this->id};
   impl.values = this->meta;
-  impl.version = xml.attribute("version", xmlns);
-  impl.component = xml.attribute("component", xmlns);
-  impl.values[String{"driver"}] = driver_name;
+  impl.version = engine.string_pool.from_string(xml.attribute("version", xmlns).c_str());
+  impl.component = engine.string_pool.from_string(xml.attribute("component", xmlns).c_str());
+  impl.values[engine.string_pool.from_static_string("driver")] = engine.string_pool.from_string(driver_name.c_str());
 //if (auto attr = xml.optional_attribute("variant", xmlns))
 //  {
 //  auto variant = parse_variant(*attr);
@@ -240,7 +234,7 @@ void FeedParser::parse_package(XmlReader& xml)
     {
     if (attr.name.namespace_uri == xmlns)
       {
-      impl.values[String{attr.name.local}] = attr.value;
+      impl.values[engine.string_pool.from_string(attr.name.local.c_str())] = engine.string_pool.from_string(attr.value.c_str());
       }
     }
   auto driver = engine.package_handler.get(driver_name);
@@ -256,7 +250,7 @@ void FeedParser::parse_package(XmlReader& xml)
         }
       for (const Dependencies& component : components)
         {
-        component.replay(impl);
+        component.replay(impl, engine.string_pool);
         }
       }
     this->engine.database.push_back(impl);

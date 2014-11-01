@@ -24,7 +24,7 @@ class XmlReader;
 class FeedParser
   {
   public:
-    FeedParser(Spec const& spec, Engine& engine);
+    FeedParser(int id, Engine& engine);
     void parse(XmlReader& xml);
   private:
     std::string next_element(XmlReader& xml) const;
@@ -35,14 +35,14 @@ class FeedParser
     void parse_depends(XmlReader& xml, Dependencies& depends);
     void parse_packages(XmlReader& xml);
     void parse_package(XmlReader& xml);
-    void add_src_package(std::string const& version, boost::optional<std::string> const& tag);
+    void add_src_package(int version, int tag);
   private:
-    Spec spec;
+    int id;
     Engine& engine;
-    FeedPreQueue queue;
+    FeedQueue queue;
     Dictionary meta;
     Dictionary variants;
-    std::vector<std::string> releases;
+    std::vector<int> releases;
     std::vector<Dependencies> components;
     std::string vcs_type;
     std::string vcs_href;

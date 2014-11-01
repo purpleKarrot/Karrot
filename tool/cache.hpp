@@ -16,6 +16,7 @@
 namespace Karrot
 {
 
+struct StringPool;
 struct Implementation;
 using Database = std::vector<Implementation>;
 
@@ -23,7 +24,7 @@ void
 write_cache(
     std::string const& filename,
     std::vector<int> const& model,
-    Database const& database);
+    Database const& database, StringPool const& pool);
 
 } // namespace Karrot
 

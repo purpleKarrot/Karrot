@@ -16,44 +16,30 @@ namespace Karrot
 Spec::Spec(
   const std::string& id,
   const std::string& component,
-  const std::string& query)
-  : id(id)
-  , component(component)
-  , query(query)
+  const std::string& query, StringPool& pool)
+  : id(pool.from_string(id.c_str()))
+  , component(pool.from_string(component.c_str()))
+  , query(query, pool)
   {
   }
 
-Spec::Spec(char const* url)
+Spec::Spec(char const* url, StringPool& pool)
   {
   std::size_t length = std::strcspn(url, "?#");
-  id = std::string(url, length);
+  id = pool.from_string(std::string(url, length).c_str());
   url += length;
   if (*url == '?')
     {
     ++url;
     length = std::strcspn(url, "#");
-    query = Query(String(url, length));
+    query = Query(std::string(url, length), pool);
     url += length;
     }
   if (*url == '#')
     {
     ++url;
-    component = String(url);
+    component = pool.from_string(url);
     }
-  }
-
-std::ostream& operator<<(std::ostream &os, Spec const& spec)
-  {
-  os << spec.id;
-  if (!spec.query.empty())
-    {
-    os << '?' << spec.query;
-    }
-  if (!spec.component.get().empty())
-    {
-    os << '#' << spec.component;
-    }
-  return os;
   }
 
 } // namespace Karrot

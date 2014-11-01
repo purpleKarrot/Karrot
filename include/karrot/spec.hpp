@@ -10,7 +10,7 @@
 #define KARROT_SPEC_HPP
 
 #include "query.hpp"
-#include "string.hpp"
+#include "string_pool.hpp"
 #include <iosfwd>
 
 namespace Karrot
@@ -23,15 +23,13 @@ class Spec
     Spec(
       const std::string& id,
       const std::string& component,
-      const std::string& query);
-    explicit Spec(char const* url);
+      const std::string& query, StringPool& pool);
+    Spec(char const* url, StringPool& pool);
   public:
-    String id;
-    String component;
+    int id = 0;
+    int component = 0;
     Query query;
   };
-
-std::ostream& operator<<(std::ostream &os, Spec const& spec);
 
 } // namespace Karrot
 

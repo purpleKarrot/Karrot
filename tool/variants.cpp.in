@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2013 Daniel Pfeifer <daniel@pfeifer-mail.de>
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * See accompanying file LICENSE_1_0.txt or copy at
+ *   http://www.boost.org/LICENSE_1_0.txt
+ */
+
+#include "variants.hpp"
+
+/*!re2c
+re2c:indent:string   = "  ";
+re2c:indent:top      = 1;
+re2c:yyfill:enable   = 0;
+re2c:define:YYCTYPE  = char;
+re2c:define:YYCURSOR = cursor;
+re2c:define:YYMARKER = marker;
+alpha                = [a-zA-Z];
+alnum                = alpha | [0-9];
+else                 = [];
+*/
+
+namespace Karrot
+{
+
+Dictionary parse_variant(const std::string& string, StringPool& pool)
+  {
+  Dictionary result;
+  int key, val;
+  auto cursor = string.c_str();
+  auto marker = cursor;
+  while (1)
+    {
+    marker = cursor;    
+    /*!re2c
+    alpha alnum*
+      {
+      key = pool.from_string(std::string(marker, cursor).c_str());
+      }
+    else
+      {
+      break;
+      }
+    */
+    marker = cursor;    
+    /*!re2c
+    alnum+
+      {
+      val = pool.from_string(std::string(marker, cursor).c_str());
+      }
+    else
+      {
+      break;
+      }
+    */
+    result.emplace(key, val);
+    }
+  if (cursor - string.c_str() < string.length())
+    {
+    throw std::runtime_error("invalid variant: " + string);
+    }
+  return result;
+  }
+
+} // namespace Karrot

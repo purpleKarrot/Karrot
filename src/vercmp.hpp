@@ -9,12 +9,12 @@
 #ifndef KARROT_VERCMP_HPP
 #define KARROT_VERCMP_HPP
 
-#include <string>
+#include <karrot/string_pool.hpp>
 
 namespace Karrot
 {
 
-int vercmp(std::string const& str1, std::string const& str2);
+int vercmp(int str1, int str2, StringPool const& pool);
 
 } // namespace Karrot
 

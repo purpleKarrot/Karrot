@@ -10,18 +10,18 @@
 #define KARROT_DICTIONARY_HPP
 
 #include <map>
-#include "string.hpp"
+#include "string_pool.hpp"
 
 namespace Karrot
 {
 
-using Dictionary = std::map<String, String>;
+using Dictionary = std::map<int, int>;
 
 inline char const *
-get (Dictionary const& self, char const *key)
+get (Dictionary const& self, char const *key, StringPool& pool)
   {
-  auto it = self.find(String{key});
-  return it != self.end() ? it->second.get().c_str() : nullptr;
+  auto it = self.find(pool.from_string(key));
+  return it != self.end() ? pool.to_string(it->second) : nullptr;
   }
 
 } // namespace Karrot

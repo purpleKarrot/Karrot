@@ -9,11 +9,10 @@
 #ifndef KARROT_QUERY_HPP
 #define KARROT_QUERY_HPP
 
-#include <iostream>
+#include <ostream>
 #include <vector>
-#include "string.hpp"
 #include "dictionary.hpp"
-#include <boost/flyweight/key_value.hpp>
+#include "string_pool.hpp"
 
 namespace Karrot
 {
@@ -21,73 +20,26 @@ namespace Karrot
 class Query
   {
   public:
-    struct Token
-      {
-      enum Id
-        {
-        False        =   0,
-        True         =   1,
-        Identifier   =   3,
-        LParen       = - 1,
-        RParen       = - 2,
-        Less         = - 3,
-        LessEqual    = - 4,
-        Greater      = - 5,
-        GreaterEqual = - 6,
-        NotEqual     = - 7,
-        Equal        = - 8,
-        And          = - 9,
-        Or           = -10,
-        };
-      Token() = default;
-      explicit Token(Id id)
-        : id{id}
-        {
-        }
-      explicit Token(bool b)
-        : id{b ? True : False}
-        {
-        }
-      explicit Token(String const& value)
-        : id{Identifier}, value{value}
-        {
-        }
-      Id id;
-      String value;
-      };
-  public:
     Query() = default;
-    Query(std::string const& string)
-      : implementation{string}
-      {
-      }
+    Query(std::string string, StringPool& pool);
   public:
-    bool empty() const
+    explicit operator bool() const
       {
-      return implementation.get_key().empty();
+      return !compiled.empty();
       }
-    bool evaluate(std::string const& version, const Dictionary& variants) const;
+    bool evaluate(int version, const Dictionary& variants, StringPool const& pool) const;
   private:
     friend std::ostream& operator<<(std::ostream &os, Query const& query)
       {
-      return os << query.implementation.get_key();
+      return os << query.str;
       }
     friend bool operator!=(Query const& q1, Query const& q2)
       {
-      return q1.implementation != q2.implementation;
+      return q1.str != q2.str;
       }
   private:
-    struct Implementation
-      {
-      Implementation(std::string const& string);
-      std::vector<Token> compiled;
-      };
-    boost::flyweight
-      <
-      boost::flyweights::key_value<std::string, Implementation>,
-      boost::flyweights::no_locking,
-      boost::flyweights::no_tracking
-      > implementation;
+    std::string str;
+    std::vector<int> compiled;
   };
 
 } // namespace Karrot

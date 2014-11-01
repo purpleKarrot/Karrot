@@ -18,7 +18,7 @@ namespace Karrot
 {
 
 std::vector<int>
-topological_sort(std::vector<int> const& model, Database const& database)
+topological_sort(std::vector<int> const& model, Database const& database, StringPool const& pool)
   {
   std::vector<int> topo_order;
   std::size_t size = model.size();
@@ -30,7 +30,7 @@ topological_sort(std::vector<int> const& model, Database const& database)
       {
       for (auto& dep : database[model[k]].depends)
         {
-        if (satisfies(impl, dep))
+        if (satisfies(impl, dep, pool))
           {
           graph[i].push_back(k);
           }
@@ -51,7 +51,7 @@ topological_sort(std::vector<int> const& model, Database const& database)
 void write_graphviz(
     std::string const& filename,
     std::vector<int> const& model,
-    Karrot::Database const& database)
+    Karrot::Database const& database, StringPool const& pool)
   {
   std::ofstream dot_file(filename);
   dot_file << "digraph G {\n";
@@ -67,7 +67,7 @@ void write_graphviz(
       {
       for (auto& spec : database[model[k]].depends)
         {
-        if (satisfies(entry, spec))
+        if (satisfies(entry, spec, pool))
           {
           dot_file << "  " << k << " -> " << i << ";\n";
           }
