@@ -9,28 +9,17 @@
 #ifndef KARROT_SOLVE_HPP
 #define KARROT_SOLVE_HPP
 
-#include "implementation.hpp"
-#include "string_pool.hpp"
-#include "spec.hpp"
+#include <vector>
 
 namespace Karrot
 {
 
+class Spec;
+class StringPool;
+struct Implementation;
+
 using Requests = std::vector<Spec>;
 using Database = std::vector<Implementation>;
-
-inline bool satisfies(const Implementation& impl, const Spec& spec, StringPool const& pool)
-  {
-  if (impl.id != spec.id)
-    {
-    return false;
-    }
-  if (impl.component != spec.component && impl.component != STR_ANY && impl.component != STR_SOURCE)
-    {
-    return false;
-    }
-  return spec.query.evaluate(impl.version, impl.values, pool);
-  }
 
 bool solve(
     Database const& database,

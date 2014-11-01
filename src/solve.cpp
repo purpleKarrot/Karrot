@@ -37,7 +37,7 @@ static void query(
   std::size_t hh = hash.begin();
   while ((id = hash.table[h]) != 0)
     {
-    if (satisfies(database[id - 1], spec, pool))
+    if (spec.satisfies(database[id - 1], pool))
       {
       res.push_back(Lit(id - 1));
       }
@@ -180,7 +180,7 @@ static void source_conflict_clauses(const Database& database, Solver& solver, St
         }
       for (const Spec& spec : database[k].depends)
         {
-        if (satisfies(database[i], spec, pool))
+        if (spec.satisfies(database[i], pool))
           {
           solver.addBinary(~Lit(i), ~Lit(k));
           }

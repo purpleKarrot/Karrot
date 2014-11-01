@@ -11,6 +11,7 @@
 #include "cache.hpp"
 #include "graph.hpp"
 #include <karrot/solve.hpp>
+#include <karrot/implementation.hpp>
 #include "feed_queue.hpp"
 #include "feed_parser.hpp"
 #include "xml_reader.hpp"
@@ -106,7 +107,7 @@ static void run(std::string& sysname, std::string& machine,
     bool requested = std::any_of(engine.requests.begin(), engine.requests.end(),
       [&impl, &engine](const Spec& spec)
       {
-      return satisfies(impl, spec, engine.string_pool);
+      return spec.satisfies(impl, engine.string_pool);
       });
     auto driver = engine.package_handler.get(get(impl.values, "driver", engine.string_pool));
     driver->handle(impl, requested);

@@ -8,6 +8,8 @@
 
 #include "graph.hpp"
 #include <karrot/solve.hpp>
+#include <karrot/spec.hpp>
+#include <karrot/implementation.hpp>
 
 #include <fstream>
 #include <boost/graph/vector_as_graph.hpp>
@@ -30,7 +32,7 @@ topological_sort(std::vector<int> const& model, Database const& database, String
       {
       for (auto& dep : database[model[k]].depends)
         {
-        if (satisfies(impl, dep, pool))
+        if (dep.satisfies(impl, pool))
           {
           graph[i].push_back(k);
           }
@@ -67,7 +69,7 @@ void write_graphviz(
       {
       for (auto& spec : database[model[k]].depends)
         {
-        if (satisfies(entry, spec, pool))
+        if (spec.satisfies(entry, pool))
           {
           dot_file << "  " << k << " -> " << i << ";\n";
           }

@@ -7,6 +7,7 @@
  */
 
 #include <karrot/spec.hpp>
+#include <karrot/implementation.hpp>
 #include <ostream>
 #include <cstring>
 
@@ -40,6 +41,19 @@ Spec::Spec(char const* url, StringPool& pool)
     ++url;
     component = pool.from_string(url);
     }
+  }
+
+bool Spec::satisfies(const Implementation& impl, const StringPool& pool) const
+  {
+  if (id != impl.id)
+    {
+    return false;
+    }
+  if (component != impl.component && impl.component != STR_ANY && impl.component != STR_SOURCE)
+    {
+    return false;
+    }
+  return query.evaluate(impl.version, impl.values, pool);
   }
 
 } // namespace Karrot

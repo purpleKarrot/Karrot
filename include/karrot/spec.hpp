@@ -10,11 +10,13 @@
 #define KARROT_SPEC_HPP
 
 #include "query.hpp"
-#include "string_pool.hpp"
 #include <iosfwd>
 
 namespace Karrot
 {
+
+class StringPool;
+struct Implementation;
 
 class Spec
   {
@@ -25,6 +27,7 @@ class Spec
       const std::string& component,
       const std::string& query, StringPool& pool);
     Spec(char const* url, StringPool& pool);
+    bool satisfies(const Implementation& impl, StringPool const& pool) const;
   public:
     int id = 0;
     int component = 0;
