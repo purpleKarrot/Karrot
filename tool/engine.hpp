@@ -9,6 +9,7 @@
 #ifndef KARROT_ENGINE_HPP
 #define KARROT_ENGINE_HPP
 
+#include <map>
 #include <string>
 #include <vector>
 #include <functional>
@@ -28,7 +29,7 @@ class Engine
     PackageHandler package_handler;
     Requests requests;
     Database database;
-    Dictionary globals;
+    std::map<int, int> globals;
     bool no_topological_order = false;
   };
 

@@ -15,7 +15,6 @@
 #ifndef KARROT_H_INCLUDED
 #define KARROT_H_INCLUDED
 
-#include <map>
 #include <memory>
 #include <vector>
 
@@ -23,7 +22,7 @@ namespace Karrot
 {
 
 class Spec;
-struct Implementation;
+class Implementation;
 
 using Requests = std::vector<Spec>;
 using Database = std::vector<Implementation>;
@@ -66,30 +65,6 @@ private:
     std::unique_ptr<Implementation> pimpl;
 };
 
-class Dictionary
-{
-public:
-  void set(int key, int val)
-    {
-    impl[key] = val;
-    }
-  int get(int key) const
-    {
-    auto it = impl.find(key);
-    return it != impl.end() ? it->second : 0;
-    }
-  template<typename Visit>
-  void foreach(Visit&& visit) const
-    {
-    for(auto& e : impl)
-      {
-      visit(e.first, e.second);
-      }
-    }
-private:
-  std::map<int, int> impl;
-};
-
 class Query
   {
   public:
@@ -101,7 +76,7 @@ class Query
       return !compiled.empty();
       }
     std::string to_string(StringPool const& pool) const;
-    bool evaluate(int version, const Dictionary& variants, StringPool const& pool) const;
+    bool evaluate(Implementation const& impl, StringPool const& pool) const;
   private:
     friend bool operator!=(Query const& q1, Query const& q2)
       {
@@ -127,14 +102,27 @@ class Spec
     Query query;
   };
 
-struct Implementation
+class Implementation
   {
-  int id;
-  int version;
-  int component;
-  Dictionary values;
-  std::vector<Spec> depends;
-  std::vector<Spec> conflicts;
+  public:
+    Implementation(int id);
+    void set(int key, int val);
+    int get(int key) const;
+    template<typename Visit>
+    void foreach_value(Visit&& visit) const
+      {
+      for (auto i = values.begin(); i != values.end(); i += 2)
+        {
+        visit(*i, *(i + 1));
+        }
+      }
+  public:
+    int id;
+    int version;
+    int component;
+    std::vector<int> values;
+    std::vector<Spec> depends;
+    std::vector<Spec> conflicts;
   };
 
 bool solve(

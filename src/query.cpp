@@ -64,9 +64,13 @@ static inline bool is_ident(int id)
   }
 
 static inline int
-get_variant(const Dictionary& variants, int key, StringPool const& pool)
+get_value(Implementation const& impl, int key, StringPool const& pool)
   {
-  if (int val = variants.get(key))
+  if (key == STR_VERSION)
+    {
+    return impl.version;
+    }
+  if (int val = impl.get(key))
     {
     return val;
     }
@@ -76,7 +80,7 @@ get_variant(const Dictionary& variants, int key, StringPool const& pool)
     << pool.to_string(key)
     << "' used in test. Known variables are: "
     ;
-  variants.foreach([&message, &pool](int key, int val)
+  impl.foreach_value([&message, &pool](int key, int val)
     {
     message << "'" << pool.to_string(key) << "', ";
     });
@@ -210,7 +214,7 @@ std::string Query::to_string(StringPool const& pool) const
   return expr.top().second;
   }
 
-bool Query::evaluate(int version, const Dictionary& variants, StringPool const& pool) const
+bool Query::evaluate(Implementation const& impl, StringPool const& pool) const
   {
   if (compiled.empty())
     {
@@ -241,11 +245,11 @@ bool Query::evaluate(int version, const Dictionary& variants, StringPool const& 
         {
         if (op1 == STR_VERSION)
           {
-          op1 = version;
+          op1 = impl.version;
           }
         else
           {
-          op1 = get_variant(variants, op1, pool);
+          op1 = get_value(impl, op1, pool);
           }
         }
       if (is_relation(c))

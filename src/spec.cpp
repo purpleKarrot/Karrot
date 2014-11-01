@@ -52,7 +52,7 @@ bool Spec::satisfies(const Implementation& impl, const StringPool& pool) const
     {
     return false;
     }
-  return query.evaluate(impl.version, impl.values, pool);
+  return query.evaluate(impl, pool);
   }
 
 } // namespace Karrot

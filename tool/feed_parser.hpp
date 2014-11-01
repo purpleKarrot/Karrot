@@ -40,8 +40,8 @@ class FeedParser
     int id;
     Engine& engine;
     FeedQueue queue;
-    Dictionary meta;
-    Dictionary variants;
+    std::map<int, int> meta;
+    std::map<int, int> variants;
     std::vector<int> releases;
     std::vector<Dependencies> components;
     std::string vcs_type;

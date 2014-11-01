@@ -23,9 +23,9 @@ else                 = [];
 namespace Karrot
 {
 
-Dictionary parse_variant(const std::string& string, StringPool& pool)
+std::map<int, int> parse_variant(const std::string& string, StringPool& pool)
   {
-  Dictionary result;
+  std::map<int, int> result;
   int key, val;
   auto cursor = string.c_str();
   auto marker = cursor;
@@ -53,7 +53,7 @@ Dictionary parse_variant(const std::string& string, StringPool& pool)
       break;
       }
     */
-    result.set(key, val);
+    result.emplace(key, val);
     }
   if (cursor - string.c_str() < string.length())
     {

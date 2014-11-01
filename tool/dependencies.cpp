@@ -40,7 +40,7 @@ void Dependencies::replay(Implementation& impl, StringPool& pool) const
       case IF:
         if (stack.back() == true)
           {
-          stack.push_back(entry.second.query.evaluate(impl.version, impl.values, pool));
+          stack.push_back(entry.second.query.evaluate(impl, pool));
           }
         else
           {
@@ -64,7 +64,7 @@ void Dependencies::replay(Implementation& impl, StringPool& pool) const
           }
         else if (stack.back() == false)
           {
-          stack.back() = entry.second.query.evaluate(impl.version, impl.values, pool);
+          stack.back() = entry.second.query.evaluate(impl, pool);
           }
         break;
       case ENDIF:

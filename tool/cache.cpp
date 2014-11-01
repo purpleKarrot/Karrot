@@ -57,7 +57,7 @@ void write_cache(std::string const& filename, std::vector<int> const& model,
         writer.scalar("component");
         writer.scalar(pool.to_string(impl.component));
 
-        impl.values.foreach([&writer, &pool](int key, int val)
+        impl.foreach_value([&writer, &pool](int key, int val)
         {
             writer.scalar(pool.to_string(key));
             writer.scalar(pool.to_string(val));

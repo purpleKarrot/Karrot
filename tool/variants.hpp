@@ -12,11 +12,12 @@
 #include <karrot.h>
 #include <functional>
 #include <vector>
+#include <map>
 
 namespace Karrot
 {
 
-Dictionary parse_variant(const std::string& quark, StringPool& pool);
+std::map<int, int> parse_variant(const std::string& quark, StringPool& pool);
 
 } // namespace Karrot
 

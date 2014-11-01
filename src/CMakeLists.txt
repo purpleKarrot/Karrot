@@ -18,16 +18,12 @@ re2c_target(
   )
 
 add_library(karrotlib STATIC
-  ../include/karrot/dictionary.hpp
-  ../include/karrot/implementation.hpp
-  ../include/karrot/query.hpp
-  ../include/karrot/solve.hpp
-  ../include/karrot/spec.hpp
-  ../include/karrot/string_pool.hpp
+  ../include/karrot.h
   minisat/solver.cpp
   minisat/solver.hpp
   minisat/solver_types.hpp
   hash.hpp
+  implementation.cpp
   query_re2c.hpp
   query_re2c.in.hpp
   query.cpp

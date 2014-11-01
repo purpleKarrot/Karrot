@@ -10,6 +10,7 @@
 #define KARROT_PACKAGE_HPP
 
 #include <karrot.h>
+#include <map>
 
 namespace Karrot
 {
@@ -21,9 +22,9 @@ class Package
   public:
     int component;
     int version;
-    Dictionary variant;
-    Dictionary values;
-    Dictionary fields;
+    std::map<int, int> variant;
+    std::map<int, int> values;
+    std::map<int, int> fields;
     Driver const *driver = nullptr;
   };
 
